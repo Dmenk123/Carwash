@@ -56,6 +56,10 @@
         
         <!-- begin::Global Config(global config for global JS sciprts) -->
         <script>
+            $(window).on('load', function(){
+                $('div#CssLoader').addClass('hidden');
+            });
+            
             let base_url = "<?= base_url(); ?>";
             var KTAppOptions = {
                 "colors": {
@@ -110,6 +114,10 @@
                 $('.select2').select2({
                     allowClear: true,
                     placeholder: "Mohon Pilih Salah Satu"
+                });
+
+                $('.select2_multi').select2({
+                    placeholder: "Mohon Pilih Salah Satu",
                 });
 
                 $('.kt_datepicker').datepicker({
