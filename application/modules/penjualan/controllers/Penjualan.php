@@ -52,6 +52,47 @@ class Penjualan extends CI_Controller {
 
 		$this->template_view->load_view($content, $data);
 	}
+	
+	public function get_detail_item()
+	{
+		$html = '';
+		$total = 0;
+		
+		if($this->input->get('arrItem') != '') {
+			for ($i=0; $i < count($this->input->get('arrItem')); $i++) { 
+				$id_item = $this->input->get('arrItem')[$i];
+				$det_item = $this->m_global->single_row('*', ['id_jenis_trans' => 1, 'deleted_at' => null, 'id' => $id_item], 'm_item_trans');
+				if($det_item) {
+					$total += (float)$det_item->harga;
+					$html .= '<tr>
+								<td>'.$det_item->nama.'</td>
+								<td>
+									<input type="hidden" class="form-control" value='.$det_item->id.' name="id_item[]">
+									<input type="hidden" class="form-control" value='.$det_item->harga.' name="harga[]">
+								</td>
+								<td class="kt-font-danger kt-font-lg" style="text-align: right;"><div><span class="pull-left">Rp. </span><span class="pull-right">'.number_format($det_item->harga,2,',','.').'</span></td>
+							</tr>';
+				}
+			}
+		}
+		
+
+		if($html != '') {
+			$html .= '<tr>
+						<th><span style="font-size:18px;font-weight:bold;">Grand Total</span></th>
+						<th><input type="hidden" class="form-control" value='.$total.' name="total"></th>
+						<th class="kt-font-danger kt-font-lg" style="text-align: right;"><div><span class="pull-left">Rp. </span><span class="pull-right">'.number_format($total,2,',','.').'</span></th>
+					</tr>';
+		}
+		
+		
+		$retval = [
+			'html' => $html,
+			// 'data' => $det_item,
+		];
+
+		echo json_encode($retval);
+	}
 
 	private function umur_dan_pemetaan($tanggal_lahir, $flag_cari = 'umur')
 	{

@@ -29,7 +29,7 @@ $obj_date = new DateTime();
       </div>
       <div class="kt-portlet__body">
         <div class="form-group row form-group-marginless kt-margin-t-20">
-          <div class="col-lg-6 div_menu" data-id="div_nonmember" style="cursor:pointer">
+          <div class="col-lg-6 div_menu" data-id="reguler" style="cursor:pointer">
             <div class="kt-portlet kt-iconbox kt-iconbox--warning kt-iconbox--animate-slow">
               <div class="kt-portlet__body">
                 <div class="kt-iconbox__body">
@@ -55,7 +55,7 @@ $obj_date = new DateTime();
             </div>
           </div>
 
-          <div class="col-lg-6 div_menu" data-id="div_member" style="cursor:pointer">
+          <div class="col-lg-6 div_menu" data-id="member" style="cursor:pointer">
             <div class="kt-portlet kt-iconbox kt-iconbox--success kt-iconbox--animate-slow">
               <div class="kt-portlet__body">
                 <div class="kt-iconbox__body">
@@ -84,31 +84,23 @@ $obj_date = new DateTime();
       </div>
     </div>
 
-    <div class="kt-portlet kt-portlet--mobile">
-      <div class="kt-portlet__head kt-portlet__head--lg">
-        <div class="kt-portlet__head-label">
-          <h3 class="kt-portlet__head-title" id="title_form_penjualan"></h3>
-        </div>
-      </div>
-
+    <div class="kt-portlet kt-portlet--mobile form_penjualan_area">
       <!-- div reguler -->
-      <div class="kt-portlet__body" id="divReguler">
-        <div class="col-12 row">
-          <div class="kt-portlet col-7">
-            <div class="kt-portlet__head">
-              <div class="kt-portlet__head-label">
-                <h3 class="kt-portlet__head-title">
-                  Formulir Penjualan
-                </h3>
+      <div class="kt-portlet__body" id="divReguler" style="display: none;">
+        <form class="kt-form kt-form--label-right" id="formPenjualanReg">
+          <div class="col-12 row">
+            <div class="kt-portlet col-7">
+              <div class="kt-portlet__head">
+                <div class="kt-portlet__head-label">
+                  <h3 class="kt-portlet__head-title">
+                    Formulir Penjualan Reguler
+                  </h3>
+                </div>
               </div>
-            </div>
-
-            <!--begin::Form-->
-            <form class="kt-form kt-form--label-right" id="formPenjualanReg">
               <div class="kt-portlet__body">
                 <div class="form-group">
                   <label>List Penjualan:</label>
-                    <select class="form-control select2_multi" id="selReg" name="list_reg[]" multiple="multiple">
+                    <select class="form-control select2_multi" id="selReg" name="list_item[]" multiple="multiple">
                       <?php foreach ($list_item as $key => $value) {
                         echo '<option value="'.$value->id.'">'.$value->nama.'</option>';
                       } ?>
@@ -116,176 +108,127 @@ $obj_date = new DateTime();
                   <span class="help-block"></span>
                 </div>
               </div>
+            </div>
+            
+            <div class="kt-portlet col-5">
+              <div class="kt-portlet__head">
+                <div class="kt-portlet__head-label">
+                  <h3 class="kt-portlet__head-title"></h3>
+                </div>
+              </div>
+
+              <div class="kt-portlet__body">
+                <div class="kt-invoice__container">
+                  <div class="table-responsive">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th width="70%;" colspan="2">RINCIAN</th>
+                          <th width="30%;">BIAYA</th>
+                        </tr>
+                      </thead>
+                      <tbody id="list_penjualan_reg">
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
               <div class="kt-portlet__foot">
                 <div class="kt-form__actions kt-form__actions--right">
-                  <button type="reset" class="btn btn-brand">Submit</button>
+                  <button type="submit" class="btn btn-brand">Submit</button>
                   <button type="reset" class="btn btn-secondary">Cancel</button>
                 </div>
               </div>
-            </form>
-
-            <!--end::Form-->
-          </div>
-          
-          <div class="kt-portlet col-5">
-            <div class="kt-portlet__head">
-              <div class="kt-portlet__head-label">
-                <h3 class="kt-portlet__head-title"></h3>
-              </div>
             </div>
-
-            <!--begin::Form-->
-            <form class="kt-form kt-form--label-right" id="formPenjualanReg">
-              <div class="kt-portlet__body" id="list_penjualan_reg"></div>
-              <div class="kt-portlet__foot">
-                <div class="kt-form__actions kt-form__actions--right">
-                  <!-- <button type="reset" class="btn btn-brand">Submit</button>
-                  <button type="reset" class="btn btn-secondary">Cancel</button> -->
-                </div>
-              </div>
-            </form>
-
-            <!--end::Form-->
           </div>
-        </div>
+        </form>
+          <!--end::Form-->
       </div>
       
       <!-- div member -->
-      <div class="kt-portlet__body" id="divMember">
-        <div class="col-12 row">
-          <div class="kt-portlet col-7">
-            <div class="kt-portlet__head">
-              <div class="kt-portlet__head-label">
-                <h3 class="kt-portlet__head-title">
-                  Formulir Penjualan
-                </h3>
+      <div class="kt-portlet__body" id="divMember" style="display: none;">
+        <form class="kt-form kt-form--label-right" id="formPenjualanMem">
+          <div class="col-12 row">
+            <div class="kt-portlet col-7">
+              <div class="kt-portlet__head">
+                <div class="kt-portlet__head-label">
+                  <h3 class="kt-portlet__head-title">
+                    Formulir Penjualan Member
+                  </h3>
+                </div>
               </div>
+
+              <!--begin::Form-->
+              
+                <div class="kt-portlet__body">
+                  <div class="form-group">
+                    <label>Member ID:</label>
+                    <input type="text" class="form-control" id="member_id" name="member_id">
+                  </div>
+                  <div class="form-group">
+                    <label>Nama:</label>
+                    <input type="text" class="form-control" readonly>
+                  </div>
+                  <div class="form-group">
+                    <label>Alamat:</label>
+                    <input type="text" class="form-control" readonly>
+                  </div>
+                  <div class="form-group">
+                    <label>Hp:</label>
+                    <input type="text" class="form-control" readonly>
+                  </div>
+                  <div class="form-group">
+                    <label>Email:</label>
+                    <input type="text" class="form-control" readonly>
+                  </div>
+                  <div class="form-group">
+                    <label>List Penjualan:</label>
+                      <select class="form-control select2_multi" id="selMem" name="list_item[]" multiple="multiple">
+                        <?php foreach ($list_item as $key => $value) {
+                          echo '<option value="'.$value->id.'">'.$value->nama.'</option>';
+                        } ?>
+                      </select>
+                    <span class="help-block"></span>
+                  </div>
+                </div>
+              
+
+              <!--end::Form-->
             </div>
-
-            <!--begin::Form-->
-            <form class="kt-form kt-form--label-right" id="formPenjualanReg">
-              <div class="kt-portlet__body">
-                <div class="form-group">
-                  <label>Nama:</label>
-                  <input type="text" class="form-control" readonly>
-                </div>
-                <div class="form-group">
-                  <label>Alamat:</label>
-                  <input type="text" class="form-control" readonly>
-                </div>
-                <div class="form-group">
-                  <label>Hp:</label>
-                  <input type="text" class="form-control" readonly>
-                </div>
-                <div class="form-group">
-                  <label>Email:</label>
-                  <input type="text" class="form-control" readonly>
-                </div>
-              </div>
-              <div class="kt-portlet__foot">
-                <div class="kt-form__actions kt-form__actions--right">
-                  <button type="reset" class="btn btn-brand">Submit</button>
-                  <button type="reset" class="btn btn-secondary">Cancel</button>
-                </div>
-              </div>
-            </form>
-
-            <!--end::Form-->
-          </div>
           
-          <div class="kt-portlet col-5">
-            <div class="kt-portlet__head">
-              <div class="kt-portlet__head-label">
-                <h3 class="kt-portlet__head-title">
-                  Right Action Bar
-                </h3>
+            <div class="kt-portlet col-5">
+              <div class="kt-portlet__head">
+                <div class="kt-portlet__head-label">
+                  <h3 class="kt-portlet__head-title" id="counter_member">Counter Member : 0</h3>
+                </div>
               </div>
-            </div>
-
-            <!--begin::Form-->
-            <form class="kt-form kt-form--label-right" id="formPenjualanReg">
               <div class="kt-portlet__body">
-                <div class="form-group">
-                  <label>Full Name:</label>
-                  <input type="email" class="form-control" placeholder="Enter full name">
-                  <span class="form-text text-muted">Please enter your full name</span>
-                </div>
-                <div class="form-group">
-                  <label>Email address:</label>
-                  <input type="email" class="form-control" placeholder="Enter email">
-                  <span class="form-text text-muted">We'll never share your email with anyone else</span>
-                </div>
-                <div class="form-group">
-                  <label>Communication:</label>
-                  <div class="kt-checkbox-list">
-                    <label class="kt-checkbox">
-                      <input type="checkbox"> Email
-                      <span></span>
-                    </label>
-                    <label class="kt-checkbox">
-                      <input type="checkbox"> SMS
-                      <span></span>
-                    </label>
-                    <label class="kt-checkbox">
-                      <input type="checkbox"> Phone
-                      <span></span>
-                    </label>
+                <div class="kt-invoice__container">
+                  <div class="table-responsive">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th width="70%;" colspan="2">RINCIAN</th>
+                          <th width="30%;">BIAYA</th>
+                        </tr>
+                      </thead>
+                      <tbody id="list_penjualan_mem">
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
               <div class="kt-portlet__foot">
                 <div class="kt-form__actions kt-form__actions--right">
-                  <!-- <button type="reset" class="btn btn-brand">Submit</button>
-                  <button type="reset" class="btn btn-secondary">Cancel</button> -->
+                  <button type="submit" class="btn btn-brand">Submit</button>
+                  <button type="reset" class="btn btn-secondary">Cancel</button>
                 </div>
               </div>
-            </form>
-
-            <!--end::Form-->
-          </div>
-        </div>
-        
-
-
-        <!-- <div class="form-group row form-group-marginless kt-margin-t-20">
-          <label class="col-lg-1 col-form-label">Tanggal:</label>
-          <div class="col-lg-2">
-            <input type="text" class="form-control mask_tanggal" id="tanggal_reg" name="tanggal_reg" autocomplete="off" value="<?php if(isset($data_reg)) {echo DateTime::createFromFormat('Y-m-d', $data_reg->tanggal_reg)->format('d/m/Y');}else{echo $obj_date->format('d/m/Y');} ?>">
-            <span class="help-block"></span>
-          </div>
-          <label class="col-lg-1 col-form-label">Pukul:</label>
-          
-          <div class="col-lg-2">
-            <div class="input-group timepicker">
-              <input class="form-control" id="jam_reg" name="jam_reg" readonly placeholder="Pilih Jam" type="text" value="<?php if(isset($data_reg)) {echo $data_reg->jam_reg;}?>">
-              <div class="input-group-append">
-                <span class="input-group-text">
-                  <i class="la la-clock-o"></i>
-                </span>
-              </div>
             </div>
-            <span class="help-block"></span>
           </div>
-
-          <label class="col-lg-1 col-form-label">Umur:</label>
-          <div class="col-lg-1">
-            <input type="text" class="form-control numberinput" id="umur_reg" name="umur_reg" autocomplete="off" value="<?php if(isset($data_reg)) {echo $data_reg->umur;} ?>">
-            <span class="help-block"></span>
-          </div>
-
-          <label class="col-lg-1 col-form-label">Pemetaan:</label>
-          <div class="col-lg-3">
-            <select class="form-control required" name="pemetaan" id="pemetaan">
-              <?php
-                foreach ($data_pemetaan as $keys => $vals) { ?>
-                  <option value='<?= $vals->id; ?>' <?php if(isset($data_reg) && $data_reg->id_pemetaan == $vals->id) {echo "selected";} ?>> <?= $vals->keterangan; ?> </option>;
-              <?php } ?>
-            </select>
-            <span class="help-block"></span>
-          </div>
-
-        </div> -->
-        
+        <!--end::Form-->
+        </form>   
       </div>
 
       <!-- <div class="kt-portlet__foot">

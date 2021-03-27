@@ -111,14 +111,16 @@
                 objek.value = _a.toUpperCase();
             }
 
+            function reInitSelectMulti(){
+                $('.select2_multi').select2({
+                    placeholder: "Mohon Pilih Salah Satu",
+                });
+            }
+
             $(document).ready(function () {
                 $('.select2').select2({
                     allowClear: true,
                     placeholder: "Mohon Pilih Salah Satu"
-                });
-
-                $('.select2_multi').select2({
-                    placeholder: "Mohon Pilih Salah Satu",
                 });
 
                 $('.kt_datepicker').datepicker({

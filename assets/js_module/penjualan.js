@@ -2,15 +2,77 @@ var save_method;
 var table;
 
 $(document).ready(function() {
+    $(document).on('click', '.div_menu', function(){
+        var nama_menu = $(this).data('id');
+        if(nama_menu == 'reguler') {
+            $('#divReguler').css("display", "block");
+            $('#divMember').css("display", "none");
+        }else{
+            $('#divReguler').css("display", "none");
+            $('#divMember').css("display", "block");
+            $('#member_id').focus();
+        }
+
+        $('html, body').animate({
+            scrollTop: $(".form_penjualan_area").offset().top
+        }, 300);
+        reInitSelectMulti();
+    });
+
     $("#selReg").on('change', function (e) { 
-        var totAmt = 0;
+        let totTransReg = 0;
+        let strAppend = '';
+        let arrItem = [];
         $.each($(this).find(":selected"), function (i, item) { 
-            console.log(item.value, i);
-            //totAmt += $(item).data("price");
+            arrItem.push(item.value);
+            // console.log(item.value);
         });
-        //$("#PackTotAmt").text(totAmt);
-        // console.log(totAmt);
+
+        $.ajax({
+            type: "get",
+            url  : base_url + "penjualan/get_detail_item",
+            data: {arrItem : arrItem},
+            dataType: "json",
+            success: function (response) {
+                $('tbody#list_penjualan_reg').html(response.html);
+            }
+        });
     }); 
+
+    $("#selMem").on('change', function (e) { 
+        let totTransReg = 0;
+        let strAppend = '';
+        let arrItem = [];
+        $.each($(this).find(":selected"), function (i, item) { 
+            arrItem.push(item.value);
+            // console.log(item.value);
+        });
+
+        $.ajax({
+            type: "get",
+            url  : base_url + "penjualan/get_detail_item",
+            data: {arrItem : arrItem},
+            dataType: "json",
+            success: function (response) {
+                $('tbody#list_penjualan_mem').html(response.html);
+            }
+        });
+    }); 
+
+
+    
+
+    // $("#selReg").on('change', function (e) { 
+    //     var totAmt = 0;
+    //     $.each($(this).find(":selected"), function (i, item) { 
+    //         console.log(item.value, i);
+    //         //totAmt += $(item).data("price");
+    //     });
+    //     //$("#PackTotAmt").text(totAmt);
+    //     // console.log(totAmt);
+    // }); 
+
+    //////////////////////////////////////////////////////////////
 
     //force integer input in textfield
     $('input.numberinput').bind('keypress', function (e) {
