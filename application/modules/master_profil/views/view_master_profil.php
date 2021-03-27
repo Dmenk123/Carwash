@@ -95,7 +95,7 @@
 }
 
 #manage_product {
-  margin-top: -120px;
+  margin-top: -20px;
 }
 
 .upload-dropZone {
