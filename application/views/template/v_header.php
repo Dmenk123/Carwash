@@ -27,6 +27,8 @@
 		<link href="<?= base_url('assets/template/'); ?>assets/css/skins/header/menu/light.css" rel="stylesheet" type="text/css" />
 		<link href="<?= base_url('assets/template/'); ?>assets/css/skins/brand/dark.css" rel="stylesheet" type="text/css" />
 		<link href="<?= base_url('assets/template/'); ?>assets/css/skins/aside/dark.css" rel="stylesheet" type="text/css" />
+		<link href="<?= base_url('assets/template/'); ?>assets/css/custom.css" rel="stylesheet" type="text/css" />
+		<link href="<?= base_url('assets/template/'); ?>assets/css/dropzone.min.css" rel="stylesheet" type="text/css" />
 		
 
 		<!--end::Layout Skins -->
