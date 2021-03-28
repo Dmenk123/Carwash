@@ -134,8 +134,10 @@ $obj_date = new DateTime();
               <div class="kt-portlet__body">
                 <div class="kt-invoice__container">
                   <div class="col-12">
-                    <span style="font-size: 18px;font-weight:bold;">Invoice : <span id="inv_reg"></span></span>
+                    <span style="font-size: 16px;font-weight:bold;">Invoice : <span id="inv_reg"></span></span>
+                    <span style="font-size: 14px;float:right;"><span class="jamServer"></span></span>
                   </div>
+                  <hr>
                   <div class="table-responsive">
                     <table class="table">
                       <thead>
@@ -213,7 +215,7 @@ $obj_date = new DateTime();
                 <div class="form-group">
                   <label>Pembayaran:</label>
                   <input type="text" data-thousands="." data-decimal="," id="pembayaran_mem" name="pembayaran_mem" class="form-control form-control-sm inputmask" onkeyup="hitungTotalMem()" value="">
-                  <input type="hidden" id="pembayaran_mem_raw" name="pembayaran_mem_raw" class="form-control form-control-sm" value="">
+                  <input type="hidden" id="pembayaran_mem_raw" name="pembayaran_mem_raw" class="form-control form-control-sm input-lg" value="">
                   <span class="help-block"></span>
                 </div>
 
@@ -242,8 +244,10 @@ $obj_date = new DateTime();
               <div class="kt-portlet__body">
                 <div class="kt-invoice__container">
                   <div class="col-12">
-                    <span style="font-size: 18px;font-weight:bold;">Invoice : <span id="inv_mem"></span></span>
+                    <span style="font-size: 16px;font-weight:bold;">Invoice : <span id="inv_mem"></span></span>
+                    <span style="font-size: 14px;float:right;"><span class="jamServer"></span></span>
                   </div>
+                  <hr>
                   <div class="table-responsive">
                     <table class="table">
                       <thead>

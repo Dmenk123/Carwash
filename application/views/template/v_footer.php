@@ -1,4 +1,4 @@
-                    <?php
+<?php
                         if(isset($modal)) {
                             if(is_array($modal)){
                                 foreach ($modal as $keys => $values) {
@@ -46,7 +46,7 @@
         <!--begin::Global Theme Bundle(used by all pages) -->
         <script src="<?= base_url('assets/template/'); ?>assets/plugins/global/plugins.bundle.js" type="text/javascript"></script>
         <script src="<?= base_url('assets/template/'); ?>assets/js/scripts.bundle.js" type="text/javascript"></script>
-        <script src="<?= base_url('assets/template/'); ?>assets/js/dropzone.js" type="text/javascript"></script>
+        <!-- <script src="<?= base_url('assets/template/'); ?>assets/js/dropzone.js" type="text/javascript"></script> -->
         <script src="<?= base_url('assets/template/'); ?>assets/plugins/custom/datatables/datatables.bundle.js" type="text/javascript"></script>
         <script src="<?= base_url('assets/'); ?>plugins/ckeditor/ckeditor.js" type="text/javascript"></script>
         <script src="<?= base_url('assets/'); ?>plugins/ckeditor/adapters/jquery.js" type="text/javascript"></script>
@@ -57,8 +57,17 @@
         
         <!-- begin::Global Config(global config for global JS sciprts) -->
         <script>
+            <?php 
+                $obj_date = new DateTime(); 
+            ?>
+
+            let jam = "<?= (int)$obj_date->format('H');?>";
+            let menit = "<?= (int)$obj_date->format('i');?>";
+            let detik = "<?= (int)$obj_date->format('s');?>";
+            
             $(window).on('load', function(){
                 $('div#CssLoader').addClass('hidden');
+                jamSistem();
             });
             
             let base_url = "<?= base_url(); ?>";
@@ -90,6 +99,7 @@
                     }
                 }
             };
+
             const swalConfirm = Swal.mixin({
                 customClass: {
                     confirmButton: 'btn btn-md btn-primary',
@@ -105,6 +115,26 @@
                 },
                 buttonsStyling: false
             });
+
+            function jamSistem()
+			{
+				if (detik!=0 && detik%60==0) { menit++; detik=0; }
+				second = Number(detik);
+				if (menit!=0 && menit%60==0) { jam++; menit=0; }
+				minute = Number(menit);
+				if (jam!=0 && jam%24==0) { jam=0; }
+				hour = Number(jam);
+				if (detik<10) { second='0'+detik; }
+				if (menit<10){ minute='0'+menit; }
+				if (jam<10){ hour='0'+jam; }
+				waktu = hour+':'+minute+':'+second;
+                //  console.log(waktu);
+                $('.jamServer').text("<?=$obj_date->format('d-m-Y');?>"+' '+waktu);
+                
+				detik++;
+			}
+
+			setInterval(jamSistem, 1000);
 
             function to_upper(objek) {
                 var _a = objek.value;
@@ -155,42 +185,6 @@
 
                 $('input.numberinput').bind('keypress', function (e) {
                     return (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57) && e.which != 46) ? false : true;
-                });
-
-                // var options =  {
-                //     // onComplete: function(cep) {
-                //     //     alert('CEP Completed!:' + cep);
-                //     // },
-                    
-                //     onKeyPress: function(cep, event, currentField, options){
-                //         // console.log('A key was pressed!:', cep, ' event: ', event, 'currentField: ', currentField, ' options: ', options);
-
-                //         //ambil data index attribute value
-                //         let idx = event.currentTarget.attributes[1].nodeValue;
-                //         // console.log(idx);
-                //         let val_exist = $('#f_harga_tot_'+idx).val();
-                //         console.log(parseInt(cep) * parseInt(val_exist));
-                //         // $('#f_harga_tot_'+idx).val(parseInt(cep) * parseInt(val_exist));
-                //         $('#f_harga_tot_'+idx).val(cep);
-                //     },
-
-                //     // onChange: function(cep){
-                //     //     console.log('cep changed! ', cep);
-                //     // },
-
-                //     // onInvalid: function(val, e, f, invalid, options){
-                //     //     var error = invalid[0];
-                //     //     console.log ("Digit: ", error.v, " is invalid for the position: ", error.p, ". We expect something like: ", error.e);
-                //     // }
-                // };
-
-                $('.maskmoney').maskMoney({ 
-                    thousands: '.', 
-                    decimal: ',', 
-                    //formatOnBlur: true, 
-                    reverse: true, 
-                    //selectAllOnFocus: true, 
-                    precision: 0
                 });
 
                 $(".inputmask").inputmask({

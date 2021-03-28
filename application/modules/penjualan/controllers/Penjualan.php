@@ -48,7 +48,7 @@ class Penjualan extends CI_Controller {
 			'css' 	=> null,
 			'modal' => null,
 			'js'	=> 'penjualan.js',
-			'view'	=> 'form_data_reg'
+			'view'	=> 'form_data_penjualan'
 		];
 
 		$this->template_view->load_view($content, $data);
@@ -80,9 +80,21 @@ class Penjualan extends CI_Controller {
 
 		if($html != '') {
 			$html .= '<tr>
-						<th><span style="font-size:18px;font-weight:bold;">Grand Total</span></th>
-						<th><input type="hidden" id="total_harga_global" class="form-control" value='.$total.' name="total"></th>
+						<th><span style="font-size:16px;font-weight:bold;">Grand Total</span></th>
+						<th><input type="hidden" id="total_harga_global" class="form-control" value="'.$total.'" name="total"></th>
 						<th class="kt-font-danger kt-font-lg" style="text-align: right;"><div><span class="pull-left">Rp. </span><span class="pull-right">'.number_format($total,2,',','.').'</span></th>
+					</tr>';
+
+			$html .= '<tr>
+						<th><span style="font-size:16px;font-weight:bold;">Pembayaran</span></th>
+						<th><input type="hidden" id="pembayaran_harga_global" class="form-control" name="pembayaran"></th>
+						<th class="kt-font-success kt-font-lg" style="text-align: right;"><div><span class="pull-left">Rp. </span><span class="pull-right" id="span_pembayaran_harga_global">'.number_format(0,2,',','.').'</span></th>
+					</tr>';
+
+			$html .= '<tr>
+						<th><span style="font-size:16px;font-weight:bold;">Kembalian</span></th>
+						<th><input type="hidden" id="kembalian_harga_global" class="form-control" name="kembalian"></th>
+						<th class="kt-font-primary kt-font-lg" style="text-align: right;"><div><span class="pull-left">Rp. </span><span class="pull-right" id="span_kembalian_harga_global">'.number_format(0,2,',','.').'</span></th>
 					</tr>';
 		}
 		

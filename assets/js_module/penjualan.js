@@ -218,11 +218,15 @@ function hitungTotalReg(){
     if(Number.isNaN(kembalian)) {
         kembalianFix = 0;
     }else{
-        kembalianFix = parseFloat(kembalian.toFixed(2));
+        kembalianFix = parseFloat(kembalian).toFixed(2);
     }
+
+    // console.log(kembalianFix, Number(hargaFix));
+    let kembalianNew = Number(kembalianFix).toFixed(2);
     
-    let kembalianNew = Number(kembalianFix.toFixed(2));
-    $('#kembalian_reg').val(formatMoney(kembalianNew));
+    $('#kembalian_reg').val(formatMoney(Number(kembalianNew)));
+    $('#span_pembayaran_harga_global').text(formatMoney(Number(hargaFix)));
+    $('#span_kembalian_harga_global').text(formatMoney(Number(kembalianNew)));
     
     // set raw value
     $('#pembayaran_reg_raw').val(hargaFix);
@@ -242,11 +246,15 @@ function hitungTotalMem(){
     if(Number.isNaN(kembalian)) {
         kembalianFix = 0;
     }else{
-        kembalianFix = parseFloat(kembalian.toFixed(2));
+        kembalianFix = parseFloat(kembalian).toFixed(2);
     }
+
+    // console.log(kembalianFix, Number(hargaFix));
+    let kembalianNew = Number(kembalianFix).toFixed(2);
     
-    let kembalianNew = Number(kembalianFix.toFixed(2));
-    $('#kembalian_mem').val(formatMoney(kembalianNew));
+    $('#kembalian_mem').val(formatMoney(Number(kembalianNew)));
+    $('#span_pembayaran_harga_global').text(formatMoney(Number(hargaFix)));
+    $('#span_kembalian_harga_global').text(formatMoney(Number(kembalianNew)));
     
     // set raw value
     $('#pembayaran_mem_raw').val(hargaFix);
