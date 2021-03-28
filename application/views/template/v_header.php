@@ -51,7 +51,7 @@
 			}
 			
 			.loader {
-			color: #7c58df;
+			color: #1ba79d;
 			font-size: 90px;
 			text-indent: -9999em;
 			overflow: hidden;
@@ -148,6 +148,30 @@
 				visibility: hidden !important;
 			}
 
+			.btn_1 {
+				border: none;
+				color: #fff;
+				background: #1ba79d;
+				outline: none;
+				cursor: pointer;
+				display: inline-block;
+				text-decoration: none;
+				padding: 15px 30px;
+				color: #fff;
+				font-weight: 600;
+				text-align: center;
+				line-height: 1;
+				-moz-transition: all 0.3s ease-in-out;
+				-o-transition: all 0.3s ease-in-out;
+				-webkit-transition: all 0.3s ease-in-out;
+				-ms-transition: all 0.3s ease-in-out;
+				transition: all 0.3s ease-in-out;
+				-webkit-border-radius: 3px;
+				-moz-border-radius: 3px;
+				-ms-border-radius: 3px;
+				border-radius: 3px;
+			}
+
 		</style>
 		<!-- load file css per modul -->
 		<?php if(isset($link_css)){ ?>
@@ -168,7 +192,7 @@
 		<div id="kt_header_mobile" class="kt-header-mobile  kt-header-mobile--fixed ">
 			<div class="kt-header-mobile__logo">
 				<a href="<?=base_url('/')?>">
-					<span style="color:#e2e5ec; font-size:14px; font-weight:bold;">Fuzzy AHP</span>
+					<span style="color:#e2e5ec; font-size:14px; font-weight:bold;">CAR WASH</span>
 				</a>
 			</div>
 			<div class="kt-header-mobile__toolbar">
@@ -194,7 +218,7 @@
 					<div class="kt-aside__brand kt-grid__item " id="kt_aside_brand">
 						<div class="kt-aside__brand-logo">
 							<a href="<?=base_url('/')?>">
-								<span style="color:#e2e5ec; font-size:14px; font-weight:bold;">Fuzzy AHP</span>
+								<span style="color:#e2e5ec; font-size:14px; font-weight:bold;">CAR WASH</span>
 							</a>
 						</div>
 						<div class="kt-aside__brand-tools">

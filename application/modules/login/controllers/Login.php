@@ -17,7 +17,7 @@ class Login extends CI_Controller {
 			redirect('home');
 		}
 
-		$this->load->view('view_login');
+		$this->load->view('view_login2');
 	}
 
 	public function proses()
