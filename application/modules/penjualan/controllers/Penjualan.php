@@ -300,6 +300,11 @@ class Penjualan extends CI_Controller {
 		echo '<br>';
 	}
 
+	public function simpan_barcode($value = '123456')
+	{
+		$this->barcode_lib->save_jpg($value);
+	}
+
 
 
 

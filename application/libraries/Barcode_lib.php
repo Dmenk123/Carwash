@@ -30,12 +30,12 @@ class Barcode_lib
     public function save_png($value)
 	{
 		$obj = new BarcodeGeneratorPNG();
-        file_put_contents('../files/img/barcode/'.$value.'.png', $obj->getBarcode($value, $obj::TYPE_CODE_128, 3, 50));
+        file_put_contents('./files/img/barcode/'.$value.'.png', $obj->getBarcode($value, $obj::TYPE_CODE_128, 3, 50));
 	}
 
     public function save_jpg($value)
 	{
 		$obj = new BarcodeGeneratorJPG();
-        file_put_contents('../files/img/barcode/'.$value.'.jpg', $obj->getBarcode($value, $obj::TYPE_CODE_128, 3, 50));
+        file_put_contents('./files/img/barcode/'.$value.'.jpg', $obj->getBarcode($value, $obj::TYPE_CODE_128, 3, 50));
 	}
 }
