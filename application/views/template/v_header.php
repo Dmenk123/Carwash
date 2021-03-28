@@ -192,7 +192,7 @@
 		<div id="kt_header_mobile" class="kt-header-mobile  kt-header-mobile--fixed ">
 			<div class="kt-header-mobile__logo">
 				<a href="<?=base_url('/')?>">
-					<span style="color:#e2e5ec; font-size:14px; font-weight:bold;">Fuzzy AHP</span>
+					<span style="color:#e2e5ec; font-size:14px; font-weight:bold;">CAR WASH</span>
 				</a>
 			</div>
 			<div class="kt-header-mobile__toolbar">
@@ -218,7 +218,7 @@
 					<div class="kt-aside__brand kt-grid__item " id="kt_aside_brand">
 						<div class="kt-aside__brand-logo">
 							<a href="<?=base_url('/')?>">
-								<span style="color:#e2e5ec; font-size:14px; font-weight:bold;">Fuzzy AHP</span>
+								<span style="color:#e2e5ec; font-size:14px; font-weight:bold;">CAR WASH</span>
 							</a>
 						</div>
 						<div class="kt-aside__brand-tools">
