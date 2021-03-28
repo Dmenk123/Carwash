@@ -1797,10 +1797,15 @@ section#title-product {
   margin-top: -11px;
 }
 
-a.btn_1.outline:hover,
-.btn_1.outline:hover{
+.btn_outline:hover{
   background: #707070;
   border-color: #707070;
+}
+
+a.btn_1.full-width.wishlist, .btn_1.full-width.wishlist {
+  border-color: #1ba79d;
+  color: #1ba79d;
+  font-size: 12px;
 }
 
 .modal-type-1 {

@@ -172,6 +172,29 @@
 				border-radius: 3px;
 			}
 
+			.btn_outline {
+			border-color: #1ba79d;
+			color: #1ba79d;
+			font-size: 12px;
+			cursor: pointer;
+			display: inline-block;
+			text-decoration: none;
+			padding: 15px 30px;
+			color: #434349;
+			font-weight: 600;
+			text-align: center;
+			line-height: 1;
+			-moz-transition: all 0.3s ease-in-out;
+			-o-transition: all 0.3s ease-in-out;
+			-webkit-transition: all 0.3s ease-in-out;
+			-ms-transition: all 0.3s ease-in-out;
+			transition: all 0.3s ease-in-out;
+			-webkit-border-radius: 3px;
+			-moz-border-radius: 3px;
+			-ms-border-radius: 3px;
+			border-radius: 3px;
+			}
+
 		</style>
 		<!-- load file css per modul -->
 		<?php if(isset($link_css)){ ?>

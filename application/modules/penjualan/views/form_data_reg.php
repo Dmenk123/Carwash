@@ -228,7 +228,7 @@ $obj_date = new DateTime();
               <div class="kt-portlet__foot">
                 <div class="kt-form__actions kt-form__actions--right">
                   <button type="submit" class="btn btn_1">Submit</button>
-                  <button type="reset" class="btn btn_1 red">Cancel</button>
+                  <button type="reset" class="btn btn_outline">Cancel</button>
                 </div>
               </div>
             </div>
