@@ -2,7 +2,8 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Penjualan extends CI_Controller {
-	
+	const ID_JENIS_TRANS = 1;
+
 	public function __construct()
 	{
 		parent::__construct();
@@ -12,9 +13,9 @@ class Penjualan extends CI_Controller {
 
 		$this->load->model('m_user');
 		$this->load->model('m_global');
-		// $this->load->model('m_asuransi');
-		
-		// $this->load->model('t_registrasi');
+		$this->load->model('t_transaksi');
+		$this->load->model('t_transaksi_det');
+		$this->load->library('barcode_lib');
 	}
 
 	public function index()
@@ -80,7 +81,7 @@ class Penjualan extends CI_Controller {
 		if($html != '') {
 			$html .= '<tr>
 						<th><span style="font-size:18px;font-weight:bold;">Grand Total</span></th>
-						<th><input type="hidden" class="form-control" value='.$total.' name="total"></th>
+						<th><input type="hidden" id="total_harga_global" class="form-control" value='.$total.' name="total"></th>
 						<th class="kt-font-danger kt-font-lg" style="text-align: right;"><div><span class="pull-left">Rp. </span><span class="pull-right">'.number_format($total,2,',','.').'</span></th>
 					</tr>';
 		}
@@ -93,6 +94,220 @@ class Penjualan extends CI_Controller {
 
 		echo json_encode($retval);
 	}
+
+	public function get_no_invoice()
+	{
+		$nomor = $this->t_transaksi->get_invoice();
+		echo json_encode($nomor);
+	}
+
+	public function simpan_trans_reg()
+	{
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$list_item = $this->input->post('list_item_reg'); 
+		
+		if($list_item == null) {
+			$data['inputerror'][] = 'list_item_reg';
+            $data['error_string'][] = 'Wajib mengisi Item Transaksi';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = TRUE;
+			echo json_encode($data);
+			return;
+		}
+
+		$arr_valid = $this->rule_validasi('reguler');
+		
+		if ($arr_valid['status'] == FALSE) {
+			echo json_encode($arr_valid);
+			return;
+		}
+
+		$this->db->trans_begin();
+
+		## insert header
+		$id_header = gen_uuid();
+		$data_ins = [
+			'id' => $id_header,
+			'kode' => $this->t_transaksi->get_invoice(),
+			'id_jenis_trans' => self::ID_JENIS_TRANS,
+			'id_user' => $this->session->userdata('id_user'),
+			'created_at' => $timestamp
+		];
+
+		$insert = $this->t_transaksi->save($data_ins);
+		if($insert) {
+			$total = 0;
+			for ($i=0; $i < count($list_item); $i++) {
+				$total += $this->input->post('harga')[$i];
+				
+				$data_ins_det = [
+					'id' => gen_uuid(),
+					'id_transaksi' => $id_header,
+					'id_item_trans' => $this->input->post('id_item')[$i],
+					'harga_satuan' => $this->input->post('harga')[$i],
+					'created_at' => $timestamp,
+				];
+
+				$insert_det = $this->t_transaksi_det->save($data_ins_det);
+			}
+
+			$data_upd_header = [
+				'harga_total' => $total
+			];
+
+			$update = $this->t_transaksi->update(['id'=> $id_header], $data_upd_header);
+		}
+				
+		if ($this->db->trans_status() === FALSE){
+			$this->db->trans_rollback();
+			$retval['status'] = false;
+			$retval['pesan'] = 'Gagal memproses Data Transaksi';
+		}else{
+			$this->db->trans_commit();
+			$retval['status'] = true;
+			$retval['pesan'] = 'Sukses memproses Data Transaksi';
+		}
+
+		echo json_encode($retval);
+	}
+
+	public function simpan_trans_mem()
+	{
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$list_item = $this->input->post('list_item_mem'); 
+		
+		if($list_item == null) {
+			$data['inputerror'][] = 'list_item_mem';
+            $data['error_string'][] = 'Wajib mengisi Item Transaksi';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = TRUE;
+			echo json_encode($data);
+			return;
+		}
+
+		$arr_valid = $this->rule_validasi('member');
+		
+		if ($arr_valid['status'] == FALSE) {
+			echo json_encode($arr_valid);
+			return;
+		}
+
+		$this->db->trans_begin();
+
+		## insert header
+		$id_header = gen_uuid();
+		$data_ins = [
+			'id' => $id_header,
+			'kode' => $this->t_transaksi->get_invoice(),
+			'id_jenis_trans' => self::ID_JENIS_TRANS,
+			'id_user' => $this->session->userdata('id_user'),
+			'created_at' => $timestamp
+		];
+
+		$insert = $this->t_transaksi->save($data_ins);
+		if($insert) {
+			$total = 0;
+			for ($i=0; $i < count($list_item); $i++) {
+				$total += $this->input->post('harga')[$i];
+				
+				$data_ins_det = [
+					'id' => gen_uuid(),
+					'id_transaksi' => $id_header,
+					'id_item_trans' => $this->input->post('id_item')[$i],
+					'harga_satuan' => $this->input->post('harga')[$i],
+					'created_at' => $timestamp,
+				];
+
+				$insert_det = $this->t_transaksi_det->save($data_ins_det);
+			}
+
+			$data_upd_header = [
+				'harga_total' => $total
+			];
+
+			$update = $this->t_transaksi->update(['id'=> $id_header], $data_upd_header);
+		}
+				
+		if ($this->db->trans_status() === FALSE){
+			$this->db->trans_rollback();
+			$retval['status'] = false;
+			$retval['pesan'] = 'Gagal memproses Data Transaksi';
+		}else{
+			$this->db->trans_commit();
+			$retval['status'] = true;
+			$retval['pesan'] = 'Sukses memproses Data Transaksi';
+		}
+
+		echo json_encode($retval);
+	}
+
+	private function rule_validasi($flag)
+	{
+		$data = array();
+		$data['error_string'] = array();
+		$data['inputerror'] = array();
+		$data['status'] = TRUE;
+
+		if($flag == 'reguler') {
+			if ($this->input->post('pembayaran_reg') == '') {
+				$data['inputerror'][] = 'pembayaran_reg';
+				$data['error_string'][] = 'Wajib Mengisi Pembayaran';
+				$data['status'] = FALSE;
+				$data['is_select2'][] = FALSE;
+			}
+			
+		}else{
+			if ($this->input->post('pembayaran_mem') == '') {
+				$data['inputerror'][] = 'pembayaran_mem';
+				$data['error_string'][] = 'Wajib Mengisi Pembayaran';
+				$data['status'] = FALSE;
+				$data['is_select2'][] = FALSE;
+			}
+			
+		}
+
+        return $data;
+	}
+
+	public function get_detail_member()
+	{
+		$kode_member = trim($this->input->get('kode_member'));
+		$data = $this->m_global->single_row('*', ['deleted_at' => null, 'kode_member' => $kode_member], 'm_member');
+		
+		if($data) {
+			$retval = [
+				'data' => $data,
+				'status' => true
+			];
+		}else{
+			$retval = [
+				'data' => null,
+				'status' => false
+			];
+		}
+
+		echo json_encode($retval);
+	}
+
+	public function tampil_barcode()
+	{
+		//var_dump($this->barcode_lib->generate());exit;
+		echo $this->barcode_lib->generate_html('M210328001');
+		echo '<br>';
+		echo $this->barcode_lib->generate_html('M210328002');
+		echo '<br>';
+	}
+
+
+
+
+
+
+
+
+	////////////////////////////////////////////////////////////////////////////////
 
 	private function umur_dan_pemetaan($tanggal_lahir, $flag_cari = 'umur')
 	{
@@ -634,78 +849,4 @@ class Penjualan extends CI_Controller {
 	    $filename = 'data_registrasi'.$tgl_awal_fix.'_'.$tgl_akhir_fix.'_'.time();
 	    $this->lib_dompdf->generate($html, $filename, true, 'legal', 'landscape');
 	}
-
-	private function rule_validasi($is_asuransi = FALSE)
-	{
-		$data = array();
-		$data['error_string'] = array();
-		$data['inputerror'] = array();
-		$data['status'] = TRUE;
-
-		
-		if ($this->input->post('nama') == '') {
-			$data['inputerror'][] = 'nama';
-            $data['error_string'][] = 'Wajib mengisi Nama';
-			$data['status'] = FALSE;
-			$data['is_select2'][] = TRUE;
-		}
-
-		if ($this->input->post('tanggal_reg') == '') {
-			$data['inputerror'][] = 'tanggal_reg';
-			$data['error_string'][] = 'Wajib Mengisi Tanggal';
-			$data['status'] = FALSE;
-			$data['is_select2'][] = FALSE;
-		}
-		
-		if ($this->input->post('jam_reg') == '') {
-			$data['inputerror'][] = 'jam_reg';
-            $data['error_string'][] = 'Wajib Mengisi Pukul';
-			$data['status'] = FALSE;
-			$data['is_select2'][] = FALSE;
-		}
-
-		if ($this->input->post('pemetaan') == '') {
-			$data['inputerror'][] = 'pemetaan';
-            $data['error_string'][] = 'Wajib Mengisi Pemetaan';
-            $data['status'] = FALSE;
-		}
-
-		if ($this->input->post('dokter') == '') {
-			$data['inputerror'][] = 'dokter';
-            $data['error_string'][] = 'Wajib Mengisi Dokter';
-			$data['status'] = FALSE;
-			$data['is_select2'][] = TRUE;
-		}
-
-		if ($this->input->post('umur_reg') == '') {
-			$data['inputerror'][] = 'umur_reg';
-            $data['error_string'][] = 'Wajib Mengisi Umur';
-			$data['status'] = FALSE;
-			$data['is_select2'][] = FALSE;
-		}
-
-		if($is_asuransi) {
-			if ($this->input->post('asuransi') == '') {
-				$data['inputerror'][] = 'asuransi';
-				$data['error_string'][] = 'Wajib Mengisi Asuransi';
-				$data['status'] = FALSE;
-				$data['is_select2'][] = TRUE;
-			}
-			
-			if ($this->input->post('no_asuransi') == '') {
-				$data['inputerror'][] = 'no_asuransi';
-				$data['error_string'][] = 'Wajib Mengisi Nomor Asuransi';
-				$data['status'] = FALSE;
-				$data['is_select2'][] = FALSE;
-			}
-		}
-
-        return $data;
-	}
-
-
-
-
-	/////////////////////////////////
-
 }

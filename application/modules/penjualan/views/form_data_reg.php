@@ -100,31 +100,48 @@ $obj_date = new DateTime();
               <div class="kt-portlet__body">
                 <div class="form-group">
                   <label>List Penjualan:</label>
-                    <select class="form-control select2_multi" id="selReg" name="list_item[]" multiple="multiple">
+                    <select class="form-control select2_multi" id="selReg" name="list_item_reg[]" multiple="multiple">
                       <?php foreach ($list_item as $key => $value) {
                         echo '<option value="'.$value->id.'">'.$value->nama.'</option>';
                       } ?>
                     </select>
                   <span class="help-block"></span>
                 </div>
+
+                <div class="form-group">
+                  <label>Pembayaran:</label>
+                  <input type="text" data-thousands="." data-decimal="," id="pembayaran_reg" name="pembayaran_reg" class="form-control form-control-sm inputmask" onkeyup="hitungTotalReg()" value="">
+                  <input type="hidden" id="pembayaran_reg_raw" name="pembayaran_reg_raw" class="form-control form-control-sm" value="">
+                  <span class="help-block"></span>
+                </div>
+
+                <div class="form-group">
+                  <label>Kembalian:</label>
+                  <input type="text" class="form-control" name="kembalian_reg" id="kembalian_reg" disabled>
+                  <input type="hidden" id="kembalian_reg_raw" name="kembalian_reg_raw" class="form-control form-control-sm" value="">
+                  <span class="help-block"></span>
+                </div>
+              </div>
+              <div class="kt-portlet__foot">
+                <div class="kt-form__actions kt-form__actions--right">
+                  <button type="submit" class="btn btn-brand">Submit</button>
+                  <button type="reset" class="btn btn-secondary">Cancel</button>
+                </div>
               </div>
             </div>
             
             <div class="kt-portlet col-5">
-              <div class="kt-portlet__head">
-                <div class="kt-portlet__head-label">
-                  <h3 class="kt-portlet__head-title"></h3>
-                </div>
-              </div>
-
               <div class="kt-portlet__body">
                 <div class="kt-invoice__container">
+                  <div class="col-12">
+                    <span style="font-size: 18px;font-weight:bold;">Invoice : <span id="inv_reg"></span></span>
+                  </div>
                   <div class="table-responsive">
                     <table class="table">
                       <thead>
                         <tr>
-                          <th width="70%;" colspan="2">RINCIAN</th>
-                          <th width="30%;">BIAYA</th>
+                          <th width="60%;" colspan="2">RINCIAN</th>
+                          <th width="40%;">BIAYA</th>
                         </tr>
                       </thead>
                       <tbody id="list_penjualan_reg">
@@ -134,18 +151,13 @@ $obj_date = new DateTime();
                 </div>
               </div>
 
-              <div class="kt-portlet__foot">
-                <div class="kt-form__actions kt-form__actions--right">
-                  <button type="submit" class="btn btn-brand">Submit</button>
-                  <button type="reset" class="btn btn-secondary">Cancel</button>
-                </div>
-              </div>
+              
             </div>
           </div>
         </form>
-          <!--end::Form-->
       </div>
-      
+      <!-- div reguler -->
+
       <!-- div member -->
       <div class="kt-portlet__body" id="divMember" style="display: none;">
         <form class="kt-form kt-form--label-right" id="formPenjualanMem">
@@ -159,42 +171,66 @@ $obj_date = new DateTime();
                 </div>
               </div>
 
-              <!--begin::Form-->
-              
-                <div class="kt-portlet__body">
-                  <div class="form-group">
-                    <label>Member ID:</label>
-                    <input type="text" class="form-control" id="member_id" name="member_id">
-                  </div>
-                  <div class="form-group">
-                    <label>Nama:</label>
-                    <input type="text" class="form-control" readonly>
-                  </div>
-                  <div class="form-group">
-                    <label>Alamat:</label>
-                    <input type="text" class="form-control" readonly>
-                  </div>
-                  <div class="form-group">
-                    <label>Hp:</label>
-                    <input type="text" class="form-control" readonly>
-                  </div>
-                  <div class="form-group">
-                    <label>Email:</label>
-                    <input type="text" class="form-control" readonly>
-                  </div>
-                  <div class="form-group">
-                    <label>List Penjualan:</label>
-                      <select class="form-control select2_multi" id="selMem" name="list_item[]" multiple="multiple">
-                        <?php foreach ($list_item as $key => $value) {
-                          echo '<option value="'.$value->id.'">'.$value->nama.'</option>';
-                        } ?>
-                      </select>
-                    <span class="help-block"></span>
-                  </div>
+              <div class="kt-portlet__body">
+                <div class="form-group">
+                  <label>Member ID:</label>
+                  <input type="text" class="form-control" id="member_id" name="member_id" onkeyup="cariMember(this.value)">
                 </div>
-              
+                <div class="form-group row">
+                  <label class="col-2" style="text-align: left;">Nama</label>
+                  <label class="col-1" style="text-align: left;">:</label>
+                  <label class="col-7" style="text-align: left;" id="labelMemNama"></label>
+                </div>
 
-              <!--end::Form-->
+                <div class="form-group row">
+                  <label class="col-2" style="text-align: left;">Alamat</label>
+                  <label class="col-1" style="text-align: left;">:</label>
+                  <label class="col-7" style="text-align: left;" id="labelMemAlamat"></label>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-2" style="text-align: left;">Hp</label>
+                  <label class="col-1" style="text-align: left;">:</label>
+                  <label class="col-7" style="text-align: left;" id="labelMemHp"></label>
+                </div>
+                
+                <div class="form-group row">
+                  <label class="col-2" style="text-align: left;">Email</label>
+                  <label class="col-1" style="text-align: left;">:</label>
+                  <label class="col-7" style="text-align: left;" id="labelMemEmail"></label>
+                </div>
+
+                <div class="form-group">
+                  <label>List Penjualan:</label>
+                    <select class="form-control select2_multi" id="selMem" name="list_item_mem[]" multiple="multiple">
+                      <?php foreach ($list_item as $key => $value) {
+                        echo '<option value="'.$value->id.'">'.$value->nama.'</option>';
+                      } ?>
+                    </select>
+                  <span class="help-block"></span>
+                </div>
+
+                <div class="form-group">
+                  <label>Pembayaran:</label>
+                  <input type="text" data-thousands="." data-decimal="," id="pembayaran_mem" name="pembayaran_mem" class="form-control form-control-sm inputmask" onkeyup="hitungTotalMem()" value="">
+                  <input type="hidden" id="pembayaran_mem_raw" name="pembayaran_mem_raw" class="form-control form-control-sm" value="">
+                  <span class="help-block"></span>
+                </div>
+
+                <div class="form-group">
+                  <label>Kembalian:</label>
+                  <input type="text" class="form-control" name="kembalian_mem" id="kembalian_mem" disabled>
+                  <input type="hidden" id="kembalian_mem_raw" name="kembalian_mem_raw" class="form-control form-control-sm" value="">
+                  <span class="help-block"></span>
+                </div>
+              </div>
+
+              <div class="kt-portlet__foot">
+                <div class="kt-form__actions kt-form__actions--right">
+                  <button type="submit" class="btn btn-brand">Submit</button>
+                  <button type="reset" class="btn btn-secondary">Cancel</button>
+                </div>
+              </div>
             </div>
           
             <div class="kt-portlet col-5">
@@ -205,12 +241,15 @@ $obj_date = new DateTime();
               </div>
               <div class="kt-portlet__body">
                 <div class="kt-invoice__container">
+                  <div class="col-12">
+                    <span style="font-size: 18px;font-weight:bold;">Invoice : <span id="inv_mem"></span></span>
+                  </div>
                   <div class="table-responsive">
                     <table class="table">
                       <thead>
                         <tr>
-                          <th width="70%;" colspan="2">RINCIAN</th>
-                          <th width="30%;">BIAYA</th>
+                          <th width="60%;" colspan="2">RINCIAN</th>
+                          <th width="40%;">BIAYA</th>
                         </tr>
                       </thead>
                       <tbody id="list_penjualan_mem">
@@ -219,29 +258,12 @@ $obj_date = new DateTime();
                   </div>
                 </div>
               </div>
-              <div class="kt-portlet__foot">
-                <div class="kt-form__actions kt-form__actions--right">
-                  <button type="submit" class="btn btn-brand">Submit</button>
-                  <button type="reset" class="btn btn-secondary">Cancel</button>
-                </div>
-              </div>
             </div>
           </div>
-        <!--end::Form-->
         </form>   
       </div>
+      <!-- div member -->
 
-      <!-- <div class="kt-portlet__foot">
-        <div class="kt-form__actions">
-          <div class="row">
-            <div class="col-lg-5"></div>
-            <div class="col-lg-7">
-              <button type="button" class="btn btn-brand" onclick="save()">Simpan</button>
-              <a type="button" class="btn btn-secondary" href="<?= base_url($this->uri->segment(1))?>">Batal</a>
-            </div>
-          </div>
-        </div>
-      </div> -->
     </div>
   </div>
 </div>

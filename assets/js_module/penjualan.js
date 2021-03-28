@@ -2,21 +2,152 @@ var save_method;
 var table;
 
 $(document).ready(function() {
+    $('#formPenjualanReg').submit(function (e) { 
+        e.preventDefault();
+        var form = $('#formPenjualanReg')[0];
+        var data = new FormData(form);
+        swalConfirm.fire({
+            title: 'Simpan Data Transaksi ?',
+            text: "Transaksi akan disimpan ?",
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Simpan Data !',
+            cancelButtonText: 'Tidak, Batalkan!',
+            reverseButtons: true
+          }).then((result) => {
+            if (result.value) {
+                $.ajax({
+                    type: "POST",
+                    enctype: 'multipart/form-data',
+                    url : base_url + 'penjualan/simpan_trans_reg',
+                    data: data,
+                    dataType: "JSON",
+                    processData: false, // false, it prevent jQuery form transforming the data into a query string
+                    contentType: false, 
+                    cache: false,
+                    timeout: 600000,
+                    success: function(data)
+                    {
+                        if(data.status) {
+                            swalConfirm.fire('Berhasil Proses Transaksi!', data.pesan, 'success');
+                            // table.ajax.reload();
+                        }else{
+                            for (var i = 0; i < data.inputerror.length; i++) 
+                            {
+                                if (data.inputerror[i] != 'list_item_reg') {
+                                    $('[name="'+data.inputerror[i]+'"]').addClass('is-invalid');
+                                    $('[name="'+data.inputerror[i]+'"]').next().text(data.error_string[i]).addClass('invalid-feedback'); //select span help-block class set text error string
+                                }else{
+                                    //ikut style global
+                                    $('[name="'+data.inputerror[i]+'"]').next().next().text(data.error_string[i]).addClass('invalid-feedback-select');
+                                }
+                            }
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown)
+                    {
+                        Swal.fire('Terjadi Kesalahan');
+                    }
+                });
+            } else if (
+              /* Read more about handling dismissals below */
+              result.dismiss === Swal.DismissReason.cancel
+            ) {
+              swalConfirm.fire(
+                'Dibatalkan',
+                'Aksi Dibatalakan',
+                'error'
+              )
+            }
+        });
+    });
+
+    $('#formPenjualanMem').submit(function (e) { 
+        e.preventDefault();
+        var form = $('#formPenjualanMem')[0];
+        var data = new FormData(form);
+        swalConfirm.fire({
+            title: 'Simpan Data Transaksi Member?',
+            text: "Transaksi akan disimpan ?",
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Simpan Data !',
+            cancelButtonText: 'Tidak, Batalkan!',
+            reverseButtons: true
+          }).then((result) => {
+            if (result.value) {
+                $.ajax({
+                    type: "POST",
+                    enctype: 'multipart/form-data',
+                    url : base_url + 'penjualan/simpan_trans_mem',
+                    data: data,
+                    dataType: "JSON",
+                    processData: false, // false, it prevent jQuery form transforming the data into a query string
+                    contentType: false, 
+                    cache: false,
+                    timeout: 600000,
+                    success: function(data)
+                    {
+                        if(data.status) {
+                            swalConfirm.fire('Berhasil Proses Transaksi!', data.pesan, 'success');
+                            // table.ajax.reload();
+                        }else{
+                            for (var i = 0; i < data.inputerror.length; i++) 
+                            {
+                                if (data.inputerror[i] != 'list_item_mem') {
+                                    $('[name="'+data.inputerror[i]+'"]').addClass('is-invalid');
+                                    $('[name="'+data.inputerror[i]+'"]').next().text(data.error_string[i]).addClass('invalid-feedback'); //select span help-block class set text error string
+                                }else{
+                                    //ikut style global
+                                    $('[name="'+data.inputerror[i]+'"]').next().next().text(data.error_string[i]).addClass('invalid-feedback-select');
+                                }
+                            }
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown)
+                    {
+                        Swal.fire('Terjadi Kesalahan');
+                    }
+                });
+            } else if (
+              /* Read more about handling dismissals below */
+              result.dismiss === Swal.DismissReason.cancel
+            ) {
+              swalConfirm.fire(
+                'Dibatalkan',
+                'Aksi Dibatalakan',
+                'error'
+              )
+            }
+        });
+    });
+
     $(document).on('click', '.div_menu', function(){
         var nama_menu = $(this).data('id');
-        if(nama_menu == 'reguler') {
-            $('#divReguler').css("display", "block");
-            $('#divMember').css("display", "none");
-        }else{
-            $('#divReguler').css("display", "none");
-            $('#divMember').css("display", "block");
-            $('#member_id').focus();
-        }
-
-        $('html, body').animate({
-            scrollTop: $(".form_penjualan_area").offset().top
-        }, 300);
-        reInitSelectMulti();
+        
+        $.ajax({
+            type: "get",
+            url : base_url + 'penjualan/get_no_invoice',
+            // data: {},
+            dataType: "json",
+            success: function (response) {
+                if(nama_menu == 'reguler') {
+                    $('#divReguler').css("display", "block");
+                    $('#divMember').css("display", "none");
+                    $('span#inv_reg').text(response);
+                }else{
+                    $('#divReguler').css("display", "none");
+                    $('#divMember').css("display", "block");
+                    $('#inv_mem').text(response);
+                    $('#member_id').focus();
+                }
+        
+                $('html, body').animate({
+                    scrollTop: $(".form_penjualan_area").offset().top
+                }, 300);
+                reInitSelectMulti();
+            }
+        });
     });
 
     $("#selReg").on('change', function (e) { 
@@ -57,99 +188,95 @@ $(document).ready(function() {
                 $('tbody#list_penjualan_mem').html(response.html);
             }
         });
-    }); 
-
-
-    
-
-    // $("#selReg").on('change', function (e) { 
-    //     var totAmt = 0;
-    //     $.each($(this).find(":selected"), function (i, item) { 
-    //         console.log(item.value, i);
-    //         //totAmt += $(item).data("price");
-    //     });
-    //     //$("#PackTotAmt").text(totAmt);
-    //     // console.log(totAmt);
-    // }); 
-
-    //////////////////////////////////////////////////////////////
+    });
 
     //force integer input in textfield
     $('input.numberinput').bind('keypress', function (e) {
         return (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57) && e.which != 46) ? false : true;
     });
-
-	//datatables
-	table = $('#tabel_user').DataTable({
-		responsive: true,
-        searchDelay: 500,
-        processing: true,
-        serverSide: true,
-		ajax: {
-			url  : base_url + "master_user/list_user",
-			type : "POST" 
-		},
-
-		//set column definition initialisation properties
-		columnDefs: [
-			{
-				targets: [-1], //last column
-				orderable: false, //set not orderable
-			},
-		],
-    });
-    
-    $("#foto").change(function() {
-        readURL(this);
-    });
-
-    //change menu status
-    $(document).on('click', '.btn_edit_status', function(){
-        var id = $(this).attr('id');
-        var status = $(this).val();
-        swalConfirm.fire({
-            title: 'Ubah Status Data User ?',
-            text: "Apakah Anda Yakin ?",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Ya, Ubah Status!',
-            cancelButtonText: 'Tidak, Batalkan!',
-            reverseButtons: true
-          }).then((result) => {
-            if (result.value) {
-                $.ajax({
-                    url : base_url + 'master_user/edit_status_user/'+ id,
-                    type: "POST",
-                    dataType: "JSON",
-                    data : {status : status},
-                    success: function(data)
-                    {
-                        swalConfirm.fire('Berhasil Ubah Status User!', data.pesan, 'success');
-                        table.ajax.reload();
-                    },
-                    error: function (jqXHR, textStatus, errorThrown)
-                    {
-                        Swal.fire('Terjadi Kesalahan');
-                    }
-                });
-            } else if (
-              /* Read more about handling dismissals below */
-              result.dismiss === Swal.DismissReason.cancel
-            ) {
-              swalConfirm.fire(
-                'Dibatalkan',
-                'Aksi Dibatalakan',
-                'error'
-              )
-            }
-        });
-    });
-
-    $(".modal").on("hidden.bs.modal", function(){
-        reset_modal_form();
-        reset_modal_form_import();
-    });
 });	
+
+function formatMoney(number) {
+    var value = number.toLocaleString(
+        'id-ID', 
+        { minimumFractionDigits: 2 }
+    );
+    return value;
+}
+
+
+function hitungTotalReg(){
+    let harga = $('#pembayaran_reg').inputmask('unmaskedvalue');
+    let totalBiaya = $('#total_harga_global').val();
+
+    harga = harga.replace(",", ".");
+    hargaFix = parseFloat(harga).toFixed(2);
+    totalBiayaFix = parseFloat(totalBiaya).toFixed(2);
+    
+    let kembalian = hargaFix - totalBiaya;
+    
+    if(Number.isNaN(kembalian)) {
+        kembalianFix = 0;
+    }else{
+        kembalianFix = parseFloat(kembalian.toFixed(2));
+    }
+    
+    let kembalianNew = Number(kembalianFix.toFixed(2));
+    $('#kembalian_reg').val(formatMoney(kembalianNew));
+    
+    // set raw value
+    $('#pembayaran_reg_raw').val(hargaFix);
+    $('#kembalian_reg_raw').val(kembalianFix)
+}
+
+function hitungTotalMem(){
+    let harga = $('#pembayaran_mem').inputmask('unmaskedvalue');
+    let totalBiaya = $('#total_harga_global').val();
+
+    harga = harga.replace(",", ".");
+    hargaFix = parseFloat(harga).toFixed(2);
+    totalBiayaFix = parseFloat(totalBiaya).toFixed(2);
+    
+    let kembalian = hargaFix - totalBiaya;
+    
+    if(Number.isNaN(kembalian)) {
+        kembalianFix = 0;
+    }else{
+        kembalianFix = parseFloat(kembalian.toFixed(2));
+    }
+    
+    let kembalianNew = Number(kembalianFix.toFixed(2));
+    $('#kembalian_mem').val(formatMoney(kembalianNew));
+    
+    // set raw value
+    $('#pembayaran_mem_raw').val(hargaFix);
+    $('#kembalian_mem_raw').val(kembalianFix)
+}
+
+function cariMember(val){
+    // console.log(val);
+    $.ajax({
+        type: "get",
+        url  : base_url + "penjualan/get_detail_member",
+        data: {kode_member:val},
+        dataType: "json",
+        success: function (response) {
+            if(response.status) {
+                $('#labelMemNama').text(response.data.nama);
+                $('#labelMemAlamat').text(response.data.alamat);
+                $('#labelMemHp').text(response.data.hp);
+                $('#labelMemEmail').text(response.data.email);
+            }else{
+                $('#labelMemNama').text('');
+                $('#labelMemAlamat').text('');
+                $('#labelMemHp').text('');
+                $('#labelMemEmail').text('');
+            }
+        }
+    });
+}
+
+//////////////////////////////////////////////////////
 
 function add_menu()
 {

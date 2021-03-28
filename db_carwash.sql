@@ -11,7 +11,7 @@
  Target Server Version : 100413
  File Encoding         : 65001
 
- Date: 27/03/2021 20:14:40
+ Date: 28/03/2021 14:30:58
 */
 
 SET NAMES utf8mb4;
@@ -83,11 +83,13 @@ CREATE TABLE `m_member`  (
   `updated_at` datetime(0) NULL DEFAULT NULL,
   `deleted_at` datetime(0) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of m_member
 -- ----------------------------
+INSERT INTO `m_member` VALUES (1, 'M210328001', 'Masnur', 'Jalan Raya', 'masnur@masnur.com', '1212121', 'L', '0', NULL, NULL, '2021-03-28 14:17:23', NULL, NULL);
+INSERT INTO `m_member` VALUES (2, 'M210328002', 'Runsam', 'Ayar Nalaj', 'masnur@masnur.com', '78w7q8w7', 'P', '9', NULL, NULL, '2021-03-28 14:17:23', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for m_menu
@@ -217,7 +219,7 @@ CREATE TABLE `m_user`  (
 -- ----------------------------
 -- Records of m_user
 -- ----------------------------
-INSERT INTO `m_user` VALUES (1, 1, 'superadmin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, '2021-03-27 16:43:31', 'USR-00001', NULL, NULL, NULL, NULL);
+INSERT INTO `m_user` VALUES (1, 1, 'superadmin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, '2021-03-28 10:19:40', 'USR-00001', NULL, NULL, NULL, NULL);
 INSERT INTO `m_user` VALUES (2, 3, 'admin', 'Tzg1eTllUlU2a2xNQk5yYktIM1pwUT09', NULL, NULL, 'USR-00002', 'coba-1602775328.jpg', '2020-10-15 22:22:08', '2020-10-15 22:43:54', '2020-10-15 22:58:50');
 
 -- ----------------------------
@@ -342,6 +344,7 @@ CREATE TABLE `t_transaksi`  (
 -- ----------------------------
 -- Records of t_transaksi
 -- ----------------------------
+INSERT INTO `t_transaksi` VALUES ('95bd5773-eaf2-4da4-bd9f-43b12a271051', 'INV-21032800001', 1, NULL, 35000.00, '1', '2021-03-28 13:13:51', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for t_transaksi_det
@@ -367,5 +370,7 @@ CREATE TABLE `t_transaksi_det`  (
 -- ----------------------------
 -- Records of t_transaksi_det
 -- ----------------------------
+INSERT INTO `t_transaksi_det` VALUES ('1ab681ef-b4dc-4288-8513-9bf8b86244a2', '95bd5773-eaf2-4da4-bd9f-43b12a271051', 3, 10000.00, NULL, NULL, '2021-03-28 13:13:51', NULL, NULL);
+INSERT INTO `t_transaksi_det` VALUES ('f73481f8-4232-45a0-a7c5-f05dd8881dfb', '95bd5773-eaf2-4da4-bd9f-43b12a271051', 1, 25000.00, NULL, NULL, '2021-03-28 13:13:51', NULL, NULL);
 
 SET FOREIGN_KEY_CHECKS = 1;
