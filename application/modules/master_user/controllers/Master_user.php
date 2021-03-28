@@ -65,7 +65,7 @@ class Master_user extends CI_Controller {
 			
 			$str_aksi = '
 				<div class="btn-group">
-					<button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
+					<button type="button" class="btn btn-sm btn_1 dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
 					<div class="dropdown-menu">
 						<button class="dropdown-item" onclick="edit_user(\''.$user->id.'\')">
 							<i class="la la-pencil"></i> Edit User
