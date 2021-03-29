@@ -126,7 +126,7 @@
                </div>
             </a>
             <div class="kt-notification__custom kt-space-between">
-               <a href="<?= base_url('login/logout_proc'); ?>" class="btn btn-label btn-label-brand btn-sm btn-bold">Sign Out</a>
+               <a href="<?= base_url('login/logout_proc'); ?>" class="btn btn_1 red btn-sm btn-bold">Sign Out</a>
             </div>
          </div>
 
