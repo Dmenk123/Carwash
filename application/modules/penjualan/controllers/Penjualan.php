@@ -16,6 +16,12 @@ class Penjualan extends CI_Controller {
 		$this->load->model('t_transaksi');
 		$this->load->model('t_transaksi_det');
 		$this->load->library('barcode_lib');
+		$this->load->library('thermalprint_lib');
+	}
+
+	public function cetak()
+	{
+		$this->thermalprint_lib->cek();
 	}
 
 	public function index()
