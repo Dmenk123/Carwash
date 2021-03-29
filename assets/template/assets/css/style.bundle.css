@@ -35604,6 +35604,8 @@ body {
     flex-grow: 1;
     padding: 0;
     margin: 0;
+    background-color: #d8d8d8;
+    box-shadow: 0px 5px 5px -4px rgb(0 0 0 / 50%) inset;
     list-style: none !important; }
   .kt-aside-menu .kt-menu__nav .kt-menu__inner,
   .kt-aside-menu .kt-menu__nav .kt-menu__submenu {
