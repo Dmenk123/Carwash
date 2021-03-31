@@ -52,6 +52,8 @@
         <script src="<?= base_url('assets/'); ?>plugins/ckeditor/adapters/jquery.js" type="text/javascript"></script>
         <script src="<?= base_url('assets/'); ?>plugins/jquery-mask-money/dist/jquery.maskMoney.min.js" type="text/javascript"></script>
         <script src="<?= base_url('assets/'); ?>plugins/inputmask/dist/jquery.inputmask.min.js" type="text/javascript"></script>
+        <script src="<?= base_url('assets/'); ?>plugins/keyboard-js/dist/keyboard.min.js" type="text/javascript"></script>
+        
         
         <!--end::Global Theme Bundle -->
         

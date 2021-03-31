@@ -99,7 +99,7 @@ $obj_date = new DateTime();
               </div>
               <div class="kt-portlet__body">
                 <div class="form-group">
-                  <label>List Penjualan:</label>
+                  <label>List Penjualan <span style="font-weight: bold;font-style:italic;">(Shortcut F2)<span> : </label>
                     <select class="form-control select2_multi" id="selReg" name="list_item_reg[]" multiple="multiple">
                       <?php foreach ($list_item as $key => $value) {
                         echo '<option value="'.$value->id.'">'.$value->nama.'</option>';
@@ -109,7 +109,7 @@ $obj_date = new DateTime();
                 </div>
 
                 <div class="form-group">
-                  <label>Pembayaran:</label>
+                <label>Pembayaran <span style="font-weight: bold;font-style:italic;">(Shortcut F3)<span> : </label>
                   <input type="text" data-thousands="." data-decimal="," id="pembayaran_reg" name="pembayaran_reg" class="form-control form-control-sm inputmask" onkeyup="hitungTotalReg()" value="">
                   <input type="hidden" id="pembayaran_reg_raw" name="pembayaran_reg_raw" class="form-control form-control-sm" value="">
                   <span class="help-block"></span>
@@ -126,6 +126,7 @@ $obj_date = new DateTime();
                 <div class="kt-form__actions kt-form__actions--right">
                   <button type="submit" class="btn btn-brand">Submit</button>
                   <button type="reset" class="btn btn-secondary">Cancel</button>
+                  <button type="button" class="btn btn-brand" onclick="printStruk()">Print</button>
                 </div>
               </div>
             </div>
@@ -203,7 +204,7 @@ $obj_date = new DateTime();
                 </div>
 
                 <div class="form-group">
-                  <label>List Penjualan:</label>
+                  <label>List Penjualan <span style="font-weight: bold;font-style:italic;">(Shortcut F2)<span> : </label>
                     <select class="form-control select2_multi" id="selMem" name="list_item_mem[]" multiple="multiple">
                       <?php foreach ($list_item as $key => $value) {
                         echo '<option value="'.$value->id.'">'.$value->nama.'</option>';
@@ -213,7 +214,7 @@ $obj_date = new DateTime();
                 </div>
 
                 <div class="form-group">
-                  <label>Pembayaran:</label>
+                  <label>Pembayaran <span style="font-weight: bold;font-style:italic;">(Shortcut F3)<span> : </label>
                   <input type="text" data-thousands="." data-decimal="," id="pembayaran_mem" name="pembayaran_mem" class="form-control form-control-sm inputmask" onkeyup="hitungTotalMem()" value="">
                   <input type="hidden" id="pembayaran_mem_raw" name="pembayaran_mem_raw" class="form-control form-control-sm input-lg" value="">
                   <span class="help-block"></span>
@@ -231,6 +232,7 @@ $obj_date = new DateTime();
                 <div class="kt-form__actions kt-form__actions--right">
                   <button type="submit" class="btn btn_1">Submit</button>
                   <button type="reset" class="btn btn_outline">Cancel</button>
+                  <button type="button" class="btn btn_1" onclick="printStruk()">Print</button>
                 </div>
               </div>
             </div>

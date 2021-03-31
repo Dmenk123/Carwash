@@ -1,20 +1,47 @@
 var save_method;
 var table;
+var active_div;
 
 $(document).ready(function() {
+    keyboardJS.bind('ctrl + enter', (e) => {
+        if(active_div == 'reguler') {
+            $('#formPenjualanReg').submit();
+        }else if(active_div == 'member'){
+            $('#formPenjualanMem').submit();
+        }
+    });
+
+    keyboardJS.bind('f2', (e) => {
+        if(active_div == 'reguler') {
+            $('#selReg').select2('focus');
+        }else if(active_div == 'member'){
+            $('#selMem').select2('focus');
+        }
+    });
+
+    keyboardJS.bind('f3', (e) => {
+        e.preventDefault(); 
+        if(active_div == 'reguler') {
+            $('#selReg').select2('blur');
+            $('#pembayaran_reg').focus();
+        }else if(active_div == 'member'){
+            $('#pembayaran_mem').focus();
+        }
+    });
+    
     $('#formPenjualanReg').submit(function (e) { 
         e.preventDefault();
         var form = $('#formPenjualanReg')[0];
         var data = new FormData(form);
         swalConfirm.fire({
             title: 'Simpan Data Transaksi ?',
-            text: "Transaksi akan disimpan ?",
+            text: "(Klik/Enter untuk Simpan | Esc Untuk Batal)",
             type: 'warning',
-            showCancelButton: true,
+            // showCancelButton: true,
             confirmButtonText: 'Ya, Simpan Data !',
-            cancelButtonText: 'Tidak, Batalkan!',
+            // cancelButtonText: 'Tidak, Batalkan!',
             reverseButtons: true
-          }).then((result) => {
+        }).then((result) => {
             if (result.value) {
                 $.ajax({
                     type: "POST",
@@ -70,9 +97,9 @@ $(document).ready(function() {
             title: 'Simpan Data Transaksi Member?',
             text: "Transaksi akan disimpan ?",
             type: 'warning',
-            showCancelButton: true,
+            // showCancelButton: true,
             confirmButtonText: 'Ya, Simpan Data !',
-            cancelButtonText: 'Tidak, Batalkan!',
+            // cancelButtonText: 'Tidak, Batalkan!',
             reverseButtons: true
           }).then((result) => {
             if (result.value) {
@@ -135,10 +162,12 @@ $(document).ready(function() {
                     $('#divReguler').css("display", "block");
                     $('#divMember').css("display", "none");
                     $('span#inv_reg').text(response);
+                    active_div = 'reguler';
                 }else{
                     $('#divReguler').css("display", "none");
                     $('#divMember').css("display", "block");
                     $('#inv_mem').text(response);
+                    active_div = 'member';
                     $('#member_id').focus();
                 }
         
@@ -282,6 +311,38 @@ function cariMember(val){
             }
         }
     });
+}
+
+function printStruk(str) 
+{
+    $.ajax({
+        type: "GET",
+        url:  base_url+"penjualan/temp_html",
+        dataType: "json",
+        success: function (response) {
+            tampilCetak(response);        
+        }
+    });
+    
+}
+
+function tampilCetak(data) 
+{
+    var myWindow = window.open('', 'Receipt', 'height=400,width=600');
+    myWindow.document.write('<html><head><title>Receipt</title>');
+    /*optional stylesheet*/ //myWindow.document.write('<link rel="stylesheet" href="main.css" type="text/css" />');
+    myWindow.document.write('<style type="text/css"> *, html {margin:0;padding:0;} </style>');
+    myWindow.document.write('</head><body>');
+    myWindow.document.write(data);
+    myWindow.document.write('</body></html>');
+    myWindow.document.close(); // necessary for IE >= 10
+
+    myWindow.onload=function(){ // necessary if the div contain images
+
+        myWindow.focus(); // necessary for IE >= 10
+        myWindow.print();
+        myWindow.close();
+    };
 }
 
 //////////////////////////////////////////////////////
