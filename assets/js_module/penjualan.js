@@ -3,13 +3,7 @@ var table;
 var active_div;
 
 $(document).ready(function() {
-    keyboardJS.bind('ctrl + enter', (e) => {
-        if(active_div == 'reguler') {
-            $('#formPenjualanReg').submit();
-        }else if(active_div == 'member'){
-            $('#formPenjualanMem').submit();
-        }
-    });
+    
 
     keyboardJS.bind('f2', (e) => {
         if(active_div == 'reguler') {
@@ -57,7 +51,7 @@ $(document).ready(function() {
                     {
                         if(data.status) {
                             swalConfirm.fire('Berhasil Proses Transaksi!', data.pesan, 'success');
-                            // table.ajax.reload();
+                            $('.div-button-area').html(data.button);
                         }else{
                             for (var i = 0; i < data.inputerror.length; i++) 
                             {
@@ -95,7 +89,7 @@ $(document).ready(function() {
         var data = new FormData(form);
         swalConfirm.fire({
             title: 'Simpan Data Transaksi Member?',
-            text: "Transaksi akan disimpan ?",
+            text: "(Klik/Enter untuk Simpan | Esc Untuk Batal)",
             type: 'warning',
             // showCancelButton: true,
             confirmButtonText: 'Ya, Simpan Data !',
@@ -117,6 +111,7 @@ $(document).ready(function() {
                     {
                         if(data.status) {
                             swalConfirm.fire('Berhasil Proses Transaksi!', data.pesan, 'success');
+                            $('.div-button-area').html(data.button);
                             // table.ajax.reload();
                         }else{
                             for (var i = 0; i < data.inputerror.length; i++) 
@@ -259,7 +254,21 @@ function hitungTotalReg(){
     
     // set raw value
     $('#pembayaran_reg_raw').val(hargaFix);
-    $('#kembalian_reg_raw').val(kembalianFix)
+    $('#kembalian_reg_raw').val(kembalianFix);
+
+    if(kembalianFix < 0) {
+        $('.btnSubmit').attr('disabled', 'disabled');
+    }else{
+        $('.btnSubmit').removeAttr('disabled');
+
+        keyboardJS.bind('ctrl + enter', (e) => {
+            if(active_div == 'reguler') {
+                $('#formPenjualanReg').submit();
+            }else if(active_div == 'member'){
+                $('#formPenjualanMem').submit();
+            }
+        });
+    }
 }
 
 function hitungTotalMem(){
@@ -277,6 +286,7 @@ function hitungTotalMem(){
     }else{
         kembalianFix = parseFloat(kembalian).toFixed(2);
     }
+    
 
     // console.log(kembalianFix, Number(hargaFix));
     let kembalianNew = Number(kembalianFix).toFixed(2);
@@ -288,6 +298,20 @@ function hitungTotalMem(){
     // set raw value
     $('#pembayaran_mem_raw').val(hargaFix);
     $('#kembalian_mem_raw').val(kembalianFix)
+
+    if(kembalianFix < 0) {
+        $('.btnSubmit').attr('disabled', 'disabled');
+    }else{
+        $('.btnSubmit').removeAttr('disabled');
+
+        keyboardJS.bind('ctrl + enter', (e) => {
+            if(active_div == 'reguler') {
+                $('#formPenjualanReg').submit();
+            }else if(active_div == 'member'){
+                $('#formPenjualanMem').submit();
+            }
+        });
+    }
 }
 
 function cariMember(val){
@@ -309,6 +333,8 @@ function cariMember(val){
                 $('#labelMemHp').text('');
                 $('#labelMemEmail').text('');
             }
+            
+            $('#counter_member').text('Counter Member : '+response.counter);
         }
     });
 }
@@ -328,13 +354,13 @@ function printStruk(str)
 
 function tampilCetak(data) 
 {
-    var myWindow = window.open('', 'Receipt', 'height=400,width=600');
-    myWindow.document.write('<html><head><title>Receipt</title>');
-    /*optional stylesheet*/ //myWindow.document.write('<link rel="stylesheet" href="main.css" type="text/css" />');
-    myWindow.document.write('<style type="text/css"> *, html {margin:0;padding:0;} </style>');
-    myWindow.document.write('</head><body>');
+    var myWindow = window.open('', 'Struk Pembayaran', 'height=400,width=600');
+    //myWindow.document.write('<html><head><title>Receipt</title>');
+    // /*optional stylesheet*/ //myWindow.document.write('<link rel="stylesheet" href="main.css" type="text/css" />');
+    //myWindow.document.write('<style type="text/css"> *, html {margin:0;padding:0;} </style>');
+    //myWindow.document.write('</head><body>');
     myWindow.document.write(data);
-    myWindow.document.write('</body></html>');
+    // myWindow.document.write('</body></html>');
     myWindow.document.close(); // necessary for IE >= 10
 
     myWindow.onload=function(){ // necessary if the div contain images

@@ -31,9 +31,10 @@ class Penjualan extends CI_Controller {
 				
 				<head>
 				<style>
+					@page { size: 58mm 100mm }
 					
 					@media print {
-						width: 55mm;
+						width: 58mm;
 						height:100%;
 						position:absolute;
 						.page-break { display: block; page-break-before: always; }
@@ -128,7 +129,7 @@ class Penjualan extends CI_Controller {
 					}
 				</style>
 
-				<body translate="no" >
+				<body translate="no" class=receipt>
             		<div id="invoice-POS">
 						<center id="top">
 							<div class="logo"></div>
@@ -212,7 +213,6 @@ class Penjualan extends CI_Controller {
 						</div>
   					</div>
 				</body>	
-
 			</html>';
 		echo json_encode($html);
 	}
@@ -306,6 +306,14 @@ class Penjualan extends CI_Controller {
 		echo json_encode($retval);
 	}
 
+	private function get_div_button()
+	{
+		return '
+			<button type="button" class="btn btn-secondary">Transaksi Selanjutnya</button>
+			<button type="button" class="btn btn-brand" onclick="printStruk()">Print</button>
+		';
+	}
+
 	public function get_no_invoice()
 	{
 		$nomor = $this->t_transaksi->get_invoice();
@@ -368,15 +376,20 @@ class Penjualan extends CI_Controller {
 			];
 
 			$update = $this->t_transaksi->update(['id'=> $id_header], $data_upd_header);
+
+			$data_log = json_encode($data_ins_det);
+			$this->lib_fungsi->catat_log_aktifitas('CREATE', null, $data_log);
 		}
 				
 		if ($this->db->trans_status() === FALSE){
 			$this->db->trans_rollback();
 			$retval['status'] = false;
+			$retval['button'] = false;
 			$retval['pesan'] = 'Gagal memproses Data Transaksi';
 		}else{
 			$this->db->trans_commit();
 			$retval['status'] = true;
+			$retval['button'] = $this->get_div_button();
 			$retval['pesan'] = 'Sukses memproses Data Transaksi';
 		}
 
@@ -388,6 +401,17 @@ class Penjualan extends CI_Controller {
 		$obj_date = new DateTime();
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
 		$list_item = $this->input->post('list_item_mem'); 
+		$kode_member = $this->input->post('member_id');
+		$data_member = $this->m_global->single_row('*', ['deleted_at' => null, 'kode_member' => $kode_member], 'm_member');
+
+		if(!$data_member) {
+			$data['inputerror'][] = 'member_id';
+            $data['error_string'][] = 'Kode Member Tidak Ditemukan';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = FALSE;
+			echo json_encode($data);
+			return;
+		}
 		
 		if($list_item == null) {
 			$data['inputerror'][] = 'list_item_mem';
@@ -413,6 +437,7 @@ class Penjualan extends CI_Controller {
 			'id' => $id_header,
 			'kode' => $this->t_transaksi->get_invoice(),
 			'id_jenis_trans' => self::ID_JENIS_TRANS,
+			'id_member' => $data_member->id,
 			'id_user' => $this->session->userdata('id_user'),
 			'created_at' => $timestamp
 		];
@@ -439,15 +464,32 @@ class Penjualan extends CI_Controller {
 			];
 
 			$update = $this->t_transaksi->update(['id'=> $id_header], $data_upd_header);
+
+			if($update) {
+				$counter = $this->lib_fungsi->cek_counter($data_member->id);
+				$ins_count = $this->lib_fungsi->insert_counter($data_member->id, $counter);
+
+				if($ins_count === FALSE) {
+					$this->db->trans_rollback();
+					$retval['status'] = false;
+					$retval['button'] = false;
+					$retval['pesan'] = 'Gagal memproses Data Transaksi';
+				}
+			}
+
+			$data_log = json_encode($data_ins_det);
+			$this->lib_fungsi->catat_log_aktifitas('CREATE', null, $data_log);
 		}
 				
 		if ($this->db->trans_status() === FALSE){
 			$this->db->trans_rollback();
 			$retval['status'] = false;
+			$retval['button'] = false;
 			$retval['pesan'] = 'Gagal memproses Data Transaksi';
 		}else{
 			$this->db->trans_commit();
 			$retval['status'] = true;
+			$retval['button'] = $this->get_div_button();
 			$retval['pesan'] = 'Sukses memproses Data Transaksi';
 		}
 
@@ -486,16 +528,23 @@ class Penjualan extends CI_Controller {
 	{
 		$kode_member = trim($this->input->get('kode_member'));
 		$data = $this->m_global->single_row('*', ['deleted_at' => null, 'kode_member' => $kode_member], 'm_member');
+		if($data) {
+			$counter = $this->lib_fungsi->cek_counter($data->id);
+		}else{
+			$counter = 0;
+		}
 		
 		if($data) {
 			$retval = [
 				'data' => $data,
-				'status' => true
+				'status' => true,
+				'counter' => $counter
 			];
 		}else{
 			$retval = [
 				'data' => null,
-				'status' => false
+				'status' => false,
+				'counter' => $counter
 			];
 		}
 
