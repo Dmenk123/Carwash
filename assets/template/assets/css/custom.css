@@ -8358,7 +8358,7 @@ ul#top_menu {
   font-family: inherit;
   font-size: 14px;
   font-weight: normal;
-  height: 50px;
+  height: 53px;
   line-height: 48px;
   outline: none;
   padding-left: 15px;
@@ -8371,7 +8371,8 @@ ul#top_menu {
   width: auto;
   color: #555;
   padding-top: 2px;
-  border-right: 1px solid #d2d8dd;
+  border: 1px solid #d2d8dd;
+  z-index: 999px;
 }
 .custom-search-input-3 .select2-container--default .select2-selection--single {
   border: 0px solid;
@@ -8385,7 +8386,7 @@ ul#top_menu {
 }
 .custom-search-input-3 .select2-container--default .select2-selection--single .select2-selection__arrow {
   height: 50px;
-  line-height: 48px;
+  /* line-height: 48px; */
 }
 .custom-search-input-3 i, .custom-search-input-5 i {
   -webkit-border-radius: 3px;
@@ -8424,7 +8425,7 @@ ul#top_menu {
   font-size: 0.875rem;
   border: 0;
   padding: 0 25px;
-  height: 50px;
+  height: 53px;
   cursor: pointer;
   outline: none;
   width: 100%;
