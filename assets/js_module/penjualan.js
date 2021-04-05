@@ -52,6 +52,7 @@ $(document).ready(function() {
                         if(data.status) {
                             swalConfirm.fire('Berhasil Proses Transaksi!', data.pesan, 'success');
                             $('.div-button-area').html(data.button);
+                            printStruk(data.id_trans);
                         }else{
                             for (var i = 0; i < data.inputerror.length; i++) 
                             {
@@ -339,14 +340,15 @@ function cariMember(val){
     });
 }
 
-function printStruk(str) 
+function printStruk(id_trans) 
 {
     $.ajax({
-        type: "GET",
-        url:  base_url+"penjualan/temp_html",
+        type: "get",
+        url:  base_url+"penjualan/cetak_struk/"+id_trans,
         dataType: "json",
+        // data: {id_trans:id_trans},
         success: function (response) {
-            tampilCetak(response);        
+           return;     
         }
     });
     

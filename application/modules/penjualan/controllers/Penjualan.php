@@ -19,203 +19,24 @@ class Penjualan extends CI_Controller {
 		$this->load->library('thermalprint_lib');
 	}
 
-	public function cetak()
+	public function cetak_struk($id_trans)
 	{
-		$this->thermalprint_lib->cek();
+		$id_user = $this->session->userdata('id_user'); 
+		$data_profile = $this->m_global->single_row("*",NULL,'m_profil');
+		$select = 'trans.*, trans_det.id as id_det, trans_det.id_item_trans, trans_det.harga_satuan, m_item_trans.nama';
+		$join = [ 
+			['table' => 't_transaksi_det as trans_det', 'on' => 'trans.id = trans_det.id_transaksi'],
+			['table' => 'm_item_trans', 'on' => 'trans_det.id_item_trans = m_item_trans.id and m_item_trans.id_jenis_trans = 1']
+		];
+		$data_penjualan = $this->m_global->multi_row($select, ['trans.id' =>  $id_trans,'trans.deleted_at' => null], 't_transaksi as trans', $join);
+		// echo $this->db->last_query();exit;
+		
+		$data_user = $this->m_user->get_detail_user($id_user);
+		
+		$this->thermalprint_lib->cek_cetak($data_user, $data_profile, $data_penjualan);
 	}
 
-	public function temp_html()
-	{
-		$html = '<!DOCTYPE html>
-			<html lang="en" >
-				
-				<head>
-				<style>
-					@page { size: 58mm 100mm }
-					
-					@media print {
-						width: 58mm;
-						height:100%;
-						position:absolute;
-						.page-break { display: block; page-break-before: always; }
-					}
-					#invoice-POS {
-					box-shadow: 0 0 1in -0.25in rgba(0, 0, 0, 0.5);
-					padding: 2mm;
-					margin: 0 auto;
-					width: 44mm;
-					background: #FFF;
-					}
-					#invoice-POS ::selection {
-					background: #f31544;
-					color: #FFF;
-					}
-					#invoice-POS ::moz-selection {
-					background: #f31544;
-					color: #FFF;
-					}
-					#invoice-POS h1 {
-					font-size: 1.5em;
-					color: #222;
-					}
-					#invoice-POS h2 {
-					font-size: .9em;
-					}
-					#invoice-POS h3 {
-					font-size: 1.2em;
-					font-weight: 300;
-					line-height: 2em;
-					}
-					#invoice-POS p {
-					font-size: .7em;
-					color: #666;
-					line-height: 1.2em;
-					}
-					#invoice-POS #top, #invoice-POS #mid, #invoice-POS #bot {
-					border-bottom: 1px solid #EEE;
-					}
-					#invoice-POS #top {
-					min-height: 100px;
-					}
-					#invoice-POS #mid {
-					min-height: 80px;
-					}
-					#invoice-POS #bot {
-					min-height: 50px;
-					}
-					#invoice-POS #top .logo {
-					height: 60px;
-					width: 60px;
-					#background: url(../files/img/app_img/thumbs/logo_thumb.jpg) no-repeat;
-					background-size: 60px 60px;
-					}
-					#invoice-POS .clientlogo {
-					float: left;
-					height: 60px;
-					width: 60px;
-					#background: url(../files/img/app_img/thumbs/logo_thumb.jpg) no-repeat;
-					background-size: 60px 60px;
-					border-radius: 50px;
-					}
-					#invoice-POS .info {
-					display: block;
-					margin-left: 0;
-					}
-					#invoice-POS .title {
-					float: right;
-					}
-					#invoice-POS .title p {
-					text-align: right;
-					}
-					#invoice-POS table {
-					width: 100%;
-					border-collapse: collapse;
-					}
-					#invoice-POS .tabletitle {
-					font-size: .5em;
-					background: #EEE;
-					}
-					#invoice-POS .service {
-					border-bottom: 1px solid #EEE;
-					}
-					#invoice-POS .item {
-					width: 24mm;
-					}
-					#invoice-POS .itemtext {
-					font-size: .5em;
-					}
-					#invoice-POS #legalcopy {
-					margin-top: 5mm;
-					}
-				</style>
-
-				<body translate="no" class=receipt>
-            		<div id="invoice-POS">
-						<center id="top">
-							<div class="logo"></div>
-							<div class="info"> 
-								<h2>SBISTechs Inc</h2>
-							</div><!--End Info-->
-						</center>
-
-						<div id="mid">
-							<div class="info">
-								<h2>Contact Info</h2>
-								<p> 
-									Address : street city, state 0000</br>
-									Email   : JohnDoe@gmail.com</br>
-									Phone   : 555-555-5555</br>
-								</p>
-							</div>
-						</div>
-
-						<div id="bot">
-
-							<div id="table">
-								<table>
-									<tr class="tabletitle">
-										<td class="item"><h2>Item</h2></td>
-										<td class="Hours"><h2>Qty</h2></td>
-										<td class="Rate"><h2>Sub Total</h2></td>
-									</tr>
-
-									<tr class="service">
-										<td class="tableitem"><p class="itemtext">Communication</p></td>
-										<td class="tableitem"><p class="itemtext">5</p></td>
-										<td class="tableitem"><p class="itemtext">$375.00</p></td>
-									</tr>
-
-									<tr class="service">
-										<td class="tableitem"><p class="itemtext">Asset Gathering</p></td>
-										<td class="tableitem"><p class="itemtext">3</p></td>
-										<td class="tableitem"><p class="itemtext">$225.00</p></td>
-									</tr>
-
-									<tr class="service">
-										<td class="tableitem"><p class="itemtext">Design Development</p></td>
-										<td class="tableitem"><p class="itemtext">5</p></td>
-										<td class="tableitem"><p class="itemtext">$375.00</p></td>
-									</tr>
-
-									<tr class="service">
-										<td class="tableitem"><p class="itemtext">Animation</p></td>
-										<td class="tableitem"><p class="itemtext">20</p></td>
-										<td class="tableitem"><p class="itemtext">$1500.00</p></td>
-									</tr>
-
-									<tr class="service">
-										<td class="tableitem"><p class="itemtext">Animation Revisions</p></td>
-										<td class="tableitem"><p class="itemtext">10</p></td>
-										<td class="tableitem"><p class="itemtext">$750.00</p></td>
-									</tr>
-
-
-									<tr class="tabletitle">
-										<td></td>
-										<td class="Rate"><h2>tax</h2></td>
-										<td class="payment"><h2>$419.25</h2></td>
-									</tr>
-
-									<tr class="tabletitle">
-										<td></td>
-										<td class="Rate"><h2>Total</h2></td>
-										<td class="payment"><h2>$3,644.25</h2></td>
-									</tr>
-
-								</table>
-							</div>
-
-							<div id="legalcopy">
-								<p class="legal"><strong>Thank you for your business!</strong>  Payment is expected within 31 days; please process this invoice within that time. There will be a 5% interest charge per month on late invoices. 
-								</p>
-							</div>
-
-						</div>
-  					</div>
-				</body>	
-			</html>';
-		echo json_encode($html);
-	}
+	
 
 	public function index()
 	{
@@ -372,7 +193,9 @@ class Penjualan extends CI_Controller {
 			}
 
 			$data_upd_header = [
-				'harga_total' => $total
+				'harga_total' => $total,
+				'harga_bayar' => $this->input->post('pembayaran_reg_raw'),
+				'harga_kembalian' => $this->input->post('kembalian_reg_raw'),
 			];
 
 			$update = $this->t_transaksi->update(['id'=> $id_header], $data_upd_header);
@@ -383,11 +206,13 @@ class Penjualan extends CI_Controller {
 				
 		if ($this->db->trans_status() === FALSE){
 			$this->db->trans_rollback();
+			$retval['id_trans'] = $id_header;
 			$retval['status'] = false;
 			$retval['button'] = false;
 			$retval['pesan'] = 'Gagal memproses Data Transaksi';
 		}else{
 			$this->db->trans_commit();
+			$retval['id_trans'] = $id_header;
 			$retval['status'] = true;
 			$retval['button'] = $this->get_div_button();
 			$retval['pesan'] = 'Sukses memproses Data Transaksi';
