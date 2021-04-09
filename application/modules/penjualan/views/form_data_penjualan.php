@@ -109,8 +109,8 @@ $obj_date = new DateTime();
                 </div>
 
                 <div class="form-group">
-                <label>Pembayaran <span style="font-weight: bold;font-style:italic;">(Shortcut F3)<span> : </label>
-                  <input type="text" data-thousands="." data-decimal="," id="pembayaran_reg" name="pembayaran_reg" class="form-control form-control-sm inputmask" onkeyup="hitungTotalReg()" value="">
+                <label>Pembayaran <span style="font-weight: bold;font-style:italic;"><span> : </label>
+                  <input type="text" data-thousands="." data-decimal="," id="pembayaran_reg" name="pembayaran_reg" class="form-control form-control-sm inputmask" onkeyup="hitungTotalReg()" value="0">
                   <input type="hidden" id="pembayaran_reg_raw" name="pembayaran_reg_raw" class="form-control form-control-sm" value="">
                   <span class="help-block"></span>
                 </div>
@@ -214,8 +214,8 @@ $obj_date = new DateTime();
                 </div>
 
                 <div class="form-group">
-                  <label>Pembayaran <span style="font-weight: bold;font-style:italic;">(Shortcut F3)<span> : </label>
-                  <input type="text" data-thousands="." data-decimal="," id="pembayaran_mem" name="pembayaran_mem" class="form-control form-control-sm inputmask" onkeyup="hitungTotalMem()" value="">
+                  <label>Pembayaran <span style="font-weight: bold;font-style:italic;"><span> : </label>
+                  <input type="text" data-thousands="." data-decimal="," id="pembayaran_mem" name="pembayaran_mem" class="form-control form-control-sm inputmask" onkeyup="hitungTotalMem()" value="0">
                   <input type="hidden" id="pembayaran_mem_raw" name="pembayaran_mem_raw" class="form-control form-control-sm input-lg" value="">
                   <span class="help-block"></span>
                 </div>

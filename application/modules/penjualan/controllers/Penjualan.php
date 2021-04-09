@@ -36,8 +36,6 @@ class Penjualan extends CI_Controller {
 		$this->thermalprint_lib->cek_cetak($data_user, $data_profile, $data_penjualan);
 	}
 
-	
-
 	public function index()
 	{
 		$id_user = $this->session->userdata('id_user'); 
@@ -130,7 +128,7 @@ class Penjualan extends CI_Controller {
 	private function get_div_button()
 	{
 		return '
-			<button type="button" class="btn btn-secondary">Transaksi Selanjutnya</button>
+			<button type="button" class="btn btn-secondary" onclick="location.reload()">Transaksi Selanjutnya</button>
 			<button type="button" class="btn btn-brand" onclick="printStruk()">Print</button>
 		';
 	}
@@ -285,7 +283,9 @@ class Penjualan extends CI_Controller {
 			}
 
 			$data_upd_header = [
-				'harga_total' => $total
+				'harga_total' => $total,
+				'harga_bayar' => $this->input->post('pembayaran_reg_raw'),
+				'harga_kembalian' => $this->input->post('kembalian_reg_raw')
 			];
 
 			$update = $this->t_transaksi->update(['id'=> $id_header], $data_upd_header);
