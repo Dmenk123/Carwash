@@ -52,3 +52,80 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modalDetail" aria-hidden="true" id="modal_detail_penjualan">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Detail Penjualan</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="kt-portlet">
+          <div class="kt-form kt-form--label-right">
+            <div class="kt-portlet__body">
+              <div class="form-group form-group-xs row">
+                <label class="col-3 col-form-label">Invoice :</label>
+                <div class="col-9">
+                  <span class="form-control-plaintext kt-font-bolder" id="spn-invoice"></span>
+                </div>
+              </div>
+              <div class="form-group form-group-xs row">
+                <label class="col-3 col-form-label">Tanggal :</label>
+                <div class="col-9">
+                  <span class="form-control-plaintext kt-font-bolder" id="spn-tanggal"></span>
+                </div>
+              </div>
+              <div class="form-group form-group-xs row">
+                <label class="col-3 col-form-label">Jenis Customer :</label>
+                <div class="col-9">
+                  <span class="form-control-plaintext kt-font-bolder" id="spn-jenismember"></span>
+                </div>
+              </div>
+              <div class="form-group form-group-xs row">
+                <label class="col-3 col-form-label">Nama Member :</label>
+                <div class="col-9">
+                  <span class="form-control-plaintext kt-font-bolder" id="spn-namamember"></span>
+                </div>
+              </div>
+              <div class="form-group form-group-xs row">
+                <label class="col-3 col-form-label">Harga :</label>
+                <div class="col-9">
+                  <span class="form-control-plaintext kt-font-bolder" id="spn-harga"></span>
+                </div>
+              </div>
+              <div class="form-group form-group-xs row">
+                <label class="col-3 col-form-label">Harga Bayar :</label>
+                <div class="col-9">
+                  <span class="form-control-plaintext kt-font-bolder" id="spn-hargabayar"></span>
+                </div>
+              </div>
+              <div class="form-group form-group-xs row">
+                <label class="col-3 col-form-label">Harga Kembalian :</label>
+                <div class="col-9">
+                  <span class="form-control-plaintext kt-font-bolder" id="spn-hargakembali"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="kt-portlet">
+          <div class="kt-portlet__head">
+            <div class="kt-portlet__head-label">
+              <h3 class="kt-portlet__head-title">
+                Rincian Transaksi
+              </h3>
+            </div>
+          </div>
+          <div class="kt-portlet__body" id="div_tabel_detail"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Cetak</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -46,36 +46,53 @@ class Daftar_penjualan extends CI_Controller {
 		$this->template_view->load_view($content, $data);
 	}
 
-	public function list_item_trans()
+	public function list_penjualan()
 	{
-		$list = $this->m_item_trans->get_datatable();
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$list = $this->t_transaksi->get_datatable_penjualan();
 		
 		$data = array();
 		$no =$_POST['start'];
-		foreach ($list as $jenis) {
-			$no++;
+		foreach ($list as $item) {
+			// $no++;
 			$row = array();
 			//loop value tabel db
-			$row[] = $no;
-			$row[] = $jenis->kode_jenis;
-			$row[] = $jenis->nama_jenis;
-			$row[] = $jenis->nama;
-			$row[] = 'Rp '.number_format($jenis->harga_awal,2);
-			$row[] = 'Rp '.number_format($jenis->harga,2);
-			// $aktif_txt = ($diag->is_aktif == 1) ? '<span style="color:blue;">Aktif</span>' : '<span style="color:red;">Non Aktif</span>';
+			// $row[] = $no;
+			$row[] = $item->kode;
+			$row[] = $obj_date->createFromFormat('Y-m-d H:i:s', $item->created_at)->format('d-m-Y H:i');
+			
+			$jenis_member_txt = ($item->jenis_member == 'Reguler') ? '<span style="color:blue;">Reguler</span>' : '<span style="color:red;">Member</span>';
+			$row[] = $jenis_member_txt;
+			
+			$row[] = $item->nama;
+			$row[] = number_format($item->harga_total, 0 ,',','.');
+			$row[] = number_format($item->harga_bayar, 0 ,',','.');
+			$row[] = number_format($item->harga_bayar, 0 ,',','.');
+			
 			// $row[] = $aktif_txt;			
 			
 			$str_aksi = '
 				<div class="btn-group">
 					<button type="button" class="btn btn-sm btn_1 dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
 					<div class="dropdown-menu">
-						<button class="dropdown-item" onclick="edit_item_trans(\''.$jenis->id.'\')">
-							<i class="la la-pencil"></i> Edit Item Transaksi
-						</button>
-						<button class="dropdown-item" onclick="delete_item_trans(\''.$jenis->id.'\')">
-							<i class="la la-trash"></i> Hapus
+						<button class="dropdown-item" onclick="detailPenjualan(\''.$item->id.'\')">
+							<i class="la la-file"></i> Detail Penjualan
 						</button>
 			';
+
+			if($this->session->userdata('id_role') == '1') {
+				$str_aksi .= '
+					<button class="dropdown-item" onclick="editPenjualan(\''.$item->id.'\')">
+						<i class="la la-pencil"></i> Edit Penjualan
+					</button>
+					<button class="dropdown-item" onclick="deletePenjualan(\''.$item->id.'\')">
+						<i class="la la-trash"></i> Hapus Penjualan
+					</button>';
+			}
+
+			$str_aksi .= '</div></div>';
+
 
 			$row[] = $str_aksi;
 
@@ -85,13 +102,79 @@ class Daftar_penjualan extends CI_Controller {
 
 		$output = [
 			"draw" => $_POST['draw'],
-			"recordsTotal" => $this->m_item_trans->count_all(),
-			"recordsFiltered" => $this->m_item_trans->count_filtered(),
+			"recordsTotal" => $this->t_transaksi->count_all_penjualan(),
+			"recordsFiltered" => $this->t_transaksi->count_filtered_penjualan(),
 			"data" => $data
 		];
 		
 		echo json_encode($output);
 	}
+
+	function get_detail_penjualan() {
+		$id = $this->input->get('id');
+		$data = $this->t_transaksi->get_detail_penjualan($id);
+		$html = '';
+		
+		if($data) {
+			$status = true;
+            $html .= '
+				<div class="kt-section">
+					<div class="kt-section__content">
+						<table class="table table-bordered table-hover">
+						<thead>
+							<tr>
+							<th>No.</th>
+							<th>Nama Item</th>
+							<th>Harga</th>
+							<th>Potongan</th>
+							<th>Ket Potongan</th>
+							</tr>
+						</thead>
+						<tbody>
+			';
+
+			$total_harga = 0;
+			$total_pot = 0;
+			foreach ($data as $key => $value) {
+				$txt_disc_jual = ($value->is_disc_jual) ? number_format($value->harga_satuan, 0 ,',','.') : '0';
+				$txt_ket_disc_jual = ($value->ket_disc_jual) ? $value->ket_disc_jual : '-';
+				$total_harga += $value->harga_satuan;
+				$total_pot += ($value->is_disc_jual) ? $value->harga_satuan : 0;
+				$html .= '
+                    <tr>
+                      <th scope="row">'.($key+1).'</th>
+                      <td>'.$value->nama_item.'</td>
+					  <td>Rp '.number_format($value->harga_satuan, 0 ,',','.').'</td>
+                      <td>'.$txt_disc_jual.'</td>
+					  <td>'.$txt_ket_disc_jual.'</td>
+                    </tr>';  
+			}
+
+			$html .= '
+					<tr>
+						<th scope="row" colspan="2">Total</th>
+						<td>Rp '.number_format($total_harga, 0 ,',','.').'</td>
+						<td>Rp '.number_format($total_pot, 0 ,',','.').'</td>
+					</tr>
+					<tr>
+						<th scope="row" colspan="3">Grand Total</th>
+						<td colspan="2" align="center">Rp '.number_format(($total_harga-$total_pot), 0 ,',','.').'</td>
+					</tr>
+					';  
+			
+			$html .= '</tbody></table></div></div>';
+		}else{
+			$status = false;
+		}
+		
+		echo json_encode([
+			'status' => $status,
+			'data' => $data,
+			'html' => $html
+		]);
+	}
+
+	/////////////////////////////
 
 	public function edit_item_trans()
 	{

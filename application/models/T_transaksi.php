@@ -66,71 +66,132 @@ class T_transaksi extends CI_Model
 			$kd = "00001";
 		}
 		return "INV-".$tahun.$bulan.$hari.$kd;
-}
-	// public function get_detail_user($id_user)
-	// {
-	// 	$this->db->select('*');
-	// 	$this->db->from('m_user');
-	// 	$this->db->where('id', $id_user);
-
-    //     $query = $this->db->get();
-
-    //     if ($query->num_rows() > 0) {
-    //         return $query->result();
-    //     }
-	// }
+	}
 	
+	###################################### datatable penjualan
+	protected $column_search_p = ['t_transaksi.kode','t_transaksi.created_at','jenis_member','m_user.nama','t_transaksi.harga_total', 't_transaksi.harga_bayar', 't_transaksi.harga_kembalian'];
 	
+	protected $column_order_p = ['t_transaksi.kode','t_transaksi.created_at','jenis_member','m_user.nama','t_transaksi.harga_total', 't_transaksi.harga_bayar', 't_transaksi.harga_kembalian', null];
 
-	
+	protected $order_p = ['t_transaksi.kode' => 'desc']; 
 
-	
-
-	
-
-
-	
-	
-	public function get_max_id_user()
+	function get_datatable_penjualan()
 	{
-		$q = $this->db->query("SELECT MAX(id) as kode_max from m_user");
-		$kd = "";
-		if($q->num_rows()>0){
-			$kd = $q->row();
-			return (int)$kd->kode_max + 1;
-		}else{
-			return '1';
+		$term = $_REQUEST['search']['value'];
+		$this->_get_datatable_penjualan_query($term);
+		if($_REQUEST['length'] != -1)
+		$this->db->limit($_REQUEST['length'], $_REQUEST['start']);
+
+		$query = $this->db->get();
+		return $query->result();
+	}
+
+	private function _get_datatable_penjualan_query($term='')
+	{
+		$this->db->select('
+			t_transaksi.*,
+            m_member.kode_member,
+			CASE WHEN t_transaksi.id_member is null THEN \'Reguler\' ELSE \'Member\' END as jenis_member,
+            m_user.nama
+		');
+
+		$this->db->from('t_transaksi');
+        $this->db->join('m_member', 't_transaksi.id_member=m_member.id', 'left');
+		$this->db->join('m_user', 't_transaksi.id_user=m_user.id', 'left');
+		$this->db->where('t_transaksi.deleted_at is null');
+		
+		$i = 0;
+
+		// loop column 
+		foreach ($this->column_search_p as $item) 
+		{
+			// if datatable send POST for search
+			if($_POST['search']['value']) 
+			{
+				// first loop
+				if($i===0) 
+				{
+					// open bracket. query Where with OR clause better with bracket. because maybe can combine with other WHERE with AND.
+					$this->db->group_start();
+					$this->db->like($item, $_POST['search']['value']);
+				}
+				else
+				{
+					if($item == 'jenis_member') {
+						/**
+						 * param both untuk wildcard pada awal dan akhir kata
+						 * param false untuk disable escaping (karena pake subquery)
+						 */
+						$this->db->or_like('(CASE WHEN t_transaksi.id_member is null THEN \'Reguler\' ELSE \'Member\' END)', $_POST['search']['value'],'both',false);
+					}
+					else{
+						$this->db->or_like($item, $_POST['search']['value']);
+					}
+					
+					$this->db->or_like($item, $_POST['search']['value']);
+				}
+				//last loop
+				if(count($this->column_search_p) - 1 == $i) 
+					$this->db->group_end(); //close bracket
+			}
+			$i++;
+		}
+
+		if(isset($_POST['order'])) // here order processing
+		{
+			$this->db->order_by($this->column_order_p[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
 		} 
+		else if(isset($this->order_p))
+		{
+			$order = $this->order_p;
+            $this->db->order_by(key($order), $order[key($order)]);
+		}
 	}
 
-	public function get_id_pegawai_by_name($nama)
+	function count_filtered_penjualan()
 	{
-		$this->db->select('id');
-		$this->db->from('m_pegawai');
-		$this->db->where('LCASE(nama)', $nama);
-		$q = $this->db->get();
-		if ($q) {
-			return $q->row();
+		$this->_get_datatable_penjualan_query();
+		$query = $this->db->get();
+		return $query->num_rows();
+	}
+
+	public function count_all_penjualan()
+	{
+		$this->db->from($this->table);
+		return $this->db->count_all_results();
+	}
+	###################################### end datatable penjualan
+	
+
+	public function get_detail_penjualan($id)
+	{
+		$this->db->select('
+			t_transaksi.*,
+			t_transaksi_det.id_item_trans,
+			t_transaksi_det.harga_satuan,
+			t_transaksi_det.is_disc_jual,
+			t_transaksi_det.ket_disc_jual,
+			m_item_trans.nama as nama_item,
+            m_member.kode_member,
+			m_member.nama as nama_member,
+			CASE WHEN t_transaksi.id_member is null THEN \'Reguler\' ELSE \'Member\' END as jenis_member,
+            m_user.nama
+		');
+
+		$this->db->from('t_transaksi');
+		$this->db->join('t_transaksi_det', 't_transaksi.id = t_transaksi_det.id_transaksi', 'left');
+		$this->db->join('m_item_trans', 't_transaksi_det.id_item_trans = m_item_trans.id', 'left');
+        $this->db->join('m_member', 't_transaksi.id_member = m_member.id', 'left');
+		$this->db->join('m_user', 't_transaksi.id_user = m_user.id', 'left');
+		$this->db->where('t_transaksi.id', $id);
+		$query = $this->db->get();
+
+		if($query) {
+			return $query->result();
 		}else{
 			return false;
 		}
 	}
 
-	public function get_id_role_by_name($nama)
-	{
-		$this->db->select('id');
-		$this->db->from('m_role');
-		$this->db->where('LCASE(nama)', $nama);
-		$q = $this->db->get();
-		if ($q) {
-			return $q->row();
-		}else{
-			return false;
-		}
-	}
-
-	public function trun_master_user()
-	{
-		$this->db->query("truncate table m_user");
-	}
+	
 }

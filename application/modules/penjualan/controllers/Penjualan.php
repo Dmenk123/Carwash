@@ -284,8 +284,8 @@ class Penjualan extends CI_Controller {
 
 			$data_upd_header = [
 				'harga_total' => $total,
-				'harga_bayar' => $this->input->post('pembayaran_reg_raw'),
-				'harga_kembalian' => $this->input->post('kembalian_reg_raw')
+				'harga_bayar' => $this->input->post('pembayaran_mem_raw'),
+				'harga_kembalian' => $this->input->post('kembalian_mem_raw')
 			];
 
 			$update = $this->t_transaksi->update(['id'=> $id_header], $data_upd_header);

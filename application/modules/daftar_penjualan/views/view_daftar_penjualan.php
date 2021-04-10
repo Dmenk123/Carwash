@@ -38,15 +38,16 @@
       <div class="kt-portlet__body">
 
         <!--begin: Datatable -->
-        <table class="table table-striped- table-bordered table-hover table-checkable" id="tabel_item_trans">
+        <table class="table table-striped- table-bordered table-hover table-checkable" id="tabel_list_penjualan">
           <thead>
             <tr>
-              <th style="width: 5%;">No</th>
               <th>Kode</th>
-              <th>Nama Jenis Transaksi</th>
-              <th>Nama Item Transaksi</th>
-              <th>Harga Awal</th>
+              <th>Tanggal</th>
+              <th>Jenis</th>
+              <th>User</th>
               <th>Harga</th>
+              <th>Bayar</th>
+              <th>Kembalian</th>
               <th style="width: 5%;">Aksi</th>
             </tr>
           </thead>
