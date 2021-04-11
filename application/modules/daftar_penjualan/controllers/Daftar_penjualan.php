@@ -50,7 +50,10 @@ class Daftar_penjualan extends CI_Controller {
 	{
 		$obj_date = new DateTime();
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
-		$list = $this->t_transaksi->get_datatable_penjualan();
+		$tgl_awal = $obj_date->createFromFormat('d/m/Y', $this->input->post('tglAwal'))->format('Y-m-d').' 00:00:00';
+		$tgl_akhir = $obj_date->createFromFormat('d/m/Y', $this->input->post('tglAkhir'))->format('Y-m-d').' 23:59:59';
+	
+		$list = $this->t_transaksi->get_datatable_penjualan($tgl_awal, $tgl_akhir);
 		
 		$data = array();
 		$no =$_POST['start'];
@@ -69,6 +72,9 @@ class Daftar_penjualan extends CI_Controller {
 			$row[] = number_format($item->harga_total, 0 ,',','.');
 			$row[] = number_format($item->harga_bayar, 0 ,',','.');
 			$row[] = number_format($item->harga_bayar, 0 ,',','.');
+
+			$status_kuncian = ($item->status_kunci == 'Terkunci') ? '<span style="color:green;">Terkunci</span>' : '<span style="color:red;">Terbuka</span>';
+			$row[] = $status_kuncian;
 			
 			// $row[] = $aktif_txt;			
 			
@@ -83,12 +89,21 @@ class Daftar_penjualan extends CI_Controller {
 
 			if($this->session->userdata('id_role') == '1') {
 				$str_aksi .= '
-					<button class="dropdown-item" onclick="editPenjualan(\''.$item->id.'\')">
-						<i class="la la-pencil"></i> Edit Penjualan
+					<button class="dropdown-item" onclick="toggleKunci(\''.$item->id.'\')">
+						<i class="la la-lock"></i> Buka/Kunci
 					</button>
 					<button class="dropdown-item" onclick="deletePenjualan(\''.$item->id.'\')">
 						<i class="la la-trash"></i> Hapus Penjualan
-					</button>';
+					</button>
+				';
+			}else{
+				if($item->status_kunci == 'Terbuka') {
+					$str_aksi .= '
+						<button class="dropdown-item" onclick="editPenjualan(\''.$item->id.'\')">
+							<i class="la la-pencil"></i> Edit Penjualan
+						</button>
+					';
+				}
 			}
 
 			$str_aksi .= '</div></div>';
@@ -102,8 +117,8 @@ class Daftar_penjualan extends CI_Controller {
 
 		$output = [
 			"draw" => $_POST['draw'],
-			"recordsTotal" => $this->t_transaksi->count_all_penjualan(),
-			"recordsFiltered" => $this->t_transaksi->count_filtered_penjualan(),
+			"recordsTotal" => $this->t_transaksi->count_all_penjualan($tgl_awal, $tgl_akhir),
+			"recordsFiltered" => $this->t_transaksi->count_filtered_penjualan($tgl_awal, $tgl_akhir),
 			"data" => $data
 		];
 		
@@ -114,6 +129,7 @@ class Daftar_penjualan extends CI_Controller {
 		$id = $this->input->get('id');
 		$data = $this->t_transaksi->get_detail_penjualan($id);
 		$html = '';
+		$html2 = '';
 		
 		if($data) {
 			$status = true;
@@ -163,6 +179,11 @@ class Daftar_penjualan extends CI_Controller {
 					';  
 			
 			$html .= '</tbody></table></div></div>';
+
+			$html2 .= '
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				<button id="btnCetak" type="button" class="btn btn-primary" onclick="printStruk(\''.$data[0]->id.'\')">Cetak</button>
+			';
 		}else{
 			$status = false;
 		}
@@ -170,8 +191,34 @@ class Daftar_penjualan extends CI_Controller {
 		echo json_encode([
 			'status' => $status,
 			'data' => $data,
-			'html' => $html
+			'html' => $html,
+			'html2' => $html2
 		]);
+	}
+
+	public function toggle_kunci()
+	{
+		$id_trans = $this->input->post('id_trans');
+		$data_trans = $this->m_global->single_row('*', ['id' => $id_trans], 't_transaksi');
+		if($data_trans) {
+			$status = true;
+			if($data_trans->is_kunci == '1') {
+				$where = ['is_kunci' => '0'];
+				$pesan = 'Transaksi di Buka Kuncinya';
+			}else{
+				$where = ['is_kunci' => '1'];
+				$pesan = 'Transaksi di Kunci';
+			}
+
+			$update = $this->t_transaksi->update(['id' => $data_trans->id], $where);
+
+			if($update) {
+				echo json_encode(['status' => $status, 'pesan' => $pesan]);
+			}
+		}else{
+			$status = false;
+			echo json_encode(['status' => $status, 'pesan' => 'Maaf Data tidak ditemukan, Proses Gagal']);
+		}
 	}
 
 	/////////////////////////////

@@ -11,7 +11,7 @@
  Target Server Version : 100413
  File Encoding         : 65001
 
- Date: 11/04/2021 00:54:05
+ Date: 11/04/2021 23:15:04
 */
 
 SET NAMES utf8mb4;
@@ -221,8 +221,8 @@ CREATE TABLE `m_user`  (
 -- ----------------------------
 -- Records of m_user
 -- ----------------------------
-INSERT INTO `m_user` VALUES (1, 1, 'superadmin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, '2021-04-10 23:15:01', 'USR-00001', NULL, NULL, NULL, NULL, 'pemiliknya');
-INSERT INTO `m_user` VALUES (2, 3, 'admin', 'Tzg1eTllUlU2a2xNQk5yYktIM1pwUT09', NULL, NULL, 'USR-00002', 'coba-1602775328.jpg', '2020-10-15 22:22:08', '2020-10-15 22:43:54', '2020-10-15 22:58:50', NULL);
+INSERT INTO `m_user` VALUES (1, 1, 'superadmin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, '2021-04-11 18:58:48', 'USR-00001', NULL, NULL, NULL, NULL, 'pemiliknya');
+INSERT INTO `m_user` VALUES (2, 3, 'kasir', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, '2021-04-11 23:08:19', 'USR-00002', 'kasir-1618157246.jpeg', '2021-04-11 23:07:26', NULL, NULL, 'mas kasir');
 
 -- ----------------------------
 -- Table structure for t_log_aktivitas
@@ -245,6 +245,8 @@ CREATE TABLE `t_log_aktivitas`  (
 -- Records of t_log_aktivitas
 -- ----------------------------
 INSERT INTO `t_log_aktivitas` VALUES ('438df55e-6d45-4ad3-90f8-cd5216478a26', 9, 1, 'CREATE', NULL, '{\"id\":\"41164dbe-7d6b-4344-8a9c-5c563d4b02fa\",\"id_transaksi\":\"58c87a01-69d4-4df7-996d-0c66bb5fd123\",\"id_item_trans\":\"4\",\"harga_satuan\":\"5000.00\",\"created_at\":\"2021-04-10 12:40:39\"}', '2021-04-10 12:40:39', NULL, NULL);
+INSERT INTO `t_log_aktivitas` VALUES ('4d90ef86-ff41-4ddb-b66c-d4984845076b', 9, 2, 'CREATE', NULL, '{\"id\":\"a1cc944d-aafb-4022-864f-2a764946c4f0\",\"id_transaksi\":\"aed1554a-57d9-4baa-ac50-d2496619b5c3\",\"id_item_trans\":\"3\",\"harga_satuan\":\"10000.00\",\"created_at\":\"2021-04-11 23:08:58\"}', '2021-04-11 23:08:58', NULL, NULL);
+INSERT INTO `t_log_aktivitas` VALUES ('518a525e-bd9d-47fc-98ba-26b2c44170a3', 9, 2, 'CREATE', NULL, '{\"id\":\"01c3943a-e7ae-47f4-aa59-e2a84cd630f9\",\"id_transaksi\":\"c53b2e29-5983-494c-87aa-189d20e2ecfa\",\"id_item_trans\":\"4\",\"harga_satuan\":\"5000.00\",\"created_at\":\"2021-04-11 23:08:48\"}', '2021-04-11 23:08:48', NULL, NULL);
 INSERT INTO `t_log_aktivitas` VALUES ('5f5a4e84-3523-4b5d-9413-13ead0741c76', 9, 1, 'CREATE', NULL, '{\"id\":\"ccd705b9-3b4a-45a2-b775-0512163e6453\",\"id_transaksi\":\"3bf384cf-c2eb-4947-add7-8b547b90d5d7\",\"id_item_trans\":\"3\",\"harga_satuan\":\"10000.00\",\"created_at\":\"2021-04-10 09:13:17\"}', '2021-04-10 09:13:17', NULL, NULL);
 INSERT INTO `t_log_aktivitas` VALUES ('6cea075e-c095-401f-89c1-d6cabb4f7c31', 9, 1, 'CREATE', NULL, '{\"id\":\"eac9f12c-a7eb-4d7a-8cc1-8adf155aae96\",\"id_transaksi\":\"0cb83009-a6ac-4399-ad69-5ee8c0b8c14d\",\"id_item_trans\":\"4\",\"harga_satuan\":\"5000.00\",\"created_at\":\"2021-04-10 09:12:16\"}', '2021-04-10 09:12:16', NULL, NULL);
 INSERT INTO `t_log_aktivitas` VALUES ('9d5a0d38-d2dc-4a1e-bbe3-b428a274ecf9', 9, 1, 'CREATE', NULL, '{\"id\":\"e23e0e15-1b59-4461-8af8-364dbcab1d19\",\"id_transaksi\":\"20af352e-ad3e-4b76-a552-b4510ca62dde\",\"id_item_trans\":\"4\",\"harga_satuan\":\"5000.00\",\"created_at\":\"2021-04-10 09:13:41\"}', '2021-04-10 09:13:41', NULL, NULL);
@@ -324,10 +326,6 @@ INSERT INTO `t_role_menu` VALUES (11, 1, 1, 1, 1);
 INSERT INTO `t_role_menu` VALUES (12, 1, 1, 1, 1);
 INSERT INTO `t_role_menu` VALUES (8, 1, 0, 0, 0);
 INSERT INTO `t_role_menu` VALUES (9, 1, 1, 1, 1);
-INSERT INTO `t_role_menu` VALUES (13, 1, 1, 1, 1);
-INSERT INTO `t_role_menu` VALUES (2, 1, 0, 0, 0);
-INSERT INTO `t_role_menu` VALUES (4, 1, 1, 1, 1);
-INSERT INTO `t_role_menu` VALUES (3, 1, 1, 1, 1);
 
 -- ----------------------------
 -- Table structure for t_transaksi
@@ -356,11 +354,13 @@ CREATE TABLE `t_transaksi`  (
 -- ----------------------------
 -- Records of t_transaksi
 -- ----------------------------
-INSERT INTO `t_transaksi` VALUES ('0cb83009-a6ac-4399-ad69-5ee8c0b8c14d', 'INV-21041000001', 1, NULL, 15000.00, '1', '2021-04-10 09:12:16', NULL, NULL, 15000.00, 0.00, 1);
+INSERT INTO `t_transaksi` VALUES ('0cb83009-a6ac-4399-ad69-5ee8c0b8c14d', 'INV-21041000001', 1, NULL, 15000.00, '1', '2021-04-10 09:12:16', NULL, NULL, 15000.00, 0.00, 0);
 INSERT INTO `t_transaksi` VALUES ('20af352e-ad3e-4b76-a552-b4510ca62dde', 'INV-21041000004', 1, NULL, 15000.00, '1', '2021-04-10 09:13:41', NULL, NULL, 15000.00, 0.00, 1);
 INSERT INTO `t_transaksi` VALUES ('3bf384cf-c2eb-4947-add7-8b547b90d5d7', 'INV-21041000003', 1, 1, 35000.00, '1', '2021-04-10 09:13:17', NULL, NULL, 40000.00, 5000.00, 1);
 INSERT INTO `t_transaksi` VALUES ('56cd3383-73ca-428d-b2a5-cee4d392bcae', 'INV-21041000002', 1, NULL, 35000.00, '1', '2021-04-10 09:12:33', NULL, NULL, 35000.00, 0.00, 1);
 INSERT INTO `t_transaksi` VALUES ('58c87a01-69d4-4df7-996d-0c66bb5fd123', 'INV-21041000005', 1, NULL, 15000.00, '1', '2021-04-10 12:40:39', NULL, NULL, 30000.00, 15000.00, 1);
+INSERT INTO `t_transaksi` VALUES ('aed1554a-57d9-4baa-ac50-d2496619b5c3', 'INV-21041100007', 1, NULL, 10000.00, '2', '2021-04-11 23:08:58', NULL, NULL, 10000.00, 0.00, 1);
+INSERT INTO `t_transaksi` VALUES ('c53b2e29-5983-494c-87aa-189d20e2ecfa', 'INV-21041100006', 1, NULL, 15000.00, '2', '2021-04-11 23:08:48', NULL, NULL, 20000.00, 5000.00, 1);
 
 -- ----------------------------
 -- Table structure for t_transaksi_det
@@ -386,11 +386,14 @@ CREATE TABLE `t_transaksi_det`  (
 -- ----------------------------
 -- Records of t_transaksi_det
 -- ----------------------------
+INSERT INTO `t_transaksi_det` VALUES ('01c3943a-e7ae-47f4-aa59-e2a84cd630f9', 'c53b2e29-5983-494c-87aa-189d20e2ecfa', 4, 5000.00, NULL, NULL, '2021-04-11 23:08:48', NULL, NULL);
+INSERT INTO `t_transaksi_det` VALUES ('26f9f711-b265-4c52-9e6a-e008594649e2', 'c53b2e29-5983-494c-87aa-189d20e2ecfa', 2, 10000.00, NULL, NULL, '2021-04-11 23:08:48', NULL, NULL);
 INSERT INTO `t_transaksi_det` VALUES ('2d873e2b-9219-4583-8e94-c646b3a9ba61', '3bf384cf-c2eb-4947-add7-8b547b90d5d7', 1, 25000.00, NULL, NULL, '2021-04-10 09:13:17', NULL, NULL);
 INSERT INTO `t_transaksi_det` VALUES ('3f589560-3627-46b9-9640-e2ac1a060c13', '56cd3383-73ca-428d-b2a5-cee4d392bcae', 3, 10000.00, NULL, NULL, '2021-04-10 09:12:33', NULL, NULL);
 INSERT INTO `t_transaksi_det` VALUES ('41164dbe-7d6b-4344-8a9c-5c563d4b02fa', '58c87a01-69d4-4df7-996d-0c66bb5fd123', 4, 5000.00, NULL, NULL, '2021-04-10 12:40:39', NULL, NULL);
 INSERT INTO `t_transaksi_det` VALUES ('56c8b27b-ef71-4123-9c23-bcf5b48b328e', '0cb83009-a6ac-4399-ad69-5ee8c0b8c14d', 2, 10000.00, NULL, NULL, '2021-04-10 09:12:16', NULL, NULL);
 INSERT INTO `t_transaksi_det` VALUES ('858480ea-ff5c-4c67-b6e4-0e1406fb2760', '58c87a01-69d4-4df7-996d-0c66bb5fd123', 3, 10000.00, NULL, NULL, '2021-04-10 12:40:39', NULL, NULL);
+INSERT INTO `t_transaksi_det` VALUES ('a1cc944d-aafb-4022-864f-2a764946c4f0', 'aed1554a-57d9-4baa-ac50-d2496619b5c3', 3, 10000.00, NULL, NULL, '2021-04-11 23:08:58', NULL, NULL);
 INSERT INTO `t_transaksi_det` VALUES ('bbb36ee8-fcfb-43aa-9d2c-0c501c3b469a', '20af352e-ad3e-4b76-a552-b4510ca62dde', 2, 10000.00, NULL, NULL, '2021-04-10 09:13:41', NULL, NULL);
 INSERT INTO `t_transaksi_det` VALUES ('ccd705b9-3b4a-45a2-b775-0512163e6453', '3bf384cf-c2eb-4947-add7-8b547b90d5d7', 3, 10000.00, NULL, NULL, '2021-04-10 09:13:17', NULL, NULL);
 INSERT INTO `t_transaksi_det` VALUES ('e23e0e15-1b59-4461-8af8-364dbcab1d19', '20af352e-ad3e-4b76-a552-b4510ca62dde', 4, 5000.00, NULL, NULL, '2021-04-10 09:13:41', NULL, NULL);

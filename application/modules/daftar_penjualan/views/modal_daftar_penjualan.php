@@ -54,7 +54,7 @@
 </div>
 
 <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modalDetail" aria-hidden="true" id="modal_detail_penjualan">
-  <div class="modal-dialog modal-xl" role="document">
+  <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Detail Penjualan</h5>
@@ -122,10 +122,7 @@
           <div class="kt-portlet__body" id="div_tabel_detail"></div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Cetak</button>
-      </div>
+      <div class="modal-footer" id="div_button_detail"></div>
     </div>
   </div>
 </div>

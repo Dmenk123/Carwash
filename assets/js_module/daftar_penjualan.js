@@ -12,23 +12,22 @@ const formatTanggal = (tgl) => {
   let objDate = new Date(tgl);
   return moment(objDate).format(formatnya);
 };
-  
-$(document).ready(function() {
 
-    //force integer input in textfield
-    $('input.numberinput').bind('keypress', function (e) {
-        return (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57) && e.which != 46) ? false : true;
-    });
+const filter_tanggal = () => {
+    //datatables
+    let tglAwal = $('#tgl_filter_mulai').val();
+    let tglAkhir = $('#tgl_filter_akhir').val();
 
-	//datatables
 	table = $('#tabel_list_penjualan').DataTable({
-		responsive: true,
+        destroy: true,
+        responsive: true,
         searchDelay: 500,
         processing: true,
         serverSide: true,
 		ajax: {
 			url  : base_url + "daftar_penjualan/list_penjualan",
-			type : "POST" 
+			type : "POST",
+            data : {tglAwal:tglAwal, tglAkhir:tglAkhir},
 		},
         order: [[ 0, "desc" ]],
 
@@ -44,7 +43,15 @@ $(document).ready(function() {
             // }
 		],
     });
-    
+};
+  
+$(document).ready(function() {
+    filter_tanggal();
+
+    //force integer input in textfield
+    $('input.numberinput').bind('keypress', function (e) {
+        return (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57) && e.which != 46) ? false : true;
+    });
 
     //change menu status
     $(document).on('click', '.btn_edit_status', function(){
@@ -95,8 +102,6 @@ $(document).ready(function() {
 });	
 
 
-///////////////
-
 function detailPenjualan(id) {
     $.ajax({
         url : base_url + 'daftar_penjualan/get_detail_penjualan',
@@ -115,6 +120,7 @@ function detailPenjualan(id) {
                 $('#spn-hargabayar').text(formatRupiah.format(response.data[0].harga_bayar));
                 $('#spn-hargakembali').text(formatRupiah.format(response.data[0].harga_kembalian));
                 $('#div_tabel_detail').html(response.html);
+                $('#div_button_detail').html(response.html2);
             }else{
                 alert('Terjadi Kesalahan');
             }
@@ -125,6 +131,70 @@ function detailPenjualan(id) {
         }
     });
 }
+
+function printStruk(id_trans) 
+{
+    $.ajax({
+        type: "get",
+        url:  base_url+"penjualan/cetak_struk/"+id_trans,
+        dataType: "json",
+        // data: {id_trans:id_trans},
+        success: function (response) {
+           return;     
+        }
+    });
+    
+}
+
+function toggleKunci(id_trans) {
+    swalConfirm.fire({
+        title: 'Perhatian !!!',
+        text: "Yakin Buka/Kunci Transaksi ?",
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya!, Buka/Kunci Transaksi',
+        cancelButtonText: 'Tidak, Batalkan!',
+        reverseButtons: true
+      }).then((result) => {
+        if (result.value) {
+            $.ajax({
+                type: "POST",
+                url : base_url + 'daftar_penjualan/toggle_kunci',
+                data: {id_trans:id_trans},
+                dataType: "JSON",
+                // processData: false, // false, it prevent jQuery form transforming the data into a query string
+                // contentType: false, 
+                cache: false,
+                timeout: 600000,
+                success: function(data)
+                {
+                    if(data.status) {
+                        swalConfirm.fire('Berhasil !!', data.pesan, 'success');
+                        filter_tanggal();
+                    }else{
+                        swalConfirm.fire('Gagal !!', data.pesan, 'error');
+                        filter_tanggal();
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown)
+                {
+                    Swal.fire('Terjadi Kesalahan');
+                }
+            });
+        } else if (
+          /* Read more about handling dismissals below */
+          result.dismiss === Swal.DismissReason.cancel
+        ) {
+          swalConfirm.fire(
+            'Dibatalkan',
+            'Aksi Dibatalakan',
+            'error'
+          )
+        }
+    });
+}
+
+///////////////
 
 function add_tindakan()
 {

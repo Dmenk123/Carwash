@@ -69,16 +69,16 @@ class T_transaksi extends CI_Model
 	}
 	
 	###################################### datatable penjualan
-	protected $column_search_p = ['t_transaksi.kode','t_transaksi.created_at','jenis_member','m_user.nama','t_transaksi.harga_total', 't_transaksi.harga_bayar', 't_transaksi.harga_kembalian'];
+	protected $column_search_p = ['t_transaksi.kode','t_transaksi.created_at','jenis_member','m_user.nama','t_transaksi.harga_total', 't_transaksi.harga_bayar', 't_transaksi.harga_kembalian','status_kunci'];
 	
-	protected $column_order_p = ['t_transaksi.kode','t_transaksi.created_at','jenis_member','m_user.nama','t_transaksi.harga_total', 't_transaksi.harga_bayar', 't_transaksi.harga_kembalian', null];
+	protected $column_order_p = ['t_transaksi.kode','t_transaksi.created_at','jenis_member','m_user.nama','t_transaksi.harga_total', 't_transaksi.harga_bayar', 't_transaksi.harga_kembalian', 'status_kunci',null];
 
 	protected $order_p = ['t_transaksi.kode' => 'desc']; 
 
-	function get_datatable_penjualan()
+	function get_datatable_penjualan($tgl_awal, $tgl_akhir)
 	{
 		$term = $_REQUEST['search']['value'];
-		$this->_get_datatable_penjualan_query($term);
+		$this->_get_datatable_penjualan_query($tgl_awal, $tgl_akhir, $term);
 		if($_REQUEST['length'] != -1)
 		$this->db->limit($_REQUEST['length'], $_REQUEST['start']);
 
@@ -86,18 +86,21 @@ class T_transaksi extends CI_Model
 		return $query->result();
 	}
 
-	private function _get_datatable_penjualan_query($term='')
+	private function _get_datatable_penjualan_query($tgl_awal, $tgl_akhir, $term='')
 	{
 		$this->db->select('
 			t_transaksi.*,
             m_member.kode_member,
 			CASE WHEN t_transaksi.id_member is null THEN \'Reguler\' ELSE \'Member\' END as jenis_member,
+			CASE WHEN t_transaksi.is_kunci = 1 THEN \'Terkunci\' ELSE \'Terbuka\' END as status_kunci,
             m_user.nama
 		');
 
 		$this->db->from('t_transaksi');
         $this->db->join('m_member', 't_transaksi.id_member=m_member.id', 'left');
 		$this->db->join('m_user', 't_transaksi.id_user=m_user.id', 'left');
+		$this->db->where('t_transaksi.created_at >=' ,$tgl_awal);
+		$this->db->where('t_transaksi.created_at <=' ,$tgl_akhir);
 		$this->db->where('t_transaksi.deleted_at is null');
 		
 		$i = 0;
@@ -124,11 +127,16 @@ class T_transaksi extends CI_Model
 						 */
 						$this->db->or_like('(CASE WHEN t_transaksi.id_member is null THEN \'Reguler\' ELSE \'Member\' END)', $_POST['search']['value'],'both',false);
 					}
+					elseif($item == 'status_kunci') {
+						/**
+						 * param both untuk wildcard pada awal dan akhir kata
+						 * param false untuk disable escaping (karena pake subquery)
+						 */
+						$this->db->or_like('(CASE WHEN t_transaksi.is_kunci = 1 THEN \'Terkunci\' ELSE \'Terbuka\' END)', $_POST['search']['value'],'both',false);
+					}
 					else{
 						$this->db->or_like($item, $_POST['search']['value']);
 					}
-					
-					$this->db->or_like($item, $_POST['search']['value']);
 				}
 				//last loop
 				if(count($this->column_search_p) - 1 == $i) 
@@ -148,16 +156,19 @@ class T_transaksi extends CI_Model
 		}
 	}
 
-	function count_filtered_penjualan()
+	function count_filtered_penjualan($tgl_awal, $tgl_akhir)
 	{
-		$this->_get_datatable_penjualan_query();
+		$this->_get_datatable_penjualan_query($tgl_awal, $tgl_akhir);
 		$query = $this->db->get();
 		return $query->num_rows();
 	}
 
-	public function count_all_penjualan()
+	public function count_all_penjualan($tgl_awal, $tgl_akhir)
 	{
 		$this->db->from($this->table);
+		$this->db->where($this->table.'.created_at >=' ,$tgl_awal);
+		$this->db->where($this->table.'.created_at <=' ,$tgl_akhir);
+		$this->db->where($this->table.'.deleted_at is null');
 		return $this->db->count_all_results();
 	}
 	###################################### end datatable penjualan

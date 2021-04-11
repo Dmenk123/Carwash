@@ -19,18 +19,33 @@
     <div class="kt-portlet kt-portlet--mobile">
       <div class="kt-portlet__head kt-portlet__head--lg">
         <div class="kt-portlet__head-label">
-          <span class="kt-portlet__head-icon">
+          <!-- <span class="kt-portlet__head-icon">
             <i class="kt-font-brand flaticon2-line-chart"></i>
           </span>
           <h3 class="kt-portlet__head-title">
             <?= $title; ?>
-          </h3>
-        </div>
-        <div class="kt-portlet__head-toolbar">
-          <div class="kt-portlet__head-wrapper">
-            <div class="kt-portlet__head-actions">
-             
-              <?= $this->template_view->getAddButton(true, 'add_tindakan'); ?>
+          </h3> -->
+          <div class="row" style="">
+            <div class="col-md-4 row">
+              <label class="col-form-label col-lg-3">Mulai</label>
+              <div class="col-lg-9">
+                <input type="text" class="form-control kt_datepicker" id="tgl_filter_mulai" readonly placeholder="Tanggal Awal" value="<?= DateTime::createFromFormat('Y-m-d', date('Y-m-d'))->modify('-10 day')->format('d/m/Y'); ?>"/>
+              </div>
+            </div>
+            <div class="col-md-4 row">
+              <label class="col-form-label col-lg-3">Hingga</label>
+              <div class="col-lg-9">
+                <input type="text" class="form-control kt_datepicker" id="tgl_filter_akhir" readonly placeholder="Tanggal Akhir" value="<?= DateTime::createFromFormat('Y-m-d', date('Y-m-d'))->format('d/m/Y'); ?>"/>
+              </div>
+            </div>
+            <div class="col-md-4 row">
+              
+                <div class="col-12 btn-group btn-group">
+                  <button type="button" class="btn btn-primary btn-sm" onclick="filter_tanggal()">Cari</button>
+                  <button type="button" class="btn btn-sm btn-success" onclick="ekspor_excel()">Eksport Excel</button>
+                  <button type="button" class="btn btn-sm btn-warning" onclick="cetak_data()">Cetak Data</button>
+                </div>
+            
             </div>
           </div>
         </div>
@@ -48,6 +63,7 @@
               <th>Harga</th>
               <th>Bayar</th>
               <th>Kembalian</th>
+              <th>Status</th>
               <th style="width: 5%;">Aksi</th>
             </tr>
           </thead>
