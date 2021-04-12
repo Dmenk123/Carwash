@@ -194,6 +194,11 @@ function toggleKunci(id_trans) {
     });
 }
 
+function editPenjualan(id) {
+    sessionStorage.setItem("dariEditPenjualan", "true");
+    window.open(base_url+'penjualan?token='+id, '_blank');
+}
+
 ///////////////
 
 function add_tindakan()

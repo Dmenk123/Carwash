@@ -2,6 +2,14 @@ var save_method;
 var table;
 var active_div;
 
+const getParameterByName = (name, url = window.location.href) => {
+    name = name.replace(/[\[\]]/g, '\\$&');
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
 const shortcutClass = function() {
 
     let divActive = '';
@@ -49,6 +57,45 @@ const shortcutClass = function() {
 $(document).ready(function() {
     
     shortcutClass.init();
+
+    // if (sessionStorage.dariEditPenjualan == "true") {
+    //     alert('asas');
+    //     sessionStorage.removeItem("dariEditPenjualan");
+    // }
+
+    let cekUri = getParameterByName('token');
+    if(cekUri !== null) {
+        $.ajax({
+            type: "post",
+            url : base_url + 'penjualan/get_data_penjualan_edit',
+            data: {id:cekUri},
+            dataType: "json",
+            success: function (response) {
+                if(response.status) {
+                    if(response.data.id_member != '1') {
+                        $('#divReguler').css("display", "block");
+                        $('#divMember').css("display", "none");
+                        $('span#inv_reg').text(response.data.kode);
+                        active_div = 'reguler';
+                    }else{
+                        $('#divReguler').css("display", "none");
+                        $('#divMember').css("display", "block");
+                        $('#inv_mem').text(response.data.kode);
+                        active_div = 'member';
+                        $('#member_id').focus();
+                    }
+            
+                    $('html, body').animate({
+                        scrollTop: $(".form_penjualan_area").offset().top
+                    }, 300);
+                    reInitSelectMulti();
+                }else{
+                    window.location = base_url+'penjualan';
+                }
+               
+            }
+        });
+    }  
 
     $('#formPenjualanReg').submit(function (e) { 
         e.preventDefault();

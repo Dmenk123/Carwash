@@ -139,6 +139,26 @@ class Penjualan extends CI_Controller {
 		echo json_encode($nomor);
 	}
 
+	public function get_data_penjualan_edit()
+	{
+		$id = $this->input->post('id');
+		$data_trans = $this->m_global->single_row('*', ['id' => $id, 'is_kunci' => '0'], 't_transaksi');
+		if($data_trans) {
+			$retval = [
+				'data' => $data_trans,
+				'status' => true,
+			];
+		}else{
+			$retval = [
+				'data' => null,
+				'status' => false,
+			];
+		}
+		echo json_encode($retval);
+	}
+
+	
+
 	public function simpan_trans_reg()
 	{
 		$obj_date = new DateTime();
