@@ -73,15 +73,12 @@ class Lib_fungsi extends CI_Controller {
 		
 	}
 	function cek_counter($id_member) {
-		$query = $this->_ci->db->query("select count(*) as total_count from t_log_counter_member where id_member = '$id_member' and deleted_at is null")->row();
+		$query = $this->_ci->db->query("SELECT count(*) AS total_count, t_log_counter_member.id_jenis_counter, m_jenis_counter.jenis_counter FROM t_log_counter_member left join m_jenis_counter on t_log_counter_member.id_jenis_counter = m_jenis_counter.id WHERE t_log_counter_member.id_member = '$id_member' AND t_log_counter_member.deleted_at IS NULL GROUP BY t_log_counter_member.id_jenis_counter")->result();
 		if($query) {
-			$counter = $query->total_count;
+			$counter = $query;
 		}else{
-			$counter = 0;
+			$counter = null;
 		}
-
-		## update pada m_member
-		$this->_ci->db->update('m_member', ['counter_diskon' => $counter], ['id'=>$id_member]);
 
 		return $counter;		
 	}

@@ -11,7 +11,7 @@
  Target Server Version : 100413
  File Encoding         : 65001
 
- Date: 11/04/2021 23:15:04
+ Date: 14/04/2021 05:01:41
 */
 
 SET NAMES utf8mb4;
@@ -31,6 +31,7 @@ CREATE TABLE `m_item_trans`  (
   `created_at` datetime(0) NULL DEFAULT NULL,
   `updated_at` datetime(0) NULL DEFAULT NULL,
   `deleted_at` datetime(0) NULL DEFAULT NULL,
+  `id_jenis_counter` int(4) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `id_jenis_trans`(`id_jenis_trans`) USING BTREE,
   CONSTRAINT `m_item_trans_ibfk_1` FOREIGN KEY (`id_jenis_trans`) REFERENCES `m_menu` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
@@ -39,10 +40,29 @@ CREATE TABLE `m_item_trans`  (
 -- ----------------------------
 -- Records of m_item_trans
 -- ----------------------------
-INSERT INTO `m_item_trans` VALUES (1, 1, 'Cuci Mobil', 'Cuci Mobil', 25000.00, 25000.00, '2021-03-27 19:44:12', NULL, NULL);
-INSERT INTO `m_item_trans` VALUES (2, 1, 'Cuci Motor', 'Cuci Motor', 10000.00, 10000.00, '2021-03-27 19:44:12', NULL, NULL);
-INSERT INTO `m_item_trans` VALUES (3, 1, 'Poles Mobil', 'Poles Mobil', 10000.00, 10000.00, '2021-03-27 19:44:12', NULL, NULL);
-INSERT INTO `m_item_trans` VALUES (4, 1, 'Poles Motor', 'Poles Motor', 5000.00, 5000.00, '2021-03-27 19:44:12', NULL, NULL);
+INSERT INTO `m_item_trans` VALUES (1, 1, 'Cuci Mobil', 'Cuci Mobil', 25000.00, 25000.00, '2021-03-27 19:44:12', NULL, NULL, 1);
+INSERT INTO `m_item_trans` VALUES (2, 1, 'Cuci Motor', 'Cuci Motor', 10000.00, 10000.00, '2021-03-27 19:44:12', NULL, NULL, 2);
+INSERT INTO `m_item_trans` VALUES (3, 1, 'Poles Mobil', 'Poles Mobil', 10000.00, 10000.00, '2021-03-27 19:44:12', NULL, NULL, NULL);
+INSERT INTO `m_item_trans` VALUES (4, 1, 'Poles Motor', 'Poles Motor', 5000.00, 5000.00, '2021-03-27 19:44:12', NULL, NULL, NULL);
+
+-- ----------------------------
+-- Table structure for m_jenis_counter
+-- ----------------------------
+DROP TABLE IF EXISTS `m_jenis_counter`;
+CREATE TABLE `m_jenis_counter`  (
+  `id` int(4) NOT NULL,
+  `jenis_counter` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `created_at` datetime(0) NULL DEFAULT NULL,
+  `updated_at` datetime(0) NULL DEFAULT NULL,
+  `deleted_at` datetime(0) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of m_jenis_counter
+-- ----------------------------
+INSERT INTO `m_jenis_counter` VALUES (1, 'Counter Mobil', '2021-04-13 22:06:45', NULL, NULL);
+INSERT INTO `m_jenis_counter` VALUES (2, 'Counter Motor', '2021-04-13 22:06:45', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for m_jenis_trans
@@ -76,7 +96,6 @@ CREATE TABLE `m_member`  (
   `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `hp` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
   `jenis_kelamin` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT 'P/W',
-  `counter_diskon` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '(COUNTER TERKINI) WAJIB DIUPDATE ketika isi log counter diskon',
   `img_foto` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT 'jika ada',
   `img_barcode` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT 'jika ada',
   `created_at` datetime(0) NULL DEFAULT NULL,
@@ -88,8 +107,8 @@ CREATE TABLE `m_member`  (
 -- ----------------------------
 -- Records of m_member
 -- ----------------------------
-INSERT INTO `m_member` VALUES (1, 'M210328001', 'Masnur', 'Jalan Raya', 'masnur@masnur.com', '1212121', 'L', '1', NULL, NULL, '2021-03-28 14:17:23', NULL, NULL);
-INSERT INTO `m_member` VALUES (2, 'M210328002', 'Runsam', 'Ayar Nalaj', 'masnur@masnur.com', '78w7q8w7', 'P', '4', NULL, NULL, '2021-03-28 14:17:23', NULL, NULL);
+INSERT INTO `m_member` VALUES (1, 'M210328001', 'Masnur', 'Jalan Raya', 'masnur@masnur.com', '1212121', 'L', NULL, NULL, '2021-03-28 14:17:23', NULL, NULL);
+INSERT INTO `m_member` VALUES (2, 'M210328002', 'Runsam', 'Ayar Nalaj', 'masnur@masnur.com', '78w7q8w7', 'P', NULL, NULL, '2021-03-28 14:17:23', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for m_menu
@@ -221,8 +240,8 @@ CREATE TABLE `m_user`  (
 -- ----------------------------
 -- Records of m_user
 -- ----------------------------
-INSERT INTO `m_user` VALUES (1, 1, 'superadmin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, '2021-04-11 18:58:48', 'USR-00001', NULL, NULL, NULL, NULL, 'pemiliknya');
-INSERT INTO `m_user` VALUES (2, 3, 'kasir', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, '2021-04-11 23:08:19', 'USR-00002', 'kasir-1618157246.jpeg', '2021-04-11 23:07:26', NULL, NULL, 'mas kasir');
+INSERT INTO `m_user` VALUES (1, 1, 'superadmin', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, '2021-04-14 05:00:02', 'USR-00001', NULL, NULL, NULL, NULL, 'pemiliknya');
+INSERT INTO `m_user` VALUES (2, 3, 'kasir', 'SnIvSVV6c2UwdWhKS1ZKMDluUlp4dz09', 1, '2021-04-13 20:11:35', 'USR-00002', 'kasir-1618157246.jpeg', '2021-04-11 23:07:26', NULL, NULL, 'mas kasir');
 
 -- ----------------------------
 -- Table structure for t_log_aktivitas
@@ -259,18 +278,21 @@ DROP TABLE IF EXISTS `t_log_counter_member`;
 CREATE TABLE `t_log_counter_member`  (
   `id` int(32) NOT NULL AUTO_INCREMENT COMMENT 'wajib melakukan pengecekan count dengan kondisi deleted_at is null sebelum insert ke tabel ini, jika counter sudah 10 maka kolom deleted_at wajib di isi timestamp now',
   `id_member` int(14) NULL DEFAULT NULL,
+  `id_jenis_counter` int(4) NULL DEFAULT NULL,
   `created_at` datetime(0) NULL DEFAULT NULL,
   `updated_at` datetime(0) NULL DEFAULT NULL,
   `deleted_at` datetime(0) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `id_member`(`id_member`) USING BTREE,
   CONSTRAINT `t_log_counter_member_ibfk_1` FOREIGN KEY (`id_member`) REFERENCES `m_member` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of t_log_counter_member
 -- ----------------------------
-INSERT INTO `t_log_counter_member` VALUES (1, 1, '2021-04-10 09:13:17', NULL, NULL);
+INSERT INTO `t_log_counter_member` VALUES (1, 1, 1, '2021-04-10 09:13:17', NULL, NULL);
+INSERT INTO `t_log_counter_member` VALUES (2, 1, 1, '2021-04-10 09:13:17', NULL, NULL);
+INSERT INTO `t_log_counter_member` VALUES (3, 1, 2, '2021-04-10 09:13:17', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for t_log_harga
@@ -326,6 +348,14 @@ INSERT INTO `t_role_menu` VALUES (11, 1, 1, 1, 1);
 INSERT INTO `t_role_menu` VALUES (12, 1, 1, 1, 1);
 INSERT INTO `t_role_menu` VALUES (8, 1, 0, 0, 0);
 INSERT INTO `t_role_menu` VALUES (9, 1, 1, 1, 1);
+INSERT INTO `t_role_menu` VALUES (13, 1, 1, 1, 1);
+INSERT INTO `t_role_menu` VALUES (2, 1, 0, 0, 0);
+INSERT INTO `t_role_menu` VALUES (4, 1, 1, 1, 1);
+INSERT INTO `t_role_menu` VALUES (3, 1, 1, 1, 1);
+INSERT INTO `t_role_menu` VALUES (1, 3, 0, 0, 0);
+INSERT INTO `t_role_menu` VALUES (8, 3, 0, 0, 0);
+INSERT INTO `t_role_menu` VALUES (9, 3, 1, 1, 1);
+INSERT INTO `t_role_menu` VALUES (13, 3, 1, 1, 1);
 
 -- ----------------------------
 -- Table structure for t_transaksi
@@ -356,7 +386,7 @@ CREATE TABLE `t_transaksi`  (
 -- ----------------------------
 INSERT INTO `t_transaksi` VALUES ('0cb83009-a6ac-4399-ad69-5ee8c0b8c14d', 'INV-21041000001', 1, NULL, 15000.00, '1', '2021-04-10 09:12:16', NULL, NULL, 15000.00, 0.00, 0);
 INSERT INTO `t_transaksi` VALUES ('20af352e-ad3e-4b76-a552-b4510ca62dde', 'INV-21041000004', 1, NULL, 15000.00, '1', '2021-04-10 09:13:41', NULL, NULL, 15000.00, 0.00, 1);
-INSERT INTO `t_transaksi` VALUES ('3bf384cf-c2eb-4947-add7-8b547b90d5d7', 'INV-21041000003', 1, 1, 35000.00, '1', '2021-04-10 09:13:17', NULL, NULL, 40000.00, 5000.00, 1);
+INSERT INTO `t_transaksi` VALUES ('3bf384cf-c2eb-4947-add7-8b547b90d5d7', 'INV-21041000003', 1, 1, 35000.00, '1', '2021-04-10 09:13:17', NULL, NULL, 40000.00, 5000.00, 0);
 INSERT INTO `t_transaksi` VALUES ('56cd3383-73ca-428d-b2a5-cee4d392bcae', 'INV-21041000002', 1, NULL, 35000.00, '1', '2021-04-10 09:12:33', NULL, NULL, 35000.00, 0.00, 1);
 INSERT INTO `t_transaksi` VALUES ('58c87a01-69d4-4df7-996d-0c66bb5fd123', 'INV-21041000005', 1, NULL, 15000.00, '1', '2021-04-10 12:40:39', NULL, NULL, 30000.00, 15000.00, 1);
 INSERT INTO `t_transaksi` VALUES ('aed1554a-57d9-4baa-ac50-d2496619b5c3', 'INV-21041100007', 1, NULL, 10000.00, '2', '2021-04-11 23:08:58', NULL, NULL, 10000.00, 0.00, 1);

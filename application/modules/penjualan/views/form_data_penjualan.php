@@ -239,8 +239,30 @@ $obj_date = new DateTime();
           
             <div class="kt-portlet col-5">
               <div class="kt-portlet__head">
-                <div class="kt-portlet__head-label">
+                <!-- <div class="kt-portlet__head-label">
                   <h3 class="kt-portlet__head-title" id="counter_member">Counter Member : 0</h3>
+                </div> -->
+                <div class="col-6">
+                  <div class="kt-user-card-v2">   
+                    <div class="kt-user-card-v2__pic">
+                      <img alt="mobil" src="<?=base_url('files/img/app_img/car.png');?>">
+                    </div>
+                    <div class="kt-user-card-v2__details" style="text-align: center;">
+                      <span class="kt-user-card-v2__name">Counter Mobil : </span>                                
+                      <span class="kt-user-card-v2__email" id="counter_member_mobil">0</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="kt-user-card-v2">   
+                    <div class="kt-user-card-v2__pic">
+                      <img alt="sepeda motor" src="<?=base_url('files/img/app_img/motorcycle.png');?>">
+                    </div>
+                    <div class="kt-user-card-v2__details" style="text-align: center;">
+                      <span class="kt-user-card-v2__name">Counter Motor : </span>                                
+                      <span class="kt-user-card-v2__email" id="counter_member_motor">0</span>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div class="kt-portlet__body">

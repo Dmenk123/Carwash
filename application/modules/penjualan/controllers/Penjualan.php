@@ -142,15 +142,23 @@ class Penjualan extends CI_Controller {
 	public function get_data_penjualan_edit()
 	{
 		$id = $this->input->post('id');
-		$data_trans = $this->m_global->single_row('*', ['id' => $id, 'is_kunci' => '0'], 't_transaksi');
+		$join = [ 
+			['table' => 'm_member', 'on' => 't_transaksi.id_member = m_member.id']
+		];
+
+		$data_trans = $this->m_global->single_row('t_transaksi.*, m_member.kode_member', ['t_transaksi.id' => $id, 't_transaksi.is_kunci' => '0'], 't_transaksi', $join);
+		
 		if($data_trans) {
+			$data_det = $this->m_global->multi_row('*', ['id_transaksi' => $data_trans->id], 't_transaksi_det');
 			$retval = [
 				'data' => $data_trans,
+				'data_det' => $data_det,
 				'status' => true,
 			];
 		}else{
 			$retval = [
 				'data' => null,
+				'data_det' => null,
 				'status' => false,
 			];
 		}
@@ -371,25 +379,37 @@ class Penjualan extends CI_Controller {
 
 	public function get_detail_member()
 	{
+		$counter_mobil = 0;
+		$counter_motor = 0;
+
 		$kode_member = trim($this->input->get('kode_member'));
 		$data = $this->m_global->single_row('*', ['deleted_at' => null, 'kode_member' => $kode_member], 'm_member');
 		if($data) {
 			$counter = $this->lib_fungsi->cek_counter($data->id);
-		}else{
-			$counter = 0;
+			if($counter != null) {
+				foreach ($counter as $key => $value) {
+					if($value->id_jenis_counter == '1') {
+						$counter_mobil = $value->total_count;
+					}else if($value->id_jenis_counter == '2') {
+						$counter_motor = $value->total_count;
+					}
+				}
+			}
 		}
 		
 		if($data) {
 			$retval = [
 				'data' => $data,
 				'status' => true,
-				'counter' => $counter
+				'counter_mobil' => $counter_mobil,
+				'counter_motor' => $counter_motor,
 			];
 		}else{
 			$retval = [
 				'data' => null,
 				'status' => false,
-				'counter' => $counter
+				'counter_mobil' => $counter_mobil,
+				'counter_motor' => $counter_motor,
 			];
 		}
 

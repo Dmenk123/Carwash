@@ -65,6 +65,7 @@ $(document).ready(function() {
 
     let cekUri = getParameterByName('token');
     if(cekUri !== null) {
+        let arrListItem = [];
         $.ajax({
             type: "post",
             url : base_url + 'penjualan/get_data_penjualan_edit',
@@ -77,12 +78,37 @@ $(document).ready(function() {
                         $('#divMember').css("display", "none");
                         $('span#inv_reg').text(response.data.kode);
                         active_div = 'reguler';
+                        
+                        Object.entries(response.data_det).forEach(
+                            ([key, value]) =>  arrListItem[key] = value.id_item_trans
+                            // ([key, value]) => console.log(key, value)
+                        );
+                        
+                        // hargaFix = parseFloat((() => {
+                        //     return response.data.harga_bayar.replace(",", ".");
+                        // })()).toFixed(2);
+                        // console.log(hargaFix);
+                                                
+                        $('#selReg').val(arrListItem).trigger("change");
+                        $('#pembayaran_reg').val(formatMoney(Number(response.data.harga_bayar)));
+                        $('#pembayaran_reg_raw').val(response.data.harga_bayar);
+                        //$('#total_harga_global').val(response.data.harga_bayar);
+
                     }else{
                         $('#divReguler').css("display", "none");
                         $('#divMember').css("display", "block");
                         $('#inv_mem').text(response.data.kode);
                         active_div = 'member';
-                        $('#member_id').focus();
+                        Object.entries(response.data_det).forEach(
+                            ([key, value]) =>  arrListItem[key] = value.id_item_trans
+                            // ([key, value]) => console.log(key, value)
+                        );
+
+                        $('#selMem').val(arrListItem).trigger("change");
+                        $('#pembayaran_mem').val(formatMoney(Number(response.data.harga_bayar)));
+                        $('#pembayaran_mem_raw').val(response.data.harga_bayar);
+                        $('#member_id').val(response.data.kode_member).focus();
+                        cariMember(response.data.kode_member)
                     }
             
                     $('html, body').animate({
@@ -267,6 +293,7 @@ $(document).ready(function() {
             dataType: "json",
             success: function (response) {
                 $('tbody#list_penjualan_reg').html(response.html);
+                hitungTotalReg();
             }
         });
     }); 
@@ -287,6 +314,7 @@ $(document).ready(function() {
             dataType: "json",
             success: function (response) {
                 $('tbody#list_penjualan_mem').html(response.html);
+                hitungTotalMem()
             }
         });
     });
@@ -308,7 +336,7 @@ function formatMoney(number) {
 function hitungTotalReg(){
     let harga = $('#pembayaran_reg').inputmask('unmaskedvalue');
     let totalBiaya = $('#total_harga_global').val();
-
+    console.log(totalBiaya);
     harga = harga.replace(",", ".");
     hargaFix = parseFloat(harga).toFixed(2);
     totalBiayaFix = parseFloat(totalBiaya).toFixed(2);
@@ -404,7 +432,8 @@ function cariMember(val){
                 $('#labelMemEmail').text('');
             }
             
-            $('#counter_member').text('Counter Member : '+response.counter);
+            $('#counter_member_mobil').text(response.counter_mobil);
+            $('#counter_member_motor').text(response.counter_motor);
         }
     });
 }
