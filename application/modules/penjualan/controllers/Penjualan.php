@@ -72,24 +72,67 @@ class Penjualan extends CI_Controller {
 		$this->template_view->load_view($content, $data);
 	}
 	
-	public function get_detail_item()
+	public function get_detail_item($kode_member = null)
 	{
 		$html = '';
 		$total = 0;
+		$counter_mobil = 0;
+		$counter_motor = 0;
+
+		if($kode_member != null) {
+			$data_member = $this->m_global->single_row('*', ['kode_member' => $kode_member, 'deleted_at' => null], 'm_member');
+			$counter = $this->lib_fungsi->cek_counter($data_member->id);
+			//var_dump($counter);exit;
+			if ($counter != null) {
+				foreach ($counter as $key => $value) {
+					if ($value->id_jenis_counter == '1') {
+						$counter_mobil = $value->total_count;
+					} else if ($value->id_jenis_counter == '2') {
+						$counter_motor = $value->total_count;
+					}
+				}
+			}
+		}
+
+		// var_dump((int)$counter_mobil, (int)$counter_motor);exit;
 		
 		if($this->input->get('arrItem') != '') {
 			for ($i=0; $i < count($this->input->get('arrItem')); $i++) { 
 				$id_item = $this->input->get('arrItem')[$i];
 				$det_item = $this->m_global->single_row('*', ['id_jenis_trans' => 1, 'deleted_at' => null, 'id' => $id_item], 'm_item_trans');
 				if($det_item) {
-					$total += (float)$det_item->harga;
+					if((int)$counter_mobil >= 9) {
+						
+						if($det_item->id_jenis_counter == '1') {
+							$total += 0;
+							$harga_fix = 0;
+						}else{
+							$total += (float)$det_item->harga;
+							$harga_fix = $det_item->harga;
+						}
+
+					}else{
+						if ((int)$counter_motor >= 9) {
+							if ($det_item->id_jenis_counter == '2') {
+								$total += 0;
+								$harga_fix = 0;
+							} else {
+								$total += (float)$det_item->harga;
+								$harga_fix = $det_item->harga;
+							}
+						}else{
+							$total += (float)$det_item->harga;
+							$harga_fix = $det_item->harga;
+						}
+					}
+					
 					$html .= '<tr>
 								<td>'.$det_item->nama.'</td>
 								<td>
 									<input type="hidden" class="form-control" value='.$det_item->id.' name="id_item[]">
-									<input type="hidden" class="form-control" value='.$det_item->harga.' name="harga[]">
+									<input type="hidden" class="form-control" value='.$harga_fix.' name="harga[]">
 								</td>
-								<td class="kt-font-danger kt-font-lg" style="text-align: right;"><div><span class="pull-left">Rp. </span><span class="pull-right">'.number_format($det_item->harga,2,',','.').'</span></td>
+								<td class="kt-font-danger kt-font-lg" style="text-align: right;"><div><span class="pull-left">Rp. </span><span class="pull-right">'.number_format($harga_fix,2,',','.').'</span></td>
 							</tr>';
 				}
 			}
@@ -164,8 +207,6 @@ class Penjualan extends CI_Controller {
 		}
 		echo json_encode($retval);
 	}
-
-	
 
 	public function simpan_trans_reg()
 	{
@@ -249,6 +290,11 @@ class Penjualan extends CI_Controller {
 
 	public function simpan_trans_mem()
 	{
+		$counter_mobil = 0;
+		$counter_motor = 0;
+		$is_add_cnt_mobil = false;
+		$is_add_cnt_motor = false;
+
 		$obj_date = new DateTime();
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
 		$list_item = $this->input->post('list_item_mem'); 
@@ -318,9 +364,32 @@ class Penjualan extends CI_Controller {
 
 			$update = $this->t_transaksi->update(['id'=> $id_header], $data_upd_header);
 
+			### cek tipe item
+			for ($z = 0; $z < count($list_item); $z++) {
+				$id_item = $this->input->post('id_item')[$z];
+				$cek = $this->m_global->single_row('*', ['id' => $id_item], 'm_item_trans');
+				if($cek->id_jenis_counter && $cek->id_jenis_counter == '1') {
+					$is_add_cnt_mobil = true;
+				}
+
+				if ($cek->id_jenis_counter && $cek->id_jenis_counter == '2') {
+					$is_add_cnt_motor = true;
+				}
+			}
+
 			if($update) {
 				$counter = $this->lib_fungsi->cek_counter($data_member->id);
-				$ins_count = $this->lib_fungsi->insert_counter($data_member->id, $counter);
+				if ($counter != null) {
+					foreach ($counter as $key => $value) {
+						if ($value->id_jenis_counter == '1') {
+							$counter_mobil = $value->total_count;
+						} else if ($value->id_jenis_counter == '2') {
+							$counter_motor = $value->total_count;
+						}
+					}
+				}
+
+				$ins_count = $this->lib_fungsi->insert_counter($data_member->id, $counter_mobil, $counter_motor, $is_add_cnt_mobil, $is_add_cnt_motor);
 
 				if($ins_count === FALSE) {
 					$this->db->trans_rollback();

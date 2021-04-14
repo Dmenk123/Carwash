@@ -38,40 +38,69 @@ class Lib_fungsi extends CI_Controller {
 
 
 	###################
-	public function insert_counter($id_member, $counter_existing)
+	public function insert_counter($id_member, $counter_mobil, $counter_motor, $is_add_cnt_mobil=false, $is_add_cnt_motor=false)
 	{
 		$obj_date = new DateTime();
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
 
-		if($counter_existing == 10) {
-			## set deleted_at pada id_member
-			$update = $this->_ci->db->update('t_log_counter_member', ['deleted_at' => $timestamp], ['id_member' => $id_member]);
-			if($update) {
-				return TRUE;
+		if ($is_add_cnt_mobil) {
+			if ($counter_mobil == 9) {
+				## set deleted_at pada id_member	
+				$update = $this->_ci->db->update('t_log_counter_member', ['deleted_at' => $timestamp], ['id_member' => $id_member, 'id_jenis_counter' => '1']);
+				if ($update) {
+					$retval[] = TRUE;
+				} else {
+					$retval[] = FALSE;
+				}
 			}else{
-				return FALSE;
-			}
-		}else{
-			$data = [
-				'id_member' => $id_member,
-				'created_at' => $timestamp
-			];
+				$data = [
+					'id_member' => $id_member,
+					'id_jenis_counter' => 1,
+					'created_at' => $timestamp,
+				];
 
-			$ins = $this->_ci->db->insert('t_log_counter_member', $data);
-			if($ins) {
-				# update pada m_member
-				$upd = $this->_ci->db->update('m_member', ['counter_diskon' => (int)$counter_existing+1], ['id'=>$id_member]);
-
-				if($upd) {
-					return TRUE;
-				}else{
-					return FALSE;
+				$ins = $this->_ci->db->insert('t_log_counter_member', $data);
+				if ($ins) {
+					$retval[] = TRUE;
+				} else {
+					$retval[] = FALSE;
 				}
 			}
-			return TRUE;
+		}
+
+		if ($is_add_cnt_motor) {
+			if ($counter_motor == 9) {
+				## set deleted_at pada id_member
+				$update2 = $this->_ci->db->update('t_log_counter_member', ['deleted_at' => $timestamp], ['id_member' => $id_member, 'id_jenis_counter' => '2']);
+				if ($update2) {
+					$retval[] = TRUE;
+				} else {
+					$retval[] = FALSE;
+				}
+			}else{
+				$data = [
+					'id_member' => $id_member,
+					'id_jenis_counter' => 2,
+					'created_at' => $timestamp,
+				];
+
+				$ins = $this->_ci->db->insert('t_log_counter_member', $data);
+				if ($ins) {
+					$retval[] = TRUE;
+				} else {
+					$retval[] = FALSE;
+				}
+			}
+		}
+
+		if (in_array(false, $retval)) {
+			return false;
+		}else{
+			return true;
 		}
 		
 	}
+
 	function cek_counter($id_member) {
 		$query = $this->_ci->db->query("SELECT count(*) AS total_count, t_log_counter_member.id_jenis_counter, m_jenis_counter.jenis_counter FROM t_log_counter_member left join m_jenis_counter on t_log_counter_member.id_jenis_counter = m_jenis_counter.id WHERE t_log_counter_member.id_member = '$id_member' AND t_log_counter_member.deleted_at IS NULL GROUP BY t_log_counter_member.id_jenis_counter")->result();
 		if($query) {

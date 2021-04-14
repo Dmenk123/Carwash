@@ -299,6 +299,7 @@ $(document).ready(function() {
     }); 
 
     $("#selMem").on('change', function (e) { 
+        let kodeMember  = $('#member_id').val();
         let totTransReg = 0;
         let strAppend = '';
         let arrItem = [];
@@ -309,7 +310,7 @@ $(document).ready(function() {
 
         $.ajax({
             type: "get",
-            url  : base_url + "penjualan/get_detail_item",
+            url  : base_url + "penjualan/get_detail_item/"+kodeMember,
             data: {arrItem : arrItem},
             dataType: "json",
             success: function (response) {
