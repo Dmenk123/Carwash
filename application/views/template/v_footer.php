@@ -149,6 +149,12 @@
                 });
             }
 
+            function reInitSelectSingle(){
+                $('.select2').select2({
+                    placeholder: "Mohon Pilih Salah Satu",
+                });
+            }
+
             function reInitInputMask(){
                 $(".inputmask").inputmask({
                     prefix: "",
