@@ -64,7 +64,7 @@ class Master_member extends CI_Controller {
 			$row[] = $member->hp;
 			$jk = ($member->jenis_kelamin == 'L') ? 'Laki-laki' : 'Perempuan';
 			$row[] = $jk;
-			$row[] = $member->counter_diskon;
+			$row[] = '';
 
 			
 			$str_aksi = '
