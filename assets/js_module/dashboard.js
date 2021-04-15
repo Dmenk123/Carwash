@@ -182,6 +182,9 @@
 //     });
 //   }
 $(document).ready(function () {
+    var nama = $("[name=jenis_penjualan]").val();
+    var tahun = $("[name=tahun]").val();
+    monitoring(nama, tahun);
     $('#form-pegawai').submit(function () {
         url = base_url + 'home/monitoring';
         var form = $('#form-pegawai')[0];
@@ -240,3 +243,57 @@ $(document).ready(function () {
         return false;
        });
 });
+
+function monitoring(nama, tahun){
+  url = base_url + 'home/monitoring';
+  $.ajax({
+    type: "POST",
+    enctype: 'multipart/form-data',
+    url: url,
+    data: {jenis_penjualan:nama, tahun:tahun},
+    dataType: "JSON",
+    // processData: false, // false, it prevent jQuery form transforming the data into a query string
+    // contentType: false, 
+    // cache: false,
+    timeout: 600000,
+    success: function (response) {
+        if(response.status) {
+            console.log('berhasil');
+            new Chart(document.getElementById("line-chart"), {
+                type: 'bar',
+                data: {
+                  labels: response.label,
+                  datasets: response.datasets
+                },
+                options: {
+                  title: {
+                    display: true,
+                    text: response.judul
+                  }
+                }
+            });
+        }else {
+            for (var i = 0; i < data.inputerror.length; i++) 
+            {
+                if (data.inputerror[i] != 'jabatans') {
+                    $('[name="'+data.inputerror[i]+'"]').addClass('is-invalid');
+                    $('[name="'+data.inputerror[i]+'"]').next().text(data.error_string[i]).addClass('invalid-feedback'); //select span help-block class set text error string
+                }else{
+                    $($('#jabatans').data('select2').$container).addClass('has-error');
+                }
+            }
+
+            $("#btnSave").prop("disabled", false);
+            $('#btnSave').text('Simpan');
+        }
+    },
+    error: function (e) {
+        console.log("ERROR : ", e);
+        $("#btnSave").prop("disabled", false);
+        $('#btnSave').text('Simpan');
+
+        reset_modal_form();
+        $(".modal").modal('hide');
+    }
+  });
+}

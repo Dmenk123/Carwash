@@ -147,5 +147,19 @@ class M_global extends CI_Model
 	{
 		return $this->db->insert($table, $data);	
 	}
+
+    function monitoring_penjualan($jenis=null, $tahun=null)
+    {
+        $query = $this->db->query(
+            "
+            SELECT EXTRACT( MONTH FROM created_at ) as bulan, id_item_trans, COUNT(EXTRACT( MONTH FROM created_at )) as jumlah
+            FROM t_transaksi_det WHERE id_item_trans = $jenis AND EXTRACT( YEAR FROM created_at ) = $tahun
+            GROUP BY EXTRACT( MONTH FROM created_at ), id_item_trans
+            ORDER BY bulan asc
+            "
+        );
+        return $query;
+
+    }
 		
 }
