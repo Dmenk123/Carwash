@@ -41,11 +41,6 @@ class Trans_lain extends CI_Controller {
 			'list_transaksi' => $list_transaksi,
 		);
 
-		// echo "<pre>";
-		// print_r ($data);
-		// echo "</pre>";
-		// exit;
-
 		/**
 		 * content data untuk template
 		 * param (css : link css pada direktori assets/css_module)
@@ -158,6 +153,108 @@ class Trans_lain extends CI_Controller {
 
 		echo json_encode($retval);
 	}
+
+	private function clean_txt_div($text)
+	{
+		$slug = $text;
+		$slug = str_ireplace('div-', "", $slug);
+		$slug = str_ireplace('-modal', "", $slug);
+
+		return $slug;
+	}
+
+	public function get_old_data()
+	{
+		$txt_div_modal = $this->input->post('menu');
+		$slug = $this->clean_txt_div($this->input->post('menu'));
+		$q_jenis = $this->m_global->single_row('*', ['slug' => $slug], 'm_jenis_trans');
+		
+		switch ($slug) {
+			case 'pembelian':
+				$select = "t_transaksi.*, m_item_trans.nama as nama_item, t_transaksi_det.qty";
+				$where = ['t_transaksi.deleted_at' => null, 't_transaksi.id_jenis_trans' => $q_jenis->id];
+				$table = 't_transaksi';
+				$join = [ 
+					['table' => 't_transaksi_det', 'on' => 't_transaksi.id = t_transaksi_det.id_transaksi'],
+					['table' => 'm_item_trans', 'on' => 't_transaksi_det.id_item_trans = m_item_trans.id']
+				];
+			
+				$datanya = $this->m_global->multi_row($select,$where,$table, $join);
+				
+				echo json_encode(['data'=>$datanya, 'status' => true, 'menu' => $slug]);
+				break;
+
+			case 'diagnosa':
+				echo json_encode(['menu' => 'diagnosa']);
+				break;
+			
+			case 'tindakan':
+				echo json_encode(['menu' => 'tindakan']);
+				break;
+
+			case 'logistik':
+				echo json_encode(['menu' => 'logistik']);
+				break;
+
+			case 'kamera':
+				echo json_encode(['menu' => 'kamera']);
+				break;
+
+			case 'tindakanlab':
+				echo json_encode(['menu' => 'tindakanlab']);
+				break;
+			
+			case 'diskon':
+				echo json_encode(['menu' => 'diskon']);
+				break;
+			
+			default:
+				$datanya = null;
+				echo json_encode(['data'=> null, 'status' => false, 'menu' => false]);
+				break;
+		}
+	}
+
+	public function load_form_tabel_pembelian()
+	{
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$data = $this->input->post('data');
+		
+		$html = '';
+		
+		if($data){
+			foreach ($data as $key => $value) {
+				$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d H:i:s', $value['created_at'])->format('d-m-Y').'</td><td>'.$value['nama_item'].'</td><td>'.number_format($value['harga_total'],0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_pembelian(\''.$value['id'].'\')"><i class="la la-trash"></i></button></td></tr>';
+			}
+		}else{
+			$slug = $this->clean_txt_div($this->input->post('activeModal'));
+			$q_jenis = $this->m_global->single_row('*', ['slug' => $slug], 'm_jenis_trans');
+
+			$select = "t_transaksi.*, m_item_trans.nama as nama_item, t_transaksi_det.qty";
+			$where = ['t_transaksi.deleted_at' => null, 't_transaksi.id_jenis_trans' => $q_jenis->id];
+			$table = 't_transaksi';
+			$join = [ 
+				['table' => 't_transaksi_det', 'on' => 't_transaksi.id = t_transaksi_det.id_transaksi'],
+				['table' => 'm_item_trans', 'on' => 't_transaksi_det.id_item_trans = m_item_trans.id']
+			];
+		
+			$datanya = $this->m_global->multi_row($select,$where,$table, $join);
+
+			if($datanya){
+				foreach ($datanya as $key => $value) {
+					$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d H:i:s', $value->created_at)->format('d-m-Y').'</td><td>'.$value->nama_item.'</td><td>'.number_format($value->harga_total,0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_pembelian(\''.$value->id.'\')"><i class="la la-trash"></i></button></td></tr>';
+				}
+			}
+		}
+
+		echo json_encode([
+			'html' => $html
+		]);
+	}
+
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private function rule_validasi($flag)
 	{

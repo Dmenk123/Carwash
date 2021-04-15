@@ -14,6 +14,20 @@ const hitungTotalBeli = () => {
     $('#hargatot_beli_raw').val(totalFix);
 }
 
+const reloadTabelFormPembelian = (objData=null) => {
+    $('#CssLoader').removeClass('hidden');
+    $.ajax({
+        type: "post",
+        url: base_url+"trans_lain/load_form_tabel_pembelian",
+        data:{data:objData, activeModal:activeModal},
+        dataType: "json",
+        success: function (response) {
+           $('#CssLoader').addClass('hidden');
+           $('#tabel_modal_pembelian tbody').html(response.html);
+        }
+    });
+}
+
 $(document).ready(function() {
     
     $("#item_beli").select2({
@@ -90,23 +104,7 @@ $(document).ready(function() {
     
 });
 
-function reloadFormPembelian(){
-    $('#CssLoader').removeClass('hidden');
-    $.ajax({
-        type: "post",
-        url: base_url+"trans_lain/load_form_pembelian",
-        data: {
-            id_peg: id_peg,
-            id_psn: id_psn,
-            id_reg: id_reg
-        },
-        dataType: "json",
-        success: function (response) {
-           $('#CssLoader').addClass('hidden');
-           $('#tabel_modal_diagnosa tbody').html(response.html);
-        }
-    });
-}
+
 
 
 function hapus_diagnosa_det(id) {

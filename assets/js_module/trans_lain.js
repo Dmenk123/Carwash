@@ -1,6 +1,53 @@
 let slug_trans;
 let activeModal;
 
+const cekDanSetValue = (txt_div_modal) => {
+    let retval = $.ajax({
+        type: "post",
+        url: base_url+"trans_lain/get_old_data",
+        data: {
+            menu:txt_div_modal,
+        },
+        dataType: "json",
+        success: (objData) => {setModalFieldValue(objData)},
+    });
+
+    return;
+}
+
+const setModalFieldValue = (objData) => {
+    console.log(objData);
+    if(objData.menu == 'pembelian') {
+        reloadTabelFormPembelian(objData.data);
+    }else if(objData.menu == 'diagnosa'){
+        reloadFormDiagnosa();
+    }else if(objData.menu == 'tindakan'){
+        reloadFormTindakan();
+    }else if(objData.menu == 'logistik'){
+        reloadFormLogistik();
+    }else if(objData.menu == 'kamera'){
+        reloadFormKamera();
+    }else if(objData.menu == 'tindakanlab'){
+        reloadFormTindakanLab();
+    }else if(objData.menu == 'diskon'){
+        reloadFormDiskon();
+    }
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////
+
+// function reload_table()
+// {
+//     table.ajax.reload(null,false); 
+// }
+
+// function reload_table2()
+// {
+//     table2.ajax.reload(null,false); 
+// }
+
 $(document).ready(function() {
 
     //force integer input in textfield
@@ -12,7 +59,7 @@ $(document).ready(function() {
         var nama_menu = $(this).data('id');
         slug_trans = $(this).data('slug');
         activeModal =  nama_menu+'-modal';
-        // cekDanSetValue(activeModal);
+        cekDanSetValue(activeModal);
         $('#'+nama_menu+'-modal').modal('show');
         
     });
@@ -104,7 +151,7 @@ function save(id_form)
                     $("#btnSave").prop("disabled", false);
                     $('#btnSave').text('Simpan');      
                     if(id_form == 'form_pembelian') {
-                        reloadFormPembelian();
+                        reloadTabelFormPembelian();
                     }else if(id_form == 'form_tindakan'){
                         reloadFormTindakan();
                     }else if(id_form == 'form_logistik'){
@@ -142,57 +189,7 @@ function save(id_form)
     });
 }
 
-// function cekDanSetValue(txt_div_modal){
-//     let menu = txt_div_modal.split("_");
-//     let retval = $.ajax({
-//         type: "post",
-//         url: base_url+"rekam_medik/get_old_data",
-//         data: {
-//             menu:menu[1], 
-//             id_peg:id_peg,
-//             id_psn:id_psn,
-//             id_reg:id_reg
-//         },
-//         dataType: "json",
-//         success:setModalFieldValue,
-//     });
 
-//     function setModalFieldValue(objData){
-//         console.log(objData);
-//         if(objData.menu == 'anamnesa') {
-//             $("#form_anamnesa input[name='id_anamnesa']").val(objData.data.id);
-//             $("#form_anamnesa textarea[name='anamnesa']").val(objData.data.anamnesa);
-//         }else if(objData.menu == 'diagnosa'){
-//             reloadFormDiagnosa();
-//         }else if(objData.menu == 'tindakan'){
-//             reloadFormTindakan();
-//         }else if(objData.menu == 'logistik'){
-//             reloadFormLogistik();
-//         }else if(objData.menu == 'kamera'){
-//             reloadFormKamera();
-//         }else if(objData.menu == 'tindakanlab'){
-//             reloadFormTindakanLab();
-//         }else if(objData.menu == 'diskon'){
-//             reloadFormDiskon();
-//         }
-//     }
-    
-//     return;
-// }
-
-
-
-////////////////////////////////////////////////////////////////////////////
-
-// function reload_table()
-// {
-//     table.ajax.reload(null,false); 
-// }
-
-// function reload_table2()
-// {
-//     table2.ajax.reload(null,false); 
-// }
 
 function reset_form(jqIdForm) {
     $(':input','#'+jqIdForm)
