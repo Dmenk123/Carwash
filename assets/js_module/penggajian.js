@@ -1,34 +1,25 @@
-const hitungTotalBeli = () => {
-    let harga = $('#harga_beli').inputmask('unmaskedvalue');
-    let qty = $('#qty_beli').inputmask('unmaskedvalue');
-    
+const hitungTotalGaji = () => {
+    let harga = $('#harga_gaji').inputmask('unmaskedvalue');
     harga = harga.replace(",", ".");
     hargaFix = parseFloat(harga).toFixed(2);
-    
-    let total = hargaFix * qty;
-    let totalFix = Number(total).toFixed(2);
-    $('#hargatot_beli').val(formatMoney(Number(totalFix)));
-
-    // set raw value
-    $('#harga_beli_raw').val(hargaFix);
-    $('#hargatot_beli_raw').val(totalFix);
+    $('#harga_gaji_raw').val(hargaFix);
 }
 
-const reloadTabelFormPembelian = (objData=null) => {
+const reloadTabelFormPenggajian = (objData=null) => {
     $('#CssLoader').removeClass('hidden');
     $.ajax({
         type: "post",
-        url: base_url+"trans_lain/load_form_tabel_pembelian",
+        url: base_url+"trans_lain/load_form_tabel_penggajian",
         data:{data:objData, activeModal:activeModal},
         dataType: "json",
         success: function (response) {
            $('#CssLoader').addClass('hidden');
-           $('#tabel_modal_pembelian tbody').html(response.html);
+           $('#tabel_modal_penggajian tbody').html(response.html);
         }
     });
 }
 
-const hapus_pembelian = (id) => {
+const hapus_penggajian = (id) => {
     swalConfirmDelete.fire({
         title: 'Hapus Data Pembelian ?',
         text: "Data Akan dihapus ?",
@@ -47,7 +38,7 @@ const hapus_pembelian = (id) => {
                 success: function(data)
                 {
                     swalConfirm.fire('Berhasil Hapus Data!', data.pesan, 'success');
-                    reloadTabelFormPembelian();
+                    reloadTabelFormPenggajian();
                 },
                 error: function (jqXHR, textStatus, errorThrown)
                 {
@@ -70,14 +61,14 @@ const hapus_pembelian = (id) => {
 
 $(document).ready(function() {
     
-    $("#item_beli").select2({
+    $("#item_gaji").select2({
         // tags: true,
         //multiple: false,
         tokenSeparators: [',', ' '],
         minimumInputLength: 0,
         minimumResultsForSearch: 5,
         ajax: {
-            url: base_url+'master_item_trans/get_select_pembelian',
+            url: base_url+'master_item_trans/get_select_penggajian',
             dataType: "json",
             type: "GET",
             data: function (params) {
@@ -101,45 +92,13 @@ $(document).ready(function() {
         }
     });
 
-    $('#item_beli').on('select2:selecting', function(e) {
+    $('#item_gaji').on('select2:selecting', function(e) {
         let data = e.params.args.data;
         let hargaFix = Number(data.harga).toFixed(2);
-        $('#harga_beli').val(formatMoney(Number(hargaFix)));
-        $('#harga_beli_raw').val(hargaFix);
+        $('#harga_gaji').val(formatMoney(Number(hargaFix)));
+        $('#harga_gaji_raw').val(hargaFix);
         // let tgl_lhr = data.tanggal_lahir;
         // $('#tanggal_lahir').val(tgl_lhr.split("-").reverse().join("/"));
     });
 
-    $("#sup_beli").select2({
-        // tags: true,
-        //multiple: false,
-        tokenSeparators: [',', ' '],
-        minimumInputLength: 0,
-        minimumResultsForSearch: 5,
-        ajax: {
-            url: base_url+'master_supplier/get_select_supplier',
-            dataType: "json",
-            type: "GET",
-            data: function (params) {
-
-                var queryParameters = {
-                    term: params.term
-                }
-                return queryParameters;
-            },
-            processResults: function (data) {
-                return {
-                    results: $.map(data, function (item) {
-                        return {
-                            text: item.text,
-                            id: item.id,
-                        }
-                    })
-                };
-            }
-        }
-    });
-
-  
-    
 });

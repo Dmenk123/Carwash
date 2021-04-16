@@ -19,18 +19,12 @@ class Trans_lain extends CI_Controller {
 		// $this->load->library('thermalprint_lib');
 	}
 
+	######################################### BASE FUNCTION ############################################
 	public function index()
 	{
 		$id_user = $this->session->userdata('id_user'); 
 		$data_user = $this->m_user->get_detail_user($id_user);
 		$list_transaksi = $this->m_global->multi_row('*', ['kode_jenis <>' => 'A-01', 'deleted_at' => null], 'm_jenis_trans', NULL, 'kode_jenis');
-
-		// $content = [
-		// 	'css' 	=> null,
-		// 	'modal' => ['modal_pilih_pasien', 'modal_anamnesa','modal_diagnosa','modal_odonto','modal_tindakan', 'modal_logistik', 'modal_tindakan_lab', 'modal_diskon', 'modal_pasien', 'modal_kamera'],
-		// 	'js'	=> ['rekam_medik.js', 'anamnesa.js', 't_diagnosa.js', 'odonto.js','t_tindakan.js','t_logistik.js', 't_tindakanlab.js', 't_diskon.js', 't_kamera.js', 't_data_pasien.js'],
-		// 	'view'	=> 'view_rekam_medik'
-		// ];
 		
 		/**
 		 * data passing ke halaman view content
@@ -49,14 +43,77 @@ class Trans_lain extends CI_Controller {
 		 */
 		$content = [
 			'css' 	=> null,
-			'modal' => ['modal_pembelian'],
-			'js'	=> ['trans_lain.js', 'pembelian.js'],
+			'modal' => ['modal_pembelian','modal_penggajian'],
+			'js'	=> ['trans_lain.js', 'pembelian.js', 'penggajian.js'],
 			'view'	=> 'view_trans_lain'
 		];
 
 		$this->template_view->load_view($content, $data);
 	}
 
+	private function clean_txt_div($text)
+	{
+		$slug = $text;
+		$slug = str_ireplace('div-', "", $slug);
+		$slug = str_ireplace('-modal', "", $slug);
+
+		return $slug;
+	}
+
+	public function get_old_data()
+	{
+		$txt_div_modal = $this->input->post('menu');
+		$slug = $this->clean_txt_div($this->input->post('menu'));
+		$q_jenis = $this->m_global->single_row('*', ['slug' => $slug], 'm_jenis_trans');
+
+		$select = "t_transaksi.*, t_transaksi_det.harga_satuan, m_item_trans.nama as nama_item, t_transaksi_det.qty";
+		$where = ['t_transaksi.deleted_at' => null, 't_transaksi.id_jenis_trans' => $q_jenis->id];
+		$table = 't_transaksi';
+		$join = [ 
+			['table' => 't_transaksi_det', 'on' => 't_transaksi.id = t_transaksi_det.id_transaksi'],
+			['table' => 'm_item_trans', 'on' => 't_transaksi_det.id_item_trans = m_item_trans.id']
+		];
+	
+		$datanya = $this->m_global->multi_row($select,$where,$table, $join);
+		
+		switch ($slug) {
+			case 'pembelian':	
+				echo json_encode(['data' => $datanya, 'status' => true, 'menu' => $slug]);
+				break;
+
+			case 'penggajian':			
+				echo json_encode(['data'=>$datanya, 'status' => true, 'menu' => $slug]);
+				break;
+			
+			case 'tindakan':
+				echo json_encode(['menu' => 'tindakan']);
+				break;
+
+			case 'logistik':
+				echo json_encode(['menu' => 'logistik']);
+				break;
+
+			case 'kamera':
+				echo json_encode(['menu' => 'kamera']);
+				break;
+
+			case 'tindakanlab':
+				echo json_encode(['menu' => 'tindakanlab']);
+				break;
+			
+			case 'diskon':
+				echo json_encode(['menu' => 'diskon']);
+				break;
+			
+			default:
+				$datanya = null;
+				echo json_encode(['data'=> null, 'status' => false, 'menu' => false]);
+				break;
+		}
+	}
+	######################################### END BASE FUNCTION ############################################
+
+	################################ PEMBELIAN AREA #############################################
 	private function rule_validasi_pembelian()
 	{
 		$data = array();
@@ -154,67 +211,6 @@ class Trans_lain extends CI_Controller {
 		echo json_encode($retval);
 	}
 
-	private function clean_txt_div($text)
-	{
-		$slug = $text;
-		$slug = str_ireplace('div-', "", $slug);
-		$slug = str_ireplace('-modal', "", $slug);
-
-		return $slug;
-	}
-
-	public function get_old_data()
-	{
-		$txt_div_modal = $this->input->post('menu');
-		$slug = $this->clean_txt_div($this->input->post('menu'));
-		$q_jenis = $this->m_global->single_row('*', ['slug' => $slug], 'm_jenis_trans');
-		
-		switch ($slug) {
-			case 'pembelian':
-				$select = "t_transaksi.*, m_item_trans.nama as nama_item, t_transaksi_det.qty";
-				$where = ['t_transaksi.deleted_at' => null, 't_transaksi.id_jenis_trans' => $q_jenis->id];
-				$table = 't_transaksi';
-				$join = [ 
-					['table' => 't_transaksi_det', 'on' => 't_transaksi.id = t_transaksi_det.id_transaksi'],
-					['table' => 'm_item_trans', 'on' => 't_transaksi_det.id_item_trans = m_item_trans.id']
-				];
-			
-				$datanya = $this->m_global->multi_row($select,$where,$table, $join);
-				
-				echo json_encode(['data'=>$datanya, 'status' => true, 'menu' => $slug]);
-				break;
-
-			case 'diagnosa':
-				echo json_encode(['menu' => 'diagnosa']);
-				break;
-			
-			case 'tindakan':
-				echo json_encode(['menu' => 'tindakan']);
-				break;
-
-			case 'logistik':
-				echo json_encode(['menu' => 'logistik']);
-				break;
-
-			case 'kamera':
-				echo json_encode(['menu' => 'kamera']);
-				break;
-
-			case 'tindakanlab':
-				echo json_encode(['menu' => 'tindakanlab']);
-				break;
-			
-			case 'diskon':
-				echo json_encode(['menu' => 'diskon']);
-				break;
-			
-			default:
-				$datanya = null;
-				echo json_encode(['data'=> null, 'status' => false, 'menu' => false]);
-				break;
-		}
-	}
-
 	public function load_form_tabel_pembelian()
 	{
 		$obj_date = new DateTime();
@@ -225,13 +221,13 @@ class Trans_lain extends CI_Controller {
 		
 		if($data){
 			foreach ($data as $key => $value) {
-				$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d H:i:s', $value['created_at'])->format('d-m-Y').'</td><td>'.$value['nama_item'].'</td><td>'.number_format($value['harga_total'],0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_pembelian(\''.$value['id'].'\')"><i class="la la-trash"></i></button></td></tr>';
+				$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d H:i:s', $value['created_at'])->format('d-m-Y').'</td><td>'.$value['nama_item'].'</td><td align="right">'.number_format($value['harga_satuan'],0,',','.').'</td><td>'.number_format($value['qty'],0,',','.').'</td><td align="right">'.number_format($value['harga_total'],0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_pembelian(\''.$value['id'].'\')"><i class="la la-trash"></i></button></td></tr>';
 			}
 		}else{
 			$slug = $this->clean_txt_div($this->input->post('activeModal'));
 			$q_jenis = $this->m_global->single_row('*', ['slug' => $slug], 'm_jenis_trans');
 
-			$select = "t_transaksi.*, m_item_trans.nama as nama_item, t_transaksi_det.qty";
+			$select = "t_transaksi.*, m_item_trans.nama as nama_item, t_transaksi_det.qty, t_transaksi_det.harga_satuan";
 			$where = ['t_transaksi.deleted_at' => null, 't_transaksi.id_jenis_trans' => $q_jenis->id];
 			$table = 't_transaksi';
 			$join = [ 
@@ -243,7 +239,7 @@ class Trans_lain extends CI_Controller {
 
 			if($datanya){
 				foreach ($datanya as $key => $value) {
-					$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d H:i:s', $value->created_at)->format('d-m-Y').'</td><td>'.$value->nama_item.'</td><td>'.number_format($value->harga_total,0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_pembelian(\''.$value->id.'\')"><i class="la la-trash"></i></button></td></tr>';
+					$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d H:i:s', $value->created_at)->format('d-m-Y').'</td><td>'.$value->nama_item.'</td><td align="right">'.number_format($value->harga_satuan,0,',','.').'</td><td>'.number_format($value->qty,0,',','.').'</td><td align="right">'.number_format($value->harga_total,0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_pembelian(\''.$value->id.'\')"><i class="la la-trash"></i></button></td></tr>';
 				}
 			}
 		}
@@ -253,8 +249,186 @@ class Trans_lain extends CI_Controller {
 		]);
 	}
 
+	public function delete_data_pembelian()
+	{
+		$id = $this->input->post('id');
+		$this->db->trans_begin();
+		
+		$del_1 = $this->t_transaksi_det->softdelete_by_trans($id);
+		$del_2 = $this->t_transaksi->softdelete_by_id($id);
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////
+		if ($this->db->trans_status() === FALSE){
+			$this->db->trans_rollback();
+			$retval['status'] = false;
+			$retval['pesan'] = 'Gagal Menghapus Data';
+		}else{
+			$this->db->trans_commit();
+			$retval['status'] = true;
+			$retval['pesan'] = 'Sukses Menghapus Data';
+		}
+
+		echo json_encode($retval);
+	}
+	################################ END PEMBELIAN AREA #############################################
+
+	################################ PENGGAJIAN AREA #############################################
+	private function rule_validasi_penggajian()
+	{
+		$data = array();
+		$data['error_string'] = array();
+		$data['inputerror'] = array();
+		$data['status'] = TRUE;
+
+		if ($this->input->post('item_gaji') == '') {
+			$data['inputerror'][] = 'item_gaji';
+			$data['error_string'][] = 'Wajib Mengisi Gaji';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = TRUE;
+		}
+
+		if ($this->input->post('tahun_gaji') == '') {
+			$data['inputerror'][] = 'tahun_gaji';
+			$data['error_string'][] = 'Wajib Mengisi Tahun Gaji';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = TRUE;
+		}
+
+		if ($this->input->post('bulan_gaji') == '') {
+			$data['inputerror'][] = 'bulan_gaji';
+			$data['error_string'][] = 'Wajib Mengisi Bulan Gaji';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = FALSE;
+		}
+
+		if ($this->input->post('harga_gaji') == '') {
+			$data['inputerror'][] = 'harga_gaji';
+			$data['error_string'][] = 'Wajib Mengisi Nilai Gaji Total';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = FALSE;
+		}
+			
+        return $data;
+	}
+	
+	public function simpan_form_penggajian()
+	{
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$datenow = $obj_date->format('Y-m-d');
+		$arr_valid = $this->rule_validasi_penggajian();
+		
+		if ($arr_valid['status'] == FALSE) {
+			echo json_encode($arr_valid);
+			return;
+		}
+
+		$this->db->trans_begin();
+		$id_header = gen_uuid();
+		$slug_trans = $this->input->post('slug_trans');
+		$item_gaji = $this->input->post('item_gaji');
+		$tahun = $this->input->post('tahun_gaji');
+		$bulan = $this->input->post('bulan_gaji');
+		$total_gaji = $this->input->post('harga_gaji_raw');
+		
+		$cek_jenis = $this->m_global->single_row('id', ['slug' => $slug_trans], 'm_jenis_trans');
+		###insert
+		$data = [
+			'id' => $id_header,
+			'id_jenis_trans' => $cek_jenis->id,
+			'bulan_gaji' => $bulan,
+			'tahun_gaji' => $tahun,
+			'harga_total' => $total_gaji,
+			'id_user' => $this->session->userdata('id_user'),
+			'created_at' => $timestamp
+		];
+					
+		$insert = $this->m_global->store($data, 't_transaksi');
+
+		if($insert){
+			$data_det = [
+				'id' => gen_uuid(),
+				'id_transaksi' => $id_header,
+				'id_item_trans' => $item_gaji,
+				'harga_satuan' => $total_gaji,
+				'qty' => 1,
+				'created_at' => $timestamp
+			];
+						
+			$insert_det = $this->m_global->store($data_det, 't_transaksi_det');
+		}
+		
+		if ($this->db->trans_status() === FALSE){
+			$this->db->trans_rollback();
+			$retval['status'] = false;
+			$retval['pesan'] = 'Gagal Menambah Data';
+		}else{
+			$this->db->trans_commit();
+			$retval['status'] = true;
+			$retval['pesan'] = 'Sukses Menambah Data';
+		}
+
+		echo json_encode($retval);
+	}
+
+	public function load_form_tabel_penggajian()
+	{
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$data = $this->input->post('data');
+		
+		$html = '';
+		
+		if($data){
+			foreach ($data as $key => $value) {
+				$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d H:i:s', $value['created_at'])->format('d-m-Y').'</td><td>'.$value['nama_item'].'</td><td align="right">'.bulan_indo($value['bulan_gaji']).'</td><td>'.$value['tahun_gaji'].'</td><td align="right">'.number_format($value['harga_total'],0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_penggajian(\''.$value['id'].'\')"><i class="la la-trash"></i></button></td></tr>';
+			}
+		}else{
+			$slug = $this->clean_txt_div($this->input->post('activeModal'));
+			$q_jenis = $this->m_global->single_row('*', ['slug' => $slug], 'm_jenis_trans');
+
+			$select = "t_transaksi.*, m_item_trans.nama as nama_item, t_transaksi_det.qty, t_transaksi_det.harga_satuan";
+			$where = ['t_transaksi.deleted_at' => null, 't_transaksi.id_jenis_trans' => $q_jenis->id];
+			$table = 't_transaksi';
+			$join = [ 
+				['table' => 't_transaksi_det', 'on' => 't_transaksi.id = t_transaksi_det.id_transaksi'],
+				['table' => 'm_item_trans', 'on' => 't_transaksi_det.id_item_trans = m_item_trans.id']
+			];
+		
+			$datanya = $this->m_global->multi_row($select,$where,$table, $join);
+
+			if($datanya){
+				foreach ($datanya as $key => $value) {
+					$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d H:i:s', $value->created_at)->format('d-m-Y').'</td><td>'.$value->nama_item.'</td><td align="right">'.bulan_indo($value->bulan_gaji).'</td><td>'.$value->tahun_gaji.'</td><td align="right">'.number_format($value->harga_total,0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_penggajian(\''.$value->id.'\')"><i class="la la-trash"></i></button></td></tr>';
+				}
+			}
+		}
+
+		echo json_encode([
+			'html' => $html
+		]);
+	}
+
+	public function delete_data_penggajian()
+	{
+		$id = $this->input->post('id');
+		$this->db->trans_begin();
+		
+		$del_1 = $this->t_transaksi_det->softdelete_by_trans($id);
+		$del_2 = $this->t_transaksi->softdelete_by_id($id);
+
+		if ($this->db->trans_status() === FALSE){
+			$this->db->trans_rollback();
+			$retval['status'] = false;
+			$retval['pesan'] = 'Gagal Menghapus Data';
+		}else{
+			$this->db->trans_commit();
+			$retval['status'] = true;
+			$retval['pesan'] = 'Sukses Menghapus Data';
+		}
+
+		echo json_encode($retval);
+	}
+	################################ END PEMBELIAN AREA #############################################
 
 	private function rule_validasi($flag)
 	{

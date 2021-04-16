@@ -4,6 +4,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Master_item_trans extends CI_Controller {
 	
 	const ID_JENIS_PEMBELIAN = 2;
+	const ID_JENIS_PENGGAJIAN = 3;
+
 	public function __construct()
 	{
 		parent::__construct();
@@ -235,6 +237,24 @@ class Master_item_trans extends CI_Controller {
 			foreach ($data_pembelian as $key => $value) {
 				$row['id'] = $value->id;
 				$row['text'] = $value->nama;
+				$row['harga'] = $value->harga;
+				$retval[] = $row;
+			}
+		}else{
+			$retval = false;
+		}
+		echo json_encode($retval);
+	}
+
+	public function get_select_penggajian()
+	{
+		$term = $this->input->get('term');
+		$data_pembelian = $this->m_global->multi_row('*', ['deleted_at' => null, 'id_jenis_trans' => self::ID_JENIS_PENGGAJIAN, 'nama like' => '%'.$term.'%'], 'm_item_trans', null, 'nama');
+		if($data_pembelian) {
+			foreach ($data_pembelian as $key => $value) {
+				$row['id'] = $value->id;
+				$row['text'] = $value->nama;
+				$row['harga'] = $value->harga;
 				$retval[] = $row;
 			}
 		}else{

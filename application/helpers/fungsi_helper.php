@@ -40,4 +40,15 @@ if ( ! function_exists('contul'))
         }
     }
 }
+
+if ( ! function_exists('bulan_indo'))
+{
+	function bulan_indo($intBulan){
+        $arr_bulan = [
+            1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        ];
+
+        return $arr_bulan[$intBulan];
+    }
+}
 ?>

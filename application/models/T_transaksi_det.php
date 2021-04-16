@@ -45,7 +45,16 @@ class T_transaksi_det extends CI_Model
 		$obj_date = new DateTime();
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
 		$where = ['id' => $id];
-		$data = ['deleted_at' => $timestamp, 'status' => null];
+		$data = ['deleted_at' => $timestamp];
+		return $this->db->update($this->table, $data, $where);
+	}
+
+	public function softdelete_by_trans($id_trans)
+	{
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$where = ['id_transaksi' => $id_trans];
+		$data = ['deleted_at' => $timestamp];
 		return $this->db->update($this->table, $data, $where);
 	}
 

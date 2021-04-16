@@ -19,8 +19,8 @@ const setModalFieldValue = (objData) => {
     console.log(objData);
     if(objData.menu == 'pembelian') {
         reloadTabelFormPembelian(objData.data);
-    }else if(objData.menu == 'diagnosa'){
-        reloadFormDiagnosa();
+    }else if(objData.menu == 'penggajian'){
+        reloadTabelFormPenggajian(objData.data);
     }else if(objData.menu == 'tindakan'){
         reloadFormTindakan();
     }else if(objData.menu == 'logistik'){
@@ -33,7 +33,6 @@ const setModalFieldValue = (objData) => {
         reloadFormDiskon();
     }
 }
-
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -152,8 +151,8 @@ function save(id_form)
                     $('#btnSave').text('Simpan');      
                     if(id_form == 'form_pembelian') {
                         reloadTabelFormPembelian();
-                    }else if(id_form == 'form_tindakan'){
-                        reloadFormTindakan();
+                    }else if(id_form == 'form_penggajian'){
+                        reloadTabelFormPenggajian();
                     }else if(id_form == 'form_logistik'){
                         reloadFormLogistik();
                     }else if(id_form == 'form_kamera'){
@@ -188,8 +187,6 @@ function save(id_form)
         }
     });
 }
-
-
 
 function reset_form(jqIdForm) {
     $(':input','#'+jqIdForm)
