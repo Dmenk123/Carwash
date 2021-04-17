@@ -21,31 +21,19 @@ const setModalFieldValue = (objData) => {
         reloadTabelFormPembelian(objData.data);
     }else if(objData.menu == 'penggajian'){
         reloadTabelFormPenggajian(objData.data);
-    }else if(objData.menu == 'tindakan'){
-        reloadFormTindakan();
-    }else if(objData.menu == 'logistik'){
-        reloadFormLogistik();
-    }else if(objData.menu == 'kamera'){
-        reloadFormKamera();
-    }else if(objData.menu == 'tindakanlab'){
-        reloadFormTindakanLab();
-    }else if(objData.menu == 'diskon'){
-        reloadFormDiskon();
+    }else if(objData.menu == 'investasi'){
+        reloadTabelFormInvestasi(objData.data);
+    }else if(objData.menu == 'operasional'){
+        reloadTabelFormOperasional(objData.data);
+    }else if(objData.menu == 'pengeluaran-lain-lain'){
+        reloadTabelFormPengeluaranLain(objData.data);
+    }else if(objData.menu == 'penerimaan-lain-lain'){
+        reloadTabelFormPenerimaanLain(objData.data);
     }
 }
 
 
 ////////////////////////////////////////////////////////////////////////////
-
-// function reload_table()
-// {
-//     table.ajax.reload(null,false); 
-// }
-
-// function reload_table2()
-// {
-//     table2.ajax.reload(null,false); 
-// }
 
 $(document).ready(function() {
 
@@ -60,7 +48,6 @@ $(document).ready(function() {
         activeModal =  nama_menu+'-modal';
         cekDanSetValue(activeModal);
         $('#'+nama_menu+'-modal').modal('show');
-        
     });
     
     //////////////////////////////////////////////////////////////
@@ -72,52 +59,6 @@ function formatMoney(number) {
         { minimumFractionDigits: 2 }
     );
     return value;
-}
-
-
-function show_modal_pasien() {
-    $('#modal_pilih_pasien').modal('show');
-    $('#modal_pilih_pasien_title').text('Pilih Pasien'); 
-}
-
-function cari_pasien() {
-    let form = $('#form_cari_pasien')[0];
-    let data = new FormData(form);
-
-    $.ajax({
-        type: "POST",
-        enctype: 'multipart/form-data',
-        url: base_url+'rekam_medik/cari_pasien',
-        data: data,
-        dataType: "JSON",
-        processData: false,
-        contentType: false, 
-        cache: false,
-        timeout: 600000,
-        success: function (response) {
-            if(response.status) {
-                $('#tabel_pilih_pasien tbody').html(response.data);
-            }else{
-                swalConfirm.fire('Gagal','Data Tidak Ditemukan','error');
-            }
-        }
-    });
-}
-
-function pilih_pasien(enc_id){
-    $.ajax({
-        type: "post",
-        url: base_url+'rekam_medik/hasil_pilih_pasien',
-        data: {enc_id:enc_id},
-        dataType: "json",
-        success: function (response) {
-            $('#tabel_pasien tbody').html(response.data);
-            id_reg = response.data_id.id_reg;
-            id_peg = response.data_id.id_peg;
-            id_psn = response.data_id.id_psn;
-            $('#modal_pilih_pasien').modal('hide');
-        }
-    });
 }
 
 function save(id_form)
@@ -153,12 +94,14 @@ function save(id_form)
                         reloadTabelFormPembelian();
                     }else if(id_form == 'form_penggajian'){
                         reloadTabelFormPenggajian();
-                    }else if(id_form == 'form_logistik'){
-                        reloadFormLogistik();
-                    }else if(id_form == 'form_kamera'){
-                        reloadFormKamera();
-                    }else if(id_form == 'form_tindakanlab'){
-                        reloadFormTindakanLab();
+                    }else if(id_form == 'form_investasi'){
+                        reloadTabelFormInvestasi();
+                    }else if(id_form == 'form_operasional'){
+                        reloadTabelFormOperasional();
+                    }else if(id_form == 'form_out_lain'){
+                        reloadTabelFormPengeluaranLain();
+                    }else if(id_form == 'form_in_lain'){
+                        reloadTabelFormPenerimaanLain();
                     }else{
                         $('#'+activeModal).modal('hide');
                     }

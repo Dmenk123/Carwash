@@ -39,9 +39,9 @@ $obj_date = new DateTime();
                     </svg> 
                       </div>
                       <div class="kt-iconbox__desc">
-                        <h5 class="kt-iconbox__title">
+                        <span class="kt-iconbox__title" style="font-size: 16px;font-weight:bold;">
                           <?=$value->nama_jenis;?>
-                        </h5>
+                        </span>
                         <div class="kt-iconbox__content">
                           <?=$value->keterangan;?>
                         </div>

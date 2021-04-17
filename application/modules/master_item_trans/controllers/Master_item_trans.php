@@ -5,6 +5,10 @@ class Master_item_trans extends CI_Controller {
 	
 	const ID_JENIS_PEMBELIAN = 2;
 	const ID_JENIS_PENGGAJIAN = 3;
+	const ID_JENIS_INVESTASI = 4;
+	const ID_JENIS_OPERSAIONAL = 5;
+	const ID_JENIS_PENGELUARAN_LAIN = 6;
+	const ID_JENIS_PENERIMAAN_LAIN = 7;
 
 	public function __construct()
 	{
@@ -263,6 +267,73 @@ class Master_item_trans extends CI_Controller {
 		echo json_encode($retval);
 	}
 
+	public function get_select_investasi()
+	{
+		$term = $this->input->get('term');
+		$data_pembelian = $this->m_global->multi_row('*', ['deleted_at' => null, 'id_jenis_trans' => self::ID_JENIS_INVESTASI, 'nama like' => '%'.$term.'%'], 'm_item_trans', null, 'nama');
+		if($data_pembelian) {
+			foreach ($data_pembelian as $key => $value) {
+				$row['id'] = $value->id;
+				$row['text'] = $value->nama;
+				$row['harga'] = $value->harga;
+				$retval[] = $row;
+			}
+		}else{
+			$retval = false;
+		}
+		echo json_encode($retval);
+	}
+
+	public function get_select_operasional()
+	{
+		$term = $this->input->get('term');
+		$data_pembelian = $this->m_global->multi_row('*', ['deleted_at' => null, 'id_jenis_trans' => self::ID_JENIS_OPERSAIONAL, 'nama like' => '%'.$term.'%'], 'm_item_trans', null, 'nama');
+		if($data_pembelian) {
+			foreach ($data_pembelian as $key => $value) {
+				$row['id'] = $value->id;
+				$row['text'] = $value->nama;
+				$row['harga'] = $value->harga;
+				$retval[] = $row;
+			}
+		}else{
+			$retval = false;
+		}
+		echo json_encode($retval);
+	}
+
+	public function get_select_pengeluaran_lain()
+	{
+		$term = $this->input->get('term');
+		$data_pembelian = $this->m_global->multi_row('*', ['deleted_at' => null, 'id_jenis_trans' => self::ID_JENIS_PENGELUARAN_LAIN, 'nama like' => '%'.$term.'%'], 'm_item_trans', null, 'nama');
+		if($data_pembelian) {
+			foreach ($data_pembelian as $key => $value) {
+				$row['id'] = $value->id;
+				$row['text'] = $value->nama;
+				$row['harga'] = $value->harga;
+				$retval[] = $row;
+			}
+		}else{
+			$retval = false;
+		}
+		echo json_encode($retval);
+	}
+
+	public function get_select_penerimaan_lain()
+	{
+		$term = $this->input->get('term');
+		$data_pembelian = $this->m_global->multi_row('*', ['deleted_at' => null, 'id_jenis_trans' => self::ID_JENIS_PENERIMAAN_LAIN, 'nama like' => '%'.$term.'%'], 'm_item_trans', null, 'nama');
+		if($data_pembelian) {
+			foreach ($data_pembelian as $key => $value) {
+				$row['id'] = $value->id;
+				$row['text'] = $value->nama;
+				$row['harga'] = $value->harga;
+				$retval[] = $row;
+			}
+		}else{
+			$retval = false;
+		}
+		echo json_encode($retval);
+	}
 	// ===============================================
 	private function rule_validasi()
 	{
