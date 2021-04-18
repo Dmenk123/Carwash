@@ -488,10 +488,20 @@ class Penjualan extends CI_Controller {
 	public function tampil_barcode()
 	{
 		//var_dump($this->barcode_lib->generate());exit;
-		echo $this->barcode_lib->generate_html('M210328001');
-		echo '<br>';
-		echo $this->barcode_lib->generate_html('M210328002');
-		echo '<br>';
+		echo '<table border="1" width="100%">';
+		for ($i=1; $i <= 30; $i++) { 
+			
+			$rundom = 'M'.rand();
+			echo '<tr height="100px">';
+			echo '<td width="5%">'.$i.'</td>';
+			echo  '<td align="center">'.$this->barcode_lib->generate_html($rundom).'</td>';
+			echo '<td>'.$rundom.'</td>';
+			echo '</tr>';
+
+		}
+		echo '</table>';
+		
+
 	}
 
 	public function simpan_barcode($value = '123456')

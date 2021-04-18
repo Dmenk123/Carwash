@@ -41,7 +41,7 @@
               <th>Email</th>
               <th>No. HP</th>
               <th>Jenis Kelamin</th>
-              <th>Jumlah Cuci</th>
+              <th>Barcode</th>
               <th style="width: 5%;">Aksi</th>
             </tr>
           </thead>

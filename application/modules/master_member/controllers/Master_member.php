@@ -14,6 +14,7 @@ class Master_member extends CI_Controller {
 		$this->load->model('m_user');
 		$this->load->model('m_global');
 		$this->load->model('set_role/m_set_role', 'm_role');
+		$this->load->library('barcode_lib');
 	}
 
 	public function index()
@@ -64,9 +65,8 @@ class Master_member extends CI_Controller {
 			$row[] = $member->hp;
 			$jk = ($member->jenis_kelamin == 'L') ? 'Laki-laki' : 'Perempuan';
 			$row[] = $jk;
-			$row[] = '';
+			$row[] = '<img src="'.base_url().'/files/img/barcode/'.$member->kode_member.'.jpg"  width="200">';
 
-			
 			$str_aksi = '
 				<div class="btn-group">
 					<button type="button" class="btn btn-sm btn_1 dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
@@ -176,6 +176,8 @@ class Master_member extends CI_Controller {
 			$namafileseo = 'user_default.png';
 		}
 
+		$this->simpan_barcode($kode_member);
+
 		$data_user = [
 			'id' => $this->m_member->get_max_id_member(),
 			'kode_member' => $kode_member,
@@ -256,6 +258,14 @@ class Master_member extends CI_Controller {
 		}else{
 			$foto = null;
 		}
+
+		//SIMPAN BARCODE
+		$data_where = array('kode_member' => $kode_member);
+		$member     = $this->m_global->getSelectedData('m_member', $data_where)->row();
+		if (empty($member)) {
+			$this->simpan_barcode($kode_member);
+		}
+		//SIMPAN BARCODE
 
 		$data_user = [
 			'kode_member' => $kode_member,
@@ -417,5 +427,10 @@ class Master_member extends CI_Controller {
 	    //Convert whitespaces and underscore to dash
 	    $string = preg_replace("/[\s_]/", "-", $string);
 	    return $string;
+	}
+
+	public function simpan_barcode($value)
+	{
+		$this->barcode_lib->save_jpg($value);
 	}
 }

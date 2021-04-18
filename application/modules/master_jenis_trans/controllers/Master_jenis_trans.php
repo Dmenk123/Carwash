@@ -121,6 +121,7 @@ class Master_jenis_trans extends CI_Controller {
 		$arr_valid = $this->rule_validasi();
 		
 		$nama_jenis = $this->input->post('nama');
+		$slug  = $this->seoUrl($nama_jenis);
 		$kode_jenis = $this->input->post('kode');
 		$keterangan    = $this->input->post('keterangan');
 
@@ -135,6 +136,7 @@ class Master_jenis_trans extends CI_Controller {
 		$data = [
 			'kode_jenis' => $kode_jenis,
 			'nama_jenis' => $nama_jenis,
+			'slug'       => $slug,
 			'keterangan'         => $keterangan,
 			'created_at' 	=> $timestamp
 		];
@@ -168,6 +170,7 @@ class Master_jenis_trans extends CI_Controller {
 		}
 
 		$nama  = $this->input->post('nama');
+		$slug  = $this->seoUrl($nama);
 		$kode  = $this->input->post('kode');
 		$keterangan = $this->input->post('keterangan');
 
@@ -176,6 +179,7 @@ class Master_jenis_trans extends CI_Controller {
 		$data = [
 			'nama_jenis' => $nama,
 			'kode_jenis' => $kode,
+			'slug'       => $slug,
 			'keterangan'         => $keterangan,
 			'updated_at'    => $timestamp,
 		];
@@ -509,5 +513,17 @@ class Master_jenis_trans extends CI_Controller {
 		
 	
         return $data;
+	}
+
+	private function seoUrl($string) {
+	    //Lower case everything
+	    $string = strtolower($string);
+	    //Make alphanumeric (removes all other characters)
+	    $string = preg_replace("/[^a-z0-9_\s-]/", "", $string);
+	    //Clean up multiple dashes or whitespaces
+	    $string = preg_replace("/[\s-]+/", " ", $string);
+	    //Convert whitespaces and underscore to dash
+	    $string = preg_replace("/[\s_]/", "-", $string);
+	    return $string;
 	}
 }
