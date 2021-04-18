@@ -47,6 +47,7 @@ $(document).ready(function() {
         slug_trans = $(this).data('slug');
         activeModal =  nama_menu+'-modal';
         cekDanSetValue(activeModal);
+        $("a.btn_direct_data").attr("href", base_url+"daftar_transaksi_lain?tipe="+slug_trans);
         $('#'+nama_menu+'-modal').modal('show');
     });
     

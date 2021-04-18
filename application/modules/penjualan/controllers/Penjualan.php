@@ -210,6 +210,7 @@ class Penjualan extends CI_Controller {
 
 	public function simpan_trans_reg()
 	{
+		$data_log_arr = [];
 		$obj_date = new DateTime();
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
 		$list_item = $this->input->post('list_item_reg'); 
@@ -257,6 +258,7 @@ class Penjualan extends CI_Controller {
 				];
 
 				$insert_det = $this->t_transaksi_det->save($data_ins_det);
+				$data_log_arr[] = $data_ins_det;
 			}
 
 			$data_upd_header = [
@@ -267,7 +269,7 @@ class Penjualan extends CI_Controller {
 
 			$update = $this->t_transaksi->update(['id'=> $id_header], $data_upd_header);
 
-			$data_log = json_encode($data_ins_det);
+			$data_log = json_encode($data_log_arr);
 			$this->lib_fungsi->catat_log_aktifitas('CREATE', null, $data_log);
 		}
 				
@@ -290,6 +292,7 @@ class Penjualan extends CI_Controller {
 
 	public function simpan_trans_mem()
 	{
+		$data_log_arr = [];
 		$counter_mobil = 0;
 		$counter_motor = 0;
 		$is_add_cnt_mobil = false;
@@ -354,6 +357,7 @@ class Penjualan extends CI_Controller {
 				];
 
 				$insert_det = $this->t_transaksi_det->save($data_ins_det);
+				$data_log_arr[] = $data_ins_det;
 			}
 
 			$data_upd_header = [
@@ -399,7 +403,7 @@ class Penjualan extends CI_Controller {
 				}
 			}
 
-			$data_log = json_encode($data_ins_det);
+			$data_log = json_encode($data_log_arr);
 			$this->lib_fungsi->catat_log_aktifitas('CREATE', null, $data_log);
 		}
 				

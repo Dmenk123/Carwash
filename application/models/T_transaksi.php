@@ -70,15 +70,21 @@ class T_transaksi extends CI_Model
 	
 	###################################### datatable penjualan
 	protected $column_search_p = ['t_transaksi.kode','t_transaksi.created_at','jenis_member','m_user.nama','t_transaksi.harga_total', 't_transaksi.harga_bayar', 't_transaksi.harga_kembalian','status_kunci'];
-	
+
+	protected $column_search_tl = ['t_transaksi.created_at','m_jenis_trans.nama_jenis','m_user.nama','t_transaksi.harga_total', 't_transaksi.bulan_gaji', 't_transaksi.tahun_gaji','status_kunci'];
+
 	protected $column_order_p = ['t_transaksi.kode','t_transaksi.created_at','jenis_member','m_user.nama','t_transaksi.harga_total', 't_transaksi.harga_bayar', 't_transaksi.harga_kembalian', 'status_kunci',null];
+
+	protected $column_order_tl = ['t_transaksi.created_at','m_jenis_trans.nama_jenis','m_user.nama','t_transaksi.harga_total', 't_transaksi.bulan_gaji', 't_transaksi.tahun_gaji', 'status_kunci',null];
 
 	protected $order_p = ['t_transaksi.kode' => 'desc']; 
 
-	function get_datatable_penjualan($tgl_awal, $tgl_akhir)
+	protected $order_t1 = ['t_transaksi.created_at' => 'desc']; 
+
+	function get_datatable_penjualan($tgl_awal, $tgl_akhir, $jenis = '1')
 	{
 		$term = $_REQUEST['search']['value'];
-		$this->_get_datatable_penjualan_query($tgl_awal, $tgl_akhir, $term);
+		$this->_get_datatable_penjualan_query($tgl_awal, $tgl_akhir, $jenis, $term);
 		if($_REQUEST['length'] != -1)
 		$this->db->limit($_REQUEST['length'], $_REQUEST['start']);
 
@@ -86,27 +92,40 @@ class T_transaksi extends CI_Model
 		return $query->result();
 	}
 
-	private function _get_datatable_penjualan_query($tgl_awal, $tgl_akhir, $term='')
+	private function _get_datatable_penjualan_query($tgl_awal, $tgl_akhir, $jenis, $term='')
 	{
 		$this->db->select('
 			t_transaksi.*,
-            m_member.kode_member,
+			m_jenis_trans.nama_jenis,
+			m_member.kode_member,
 			CASE WHEN t_transaksi.id_member is null THEN \'Reguler\' ELSE \'Member\' END as jenis_member,
 			CASE WHEN t_transaksi.is_kunci = 1 THEN \'Terkunci\' ELSE \'Terbuka\' END as status_kunci,
-            m_user.nama
+			m_user.nama
 		');
-
+		
 		$this->db->from('t_transaksi');
+		$this->db->join('m_jenis_trans', 't_transaksi.id_jenis_trans=m_jenis_trans.id', 'left');
         $this->db->join('m_member', 't_transaksi.id_member=m_member.id', 'left');
 		$this->db->join('m_user', 't_transaksi.id_user=m_user.id', 'left');
 		$this->db->where('t_transaksi.created_at >=' ,$tgl_awal);
 		$this->db->where('t_transaksi.created_at <=' ,$tgl_akhir);
+		$this->db->where('t_transaksi.id_jenis_trans' ,$jenis);
 		$this->db->where('t_transaksi.deleted_at is null');
 		
 		$i = 0;
 
+		if($jenis == '1'){
+			$arr_search = $this->column_search_p;
+			$arr_column_order = $this->column_order_p;
+			$arr_order = $this->order_p;
+		}else{
+			$arr_search = $this->column_search_tl;
+			$arr_column_order = $this->column_order_tl;
+			$arr_order = $this->order_t1;
+		}
+		
 		// loop column 
-		foreach ($this->column_search_p as $item) 
+		foreach ($arr_search as $item) 
 		{
 			// if datatable send POST for search
 			if($_POST['search']['value']) 
@@ -134,12 +153,34 @@ class T_transaksi extends CI_Model
 						 */
 						$this->db->or_like('(CASE WHEN t_transaksi.is_kunci = 1 THEN \'Terkunci\' ELSE \'Terbuka\' END)', $_POST['search']['value'],'both',false);
 					}
+					elseif($item == 't_transaksi.bulan_gaji') {
+						/**
+						 * param both untuk wildcard pada awal dan akhir kata
+						 * param false untuk disable escaping (karena pake subquery)
+						 */
+						$this->db->or_like('(
+							CASE 
+								WHEN t_transaksi.bulan_gaji = 1 THEN \'Januari\'
+								WHEN t_transaksi.bulan_gaji = 2 THEN \'Februari\'
+								WHEN t_transaksi.bulan_gaji = 3 THEN \'Maret\'
+								WHEN t_transaksi.bulan_gaji = 4 THEN \'April\'
+								WHEN t_transaksi.bulan_gaji = 5 THEN \'Mei\'
+								WHEN t_transaksi.bulan_gaji = 6 THEN \'Juni\'
+								WHEN t_transaksi.bulan_gaji = 7 THEN \'Juli\'
+								WHEN t_transaksi.bulan_gaji = 8 THEN \'Agustus\'
+								WHEN t_transaksi.bulan_gaji = 9 THEN \'September\'
+								WHEN t_transaksi.bulan_gaji = 10 THEN \'Oktober\'
+								WHEN t_transaksi.bulan_gaji = 11 THEN \'November\'
+								WHEN t_transaksi.bulan_gaji = 12 THEN \'Desember\'
+							END
+						)', $_POST['search']['value'],'both',false);
+					}
 					else{
 						$this->db->or_like($item, $_POST['search']['value']);
 					}
 				}
 				//last loop
-				if(count($this->column_search_p) - 1 == $i) 
+				if(count($arr_search) - 1 == $i) 
 					$this->db->group_end(); //close bracket
 			}
 			$i++;
@@ -147,27 +188,28 @@ class T_transaksi extends CI_Model
 
 		if(isset($_POST['order'])) // here order processing
 		{
-			$this->db->order_by($this->column_order_p[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
+			$this->db->order_by($arr_column_order[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);
 		} 
-		else if(isset($this->order_p))
+		else if(isset($arr_order))
 		{
-			$order = $this->order_p;
+			$order = $arr_order;
             $this->db->order_by(key($order), $order[key($order)]);
 		}
 	}
 
-	function count_filtered_penjualan($tgl_awal, $tgl_akhir)
+	function count_filtered_penjualan($tgl_awal, $tgl_akhir, $jenis='1')
 	{
-		$this->_get_datatable_penjualan_query($tgl_awal, $tgl_akhir);
+		$this->_get_datatable_penjualan_query($tgl_awal, $tgl_akhir, $jenis);
 		$query = $this->db->get();
 		return $query->num_rows();
 	}
 
-	public function count_all_penjualan($tgl_awal, $tgl_akhir)
+	public function count_all_penjualan($tgl_awal, $tgl_akhir,  $jenis='1')
 	{
 		$this->db->from($this->table);
 		$this->db->where($this->table.'.created_at >=' ,$tgl_awal);
 		$this->db->where($this->table.'.created_at <=' ,$tgl_akhir);
+		$this->db->where($this->table.'.id_jenis_trans' ,$jenis);
 		$this->db->where($this->table.'.deleted_at is null');
 		return $this->db->count_all_results();
 	}

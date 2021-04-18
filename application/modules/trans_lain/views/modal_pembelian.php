@@ -1,3 +1,11 @@
+<?php 
+  $obj_date = new DateTime();
+  $timestamp = $obj_date->format('Y-m-d H:i:s');
+  $bln_now = (int)$obj_date->format('m');
+  $thn_now = (int)$obj_date->format('Y');
+  $thn_awal = $thn_now - 20;
+  $thn_akhir = $thn_now + 20;
+?>
 <div class="modal fade modal_detail" tabindex="-1" role="dialog" aria-labelledby="add_menu" aria-hidden="true" id="div-pembelian-modal">
   <div class="modal-dialog modal-xl" role="document">
     <div class="modal-content">
@@ -30,6 +38,45 @@
                       <option value="">Silahkan Pilih Supplier</option>
                     </select>
                     <span class="help-block"></span>
+                  </div>
+                </div>
+
+                <div class="col-12 row">
+                  <label class="col-6 col-form-label">Tahun :</label>
+                  <label class="col-6 col-form-label">Bulan :</label>
+                </div>
+
+                <div class="col-12 row">
+                  <div class="col-6">
+                    <select class="form-control select2" id="tahun_beli" name="tahun_beli" style="width: 100%;">
+                      <option value="">Silahkan Pilih Tahun</option>
+                      <?php 
+                        for ($i=$thn_awal; $i <= $thn_akhir; $i++) { 
+                          if($i == $thn_now) {
+                            echo '<option value="'.$i.'" selected>'.$i.'</option>';
+                          }else{
+                            echo '<option value="'.$i.'">'.$i.'</option>';
+                          }
+                          
+                        }
+                      ?>
+                    </select>
+                    <span class="help-block"></span>
+                  </div>
+                  <div class="col-6">
+                    <select class="form-control select2" id="bulan_beli" name="bulan_beli" style="width: 100%;">
+                      <option value="">Silahkan Pilih Bulan</option>
+                      <?php 
+                        for ($i=1; $i <= 12; $i++) { 
+                          if($i == $bln_now) {
+                            echo '<option value="'.$i.'" selected>'.bulan_indo($i).'</option>';
+                          }else{
+                            echo '<option value="'.$i.'">'.bulan_indo($i).'</option>';
+                          }
+                          
+                        }
+                      ?>
+                    </select>
                   </div>
                 </div>
 
@@ -69,6 +116,8 @@
                         <th>No</th>
                         <th>Tanggal</th>
                         <th>Nama</th>
+                        <th>Bulan</th>
+                        <th>Tahun</th>
                         <th>Harga</th>
                         <th>Qty</th>
                         <th>Total</th>
@@ -86,6 +135,7 @@
         </form>
       </div>
       <div class="modal-footer">
+        <a type="button" class="btn btn-primary btn_direct_data" style="color:white;" target="_blank" href="">Klik Untuk Ke Daftar Transaksi</a>
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
       </div>
     </div>
