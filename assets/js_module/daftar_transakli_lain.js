@@ -103,9 +103,9 @@ $(document).ready(function() {
 });	
 
 
-function detailPenjualan(id) {
+function detailTransLain(id) {
     $.ajax({
-        url : base_url + 'daftar_penjualan/get_detail_penjualan',
+        url : base_url + 'daftar_transaksi_lain/get_detail_transaksi',
         type: "GET",
         dataType: "JSON",
         data : {id:id},

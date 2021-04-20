@@ -85,7 +85,7 @@
                 <div class="kt-separator kt-separator--border-dashed kt-separator--space-lg kt-separator--portlet-fit"></div>
                
                 <div class=" col-lg-12 col-sm-12">
-                  <h4>Tabel Pembelian (10 Transaksi Terakhir)</h4>
+                  <h4>Tabel Penggajian (10 Transaksi Terakhir)</h4>
                   <table class="table table-striped- table-bordered table-hover" id="tabel_modal_penggajian">
                     <thead>
                       <tr>

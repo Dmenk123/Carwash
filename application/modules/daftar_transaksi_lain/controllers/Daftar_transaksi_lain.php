@@ -71,41 +71,53 @@ class Daftar_transaksi_lain extends CI_Controller {
 			
 			$row[] = $item->nama;
 			$row[] = number_format($item->harga_total, 0 ,',','.');
-			$row[] = bulan_indo((int)$item->bulan_gaji);
-			$row[] = $item->tahun_gaji;
+			$row[] = bulan_indo((int)$item->bulan_trans);
+			$row[] = $item->tahun_trans;
 
 			$status_kuncian = ($item->status_kunci == 'Terkunci') ? '<span style="color:green;">Terkunci</span>' : '<span style="color:red;">Terbuka</span>';
 			$row[] = $status_kuncian;
 			
-			// $row[] = $aktif_txt;			
-			
+			// $str_aksi = '
+			// 	<div class="btn-group">
+			// 		<button type="button" class="btn btn-sm btn_1 dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
+			// 		<div class="dropdown-menu">
+			// 			<button class="dropdown-item" onclick="detailPenjualan(\''.$item->id.'\')">
+			// 				<i class="la la-file"></i> Detail Penjualan
+			// 			</button>
+			// ';
+
+			// if($this->session->userdata('id_role') == '1') {
+			// 	$str_aksi .= '
+			// 		<button class="dropdown-item" onclick="toggleKunci(\''.$item->id.'\')">
+			// 			<i class="la la-lock"></i> Buka/Kunci
+			// 		</button>
+			// 		<button class="dropdown-item" onclick="deletePenjualan(\''.$item->id.'\')">
+			// 			<i class="la la-trash"></i> Hapus Penjualan
+			// 		</button>
+			// 	';
+			// }else{
+			// 	if($item->status_kunci == 'Terbuka') {
+			// 		$str_aksi .= '
+			// 			<button class="dropdown-item" onclick="editPenjualan(\''.$item->id.'\')">
+			// 				<i class="la la-pencil"></i> Edit Penjualan
+			// 			</button>
+			// 		';
+			// 	}
+			// }
+
 			$str_aksi = '
 				<div class="btn-group">
 					<button type="button" class="btn btn-sm btn_1 dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
 					<div class="dropdown-menu">
-						<button class="dropdown-item" onclick="detailPenjualan(\''.$item->id.'\')">
+						<button class="dropdown-item" onclick="detailTransLain(\''.$item->id.'\')">
 							<i class="la la-file"></i> Detail Penjualan
 						</button>
-			';
-
-			if($this->session->userdata('id_role') == '1') {
-				$str_aksi .= '
-					<button class="dropdown-item" onclick="toggleKunci(\''.$item->id.'\')">
-						<i class="la la-lock"></i> Buka/Kunci
-					</button>
-					<button class="dropdown-item" onclick="deletePenjualan(\''.$item->id.'\')">
-						<i class="la la-trash"></i> Hapus Penjualan
-					</button>
-				';
-			}else{
-				if($item->status_kunci == 'Terbuka') {
-					$str_aksi .= '
-						<button class="dropdown-item" onclick="editPenjualan(\''.$item->id.'\')">
+						<button class="dropdown-item" onclick="editTransLain(\''.$item->id.'\')">
 							<i class="la la-pencil"></i> Edit Penjualan
 						</button>
-					';
-				}
-			}
+						<button class="dropdown-item" onclick="deleteTransLain(\''.$item->id.'\')">
+							<i class="la la-trash"></i> Hapus Penjualan
+						</button>';
 
 			$str_aksi .= '</div></div>';
 

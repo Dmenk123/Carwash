@@ -154,6 +154,9 @@ class Master_item_trans extends CI_Controller {
 		];
 		
 		$insert = $this->m_item_trans->save($data);
+
+		$data_log = json_encode($data);
+		$this->lib_fungsi->catat_log_aktifitas('CREATE', null, $data_log);
 		
 		if ($this->db->trans_status() === FALSE){
 			$this->db->trans_rollback();
@@ -186,7 +189,7 @@ class Master_item_trans extends CI_Controller {
 		$harga_awal = $this->input->post('harga_awal');
 		$harga = $this->input->post('harga');
 		$keterangan    = $this->input->post('keterangan');
-
+		$old_data = $this->m_global->single_row_array('*', ['id' => $this->input->post('id')], 'm_item_trans');
 		$this->db->trans_begin();
 		
 		$data = [
@@ -200,6 +203,10 @@ class Master_item_trans extends CI_Controller {
 
 		$where = ['id' => $this->input->post('id')];
 		$update = $this->m_item_trans->update($where, $data);
+
+		$data_log_old = json_encode($old_data);
+		$data_log_new = json_encode($data);
+		$this->lib_fungsi->catat_log_aktifitas('UPDATE', $data_log_old, $data_log_new);
 				
 		if ($this->db->trans_status() === FALSE){
 			$this->db->trans_rollback();
@@ -221,7 +228,11 @@ class Master_item_trans extends CI_Controller {
 	public function delete_item_trans()
 	{
 		$id = $this->input->post('id');
+		$old_data = $this->m_global->single_row_array('*', ['id' => $id], 'm_item_trans');
 		$del = $this->m_item_trans->softdelete_by_id($id);
+
+		$data_log_old = json_encode($old_data);
+		$this->lib_fungsi->catat_log_aktifitas('DELETE', $data_log_old, null);
 		if($del) {
 			$retval['status'] = TRUE;
 			$retval['pesan'] = 'Data Master Item Transaksi Berhasil dihapus';

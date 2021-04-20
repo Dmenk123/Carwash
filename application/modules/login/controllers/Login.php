@@ -39,19 +39,23 @@ class Login extends CI_Controller {
 
 		if ($result) {
 			$this->m_user->set_lastlogin($result->id);
-			// unset($data['id_user']);
-			$this->session->set_userdata(
-				array(
-					'username' => $result->username,
-					'id_user' => $result->id,
-					'last_login' => $result->last_login,
-					'id_role' => $result->id_role,
-					'logged_in' => true,
-				));
+			
+			$arr_userdata = [
+				'username' => $result->username,
+				'id_user' => $result->id,
+				'last_login' => $result->last_login,
+				'id_role' => $result->id_role,
+				'logged_in' => true,
+			];
 
-				echo json_encode([
-					'status' => true
-				]);
+			$this->session->set_userdata($arr_userdata);
+
+			$data_log = json_encode($arr_userdata);
+			$this->lib_fungsi->catat_log_aktifitas('LOGIN', null, $data_log);
+
+			echo json_encode([
+				'status' => true
+			]);
 		}else{
 			echo json_encode([
 				'status' => false
@@ -65,6 +69,17 @@ class Login extends CI_Controller {
 	{
 		if ($this->session->userdata('logged_in')) 
 		{
+			$arr_userdata = [
+				'username' => $this->session->userdata('username'),
+				'id_user' => $this->session->userdata('id_user'),
+				'last_login' => $this->session->userdata('last_login'),
+				'id_role' => $this->session->userdata('id_role'),
+				'logged_in' => false,
+			];
+
+			$data_log = json_encode($arr_userdata);
+			$this->lib_fungsi->catat_log_aktifitas('LOGOUT', null, $data_log);
+
 			//$this->session->sess_destroy();
 			$this->session->unset_userdata('username');
 			$this->session->unset_userdata('id_user');

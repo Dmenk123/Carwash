@@ -69,8 +69,9 @@ class Trans_lain extends CI_Controller {
 			['table' => 't_transaksi_det', 'on' => 't_transaksi.id = t_transaksi_det.id_transaksi'],
 			['table' => 'm_item_trans', 'on' => 't_transaksi_det.id_item_trans = m_item_trans.id']
 		];
+		$order_by = "t_transaksi.tgl_trans desc";
 	
-		$datanya = $this->m_global->multi_row($select,$where,$table, $join);
+		$datanya = $this->m_global->multi_row($select,$where,$table, $join, $order_by);
 		
 		switch ($slug) {
 			case 'pembelian':	
@@ -163,8 +164,9 @@ class Trans_lain extends CI_Controller {
 		$item_beli = $this->input->post('item_beli');
 		$sup_beli = $this->input->post('sup_beli');
 		$qty_beli = $this->input->post('qty_beli');
-		$tahun = $this->input->post('tahun_beli');
-		$bulan = $this->input->post('bulan_beli');
+		$tanggal = $obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_beli'))->format('Y-m-d');
+		$tahun = (int)$obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_beli'))->format('Y');
+		$bulan = (int)$obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_beli'))->format('m');
 		$harga_beli = $this->input->post('harga_beli_raw');
 		$hargatot_beli = $this->input->post('hargatot_beli_raw');
 		$cek_jenis = $this->m_global->single_row('id', ['slug' => $slug_trans], 'm_jenis_trans');
@@ -173,8 +175,9 @@ class Trans_lain extends CI_Controller {
 			'id' => $id_header,
 			'id_jenis_trans' => $cek_jenis->id,
 			'id_supplier' => $sup_beli,
-			'bulan_gaji' => $bulan,
-			'tahun_gaji' => $tahun,
+			'bulan_trans' => $bulan,
+			'tahun_trans' => $tahun,
+			'tgl_trans' => $tanggal,
 			'harga_total' => $hargatot_beli,
 			'id_user' => $this->session->userdata('id_user'),
 			'created_at' => $timestamp
@@ -222,7 +225,7 @@ class Trans_lain extends CI_Controller {
 		
 		if($data){
 			foreach ($data as $key => $value) {
-				$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d H:i:s', $value['created_at'])->format('d-m-Y').'</td><td>'.$value['nama_item'].'</td><td align="right">'.bulan_indo($value['bulan_gaji']).'</td><td>'.$value['tahun_gaji'].'</td><td>'.$value['nama_item'].'</td><td align="right">'.number_format($value['harga_satuan'],0,',','.').'</td><td>'.number_format($value['qty'],0,',','.').'</td><td align="right">'.number_format($value['harga_total'],0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_pembelian(\''.$value['id'].'\')"><i class="la la-trash"></i></button></td></tr>';
+				$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d', $value['tgl_trans'])->format('d-m-Y').'</td><td>'.$value['nama_item'].'</td><td align="right">'.bulan_indo($value['bulan_trans']).'</td><td>'.$value['tahun_trans'].'</td><td align="right">'.number_format($value['harga_satuan'],0,',','.').'</td><td>'.number_format($value['qty'],0,',','.').'</td><td align="right">'.number_format($value['harga_total'],0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_pembelian(\''.$value['id'].'\')"><i class="la la-trash"></i></button></td></tr>';
 			}
 		}else{
 			$slug = $this->clean_txt_div($this->input->post('activeModal'));
@@ -235,12 +238,13 @@ class Trans_lain extends CI_Controller {
 				['table' => 't_transaksi_det', 'on' => 't_transaksi.id = t_transaksi_det.id_transaksi'],
 				['table' => 'm_item_trans', 'on' => 't_transaksi_det.id_item_trans = m_item_trans.id']
 			];
+			$order_by = "t_transaksi.tgl_trans desc";
 		
-			$datanya = $this->m_global->multi_row($select,$where,$table, $join);
-
+			$datanya = $this->m_global->multi_row($select,$where,$table, $join, $order_by);
+						
 			if($datanya){
 				foreach ($datanya as $key => $value) {
-					$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d H:i:s', $value->created_at)->format('d-m-Y').'</td><td>'.$value->nama_item.'</td><td align="right">'.bulan_indo($value->bulan_gaji).'</td><td>'.$value->tahun_gaji.'</td><td align="right">'.number_format($value->harga_satuan,0,',','.').'</td><td>'.number_format($value->qty,0,',','.').'</td><td align="right">'.number_format($value->harga_total,0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_pembelian(\''.$value->id.'\')"><i class="la la-trash"></i></button></td></tr>';
+					$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d', $value->tgl_trans)->format('d-m-Y').'</td><td>'.$value->nama_item.'</td><td align="right">'.bulan_indo($value->bulan_trans).'</td><td>'.$value->tahun_trans.'</td><td align="right">'.number_format($value->harga_satuan,0,',','.').'</td><td>'.number_format($value->qty,0,',','.').'</td><td align="right">'.number_format($value->harga_total,0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_pembelian(\''.$value->id.'\')"><i class="la la-trash"></i></button></td></tr>';
 				}
 			}
 		}
@@ -342,8 +346,9 @@ class Trans_lain extends CI_Controller {
 		$data = [
 			'id' => $id_header,
 			'id_jenis_trans' => $cek_jenis->id,
-			'bulan_gaji' => $bulan,
-			'tahun_gaji' => $tahun,
+			'bulan_trans' => $bulan,
+			'tahun_trans' => $tahun,
+			'tgl_trans' => $datenow,
 			'harga_total' => $total_gaji,
 			'id_user' => $this->session->userdata('id_user'),
 			'created_at' => $timestamp
@@ -391,7 +396,7 @@ class Trans_lain extends CI_Controller {
 		
 		if($data){
 			foreach ($data as $key => $value) {
-				$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d H:i:s', $value['created_at'])->format('d-m-Y').'</td><td>'.$value['nama_item'].'</td><td align="right">'.bulan_indo($value['bulan_gaji']).'</td><td>'.$value['tahun_gaji'].'</td><td align="right">'.number_format($value['harga_total'],0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_penggajian(\''.$value['id'].'\')"><i class="la la-trash"></i></button></td></tr>';
+				$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d H:i:s', $value['created_at'])->format('d-m-Y').'</td><td>'.$value['nama_item'].'</td><td align="right">'.bulan_indo($value['bulan_trans']).'</td><td>'.$value['tahun_trans'].'</td><td align="right">'.number_format($value['harga_total'],0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_penggajian(\''.$value['id'].'\')"><i class="la la-trash"></i></button></td></tr>';
 			}
 		}else{
 			$slug = $this->clean_txt_div($this->input->post('activeModal'));
@@ -404,12 +409,13 @@ class Trans_lain extends CI_Controller {
 				['table' => 't_transaksi_det', 'on' => 't_transaksi.id = t_transaksi_det.id_transaksi'],
 				['table' => 'm_item_trans', 'on' => 't_transaksi_det.id_item_trans = m_item_trans.id']
 			];
+			$order_by = "t_transaksi.tgl_trans desc";
 		
-			$datanya = $this->m_global->multi_row($select,$where,$table, $join);
+			$datanya = $this->m_global->multi_row($select,$where,$table, $join, $order_by);
 
 			if($datanya){
 				foreach ($datanya as $key => $value) {
-					$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d H:i:s', $value->created_at)->format('d-m-Y').'</td><td>'.$value->nama_item.'</td><td align="right">'.bulan_indo($value->bulan_gaji).'</td><td>'.$value->tahun_gaji.'</td><td align="right">'.number_format($value->harga_total,0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_penggajian(\''.$value->id.'\')"><i class="la la-trash"></i></button></td></tr>';
+					$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d H:i:s', $value->created_at)->format('d-m-Y').'</td><td>'.$value->nama_item.'</td><td align="right">'.bulan_indo($value->bulan_trans).'</td><td>'.$value->tahun_trans.'</td><td align="right">'.number_format($value->harga_total,0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_penggajian(\''.$value->id.'\')"><i class="la la-trash"></i></button></td></tr>';
 				}
 			}
 		}
@@ -461,16 +467,9 @@ class Trans_lain extends CI_Controller {
 			$data['is_select2'][] = TRUE;
 		}
 
-		if ($this->input->post('tahun_op') == '') {
-			$data['inputerror'][] = 'tahun_op';
-			$data['error_string'][] = 'Wajib Mengisi Tahun';
-			$data['status'] = FALSE;
-			$data['is_select2'][] = TRUE;
-		}
-
-		if ($this->input->post('bulan_inves') == '') {
-			$data['inputerror'][] = 'bulan_inves';
-			$data['error_string'][] = 'Wajib Mengisi Bulan';
+		if ($this->input->post('tgl_inves') == '') {
+			$data['inputerror'][] = 'tgl_inves';
+			$data['error_string'][] = 'Wajib Mengisi Tanggal';
 			$data['status'] = FALSE;
 			$data['is_select2'][] = FALSE;
 		}
@@ -502,8 +501,9 @@ class Trans_lain extends CI_Controller {
 		$id_header = gen_uuid();
 		$slug_trans = $this->input->post('slug_trans');
 		$item_inves = $this->input->post('item_inves');
-		$tahun = $this->input->post('tahun_inves');
-		$bulan = $this->input->post('bulan_inves');
+		$tanggal = $obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_inves'))->format('Y-m-d');
+		$tahun = (int)$obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_inves'))->format('Y');
+		$bulan = (int)$obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_inves'))->format('m');
 		$total_inves = $this->input->post('harga_inves_raw');
 		
 		$cek_jenis = $this->m_global->single_row('id', ['slug' => $slug_trans], 'm_jenis_trans');
@@ -511,8 +511,9 @@ class Trans_lain extends CI_Controller {
 		$data = [
 			'id' => $id_header,
 			'id_jenis_trans' => $cek_jenis->id,
-			'bulan_gaji' => $bulan,
-			'tahun_gaji' => $tahun,
+			'bulan_trans' => $bulan,
+			'tahun_trans' => $tahun,
+			'tgl_trans' => $tanggal,
 			'harga_total' => $total_inves,
 			'id_user' => $this->session->userdata('id_user'),
 			'created_at' => $timestamp
@@ -560,7 +561,7 @@ class Trans_lain extends CI_Controller {
 		
 		if($data){
 			foreach ($data as $key => $value) {
-				$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d H:i:s', $value['created_at'])->format('d-m-Y').'</td><td>'.$value['nama_item'].'</td><td align="right">'.bulan_indo($value['bulan_gaji']).'</td><td>'.$value['tahun_gaji'].'</td><td align="right">'.number_format($value['harga_total'],0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_investasi(\''.$value['id'].'\')"><i class="la la-trash"></i></button></td></tr>';
+				$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d', $value['tgl_trans'])->format('d-m-Y').'</td><td>'.$value['nama_item'].'</td><td align="right">'.bulan_indo($value['bulan_trans']).'</td><td>'.$value['tahun_trans'].'</td><td align="right">'.number_format($value['harga_total'],0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_investasi(\''.$value['id'].'\')"><i class="la la-trash"></i></button></td></tr>';
 			}
 		}else{
 			$slug = $this->clean_txt_div($this->input->post('activeModal'));
@@ -573,12 +574,14 @@ class Trans_lain extends CI_Controller {
 				['table' => 't_transaksi_det', 'on' => 't_transaksi.id = t_transaksi_det.id_transaksi'],
 				['table' => 'm_item_trans', 'on' => 't_transaksi_det.id_item_trans = m_item_trans.id']
 			];
+
+			$order_by = "t_transaksi.tgl_trans desc";
 		
-			$datanya = $this->m_global->multi_row($select,$where,$table, $join);
+			$datanya = $this->m_global->multi_row($select,$where,$table, $join, $order_by);
 
 			if($datanya){
 				foreach ($datanya as $key => $value) {
-					$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d H:i:s', $value->created_at)->format('d-m-Y').'</td><td>'.$value->nama_item.'</td><td align="right">'.bulan_indo($value->bulan_gaji).'</td><td>'.$value->tahun_gaji.'</td><td align="right">'.number_format($value->harga_total,0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_investasi(\''.$value->id.'\')"><i class="la la-trash"></i></button></td></tr>';
+					$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d', $value->tgl_trans)->format('d-m-Y').'</td><td>'.$value->nama_item.'</td><td align="right">'.bulan_indo($value->bulan_trans).'</td><td>'.$value->tahun_trans.'</td><td align="right">'.number_format($value->harga_total,0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_investasi(\''.$value->id.'\')"><i class="la la-trash"></i></button></td></tr>';
 				}
 			}
 		}
@@ -630,18 +633,11 @@ class Trans_lain extends CI_Controller {
 			$data['is_select2'][] = TRUE;
 		}
 
-		if ($this->input->post('tahun_op') == '') {
-			$data['inputerror'][] = 'tahun_op';
-			$data['error_string'][] = 'Wajib Mengisi Tahun';
+		if ($this->input->post('tgl_op') == '') {
+			$data['inputerror'][] = 'tgl_op';
+			$data['error_string'][] = 'Wajib Mengisi Tanggal';
 			$data['status'] = FALSE;
 			$data['is_select2'][] = TRUE;
-		}
-
-		if ($this->input->post('bulan_op') == '') {
-			$data['inputerror'][] = 'bulan_op';
-			$data['error_string'][] = 'Wajib Mengisi Bulan';
-			$data['status'] = FALSE;
-			$data['is_select2'][] = FALSE;
 		}
 
 		if ($this->input->post('harga_op') == '') {
@@ -671,8 +667,9 @@ class Trans_lain extends CI_Controller {
 		$id_header = gen_uuid();
 		$slug_trans = $this->input->post('slug_trans');
 		$item_op = $this->input->post('item_op');
-		$tahun = $this->input->post('tahun_op');
-		$bulan = $this->input->post('bulan_op');
+		$tanggal = $obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_op'))->format('Y-m-d');
+		$tahun = (int)$obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_op'))->format('Y');
+		$bulan = (int)$obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_op'))->format('m');
 		$total_op = $this->input->post('harga_op_raw');
 		
 		$cek_jenis = $this->m_global->single_row('id', ['slug' => $slug_trans], 'm_jenis_trans');
@@ -680,8 +677,9 @@ class Trans_lain extends CI_Controller {
 		$data = [
 			'id' => $id_header,
 			'id_jenis_trans' => $cek_jenis->id,
-			'bulan_gaji' => $bulan,
-			'tahun_gaji' => $tahun,
+			'bulan_trans' => $bulan,
+			'tahun_trans' => $tahun,
+			'tgl_trans' => $tanggal,
 			'harga_total' => $total_op,
 			'id_user' => $this->session->userdata('id_user'),
 			'created_at' => $timestamp
@@ -729,7 +727,7 @@ class Trans_lain extends CI_Controller {
 		
 		if($data){
 			foreach ($data as $key => $value) {
-				$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d H:i:s', $value['created_at'])->format('d-m-Y').'</td><td>'.$value['nama_item'].'</td><td align="right">'.bulan_indo($value['bulan_gaji']).'</td><td>'.$value['tahun_gaji'].'</td><td align="right">'.number_format($value['harga_total'],0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_operasional(\''.$value['id'].'\')"><i class="la la-trash"></i></button></td></tr>';
+				$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d', $value['tgl_trans'])->format('d-m-Y').'</td><td>'.$value['nama_item'].'</td><td align="right">'.bulan_indo($value['bulan_trans']).'</td><td>'.$value['tahun_trans'].'</td><td align="right">'.number_format($value['harga_total'],0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_operasional(\''.$value['id'].'\')"><i class="la la-trash"></i></button></td></tr>';
 			}
 		}else{
 			$slug = $this->clean_txt_div($this->input->post('activeModal'));
@@ -747,7 +745,7 @@ class Trans_lain extends CI_Controller {
 
 			if($datanya){
 				foreach ($datanya as $key => $value) {
-					$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d H:i:s', $value->created_at)->format('d-m-Y').'</td><td>'.$value->nama_item.'</td><td align="right">'.bulan_indo($value->bulan_gaji).'</td><td>'.$value->tahun_gaji.'</td><td align="right">'.number_format($value->harga_total,0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_operasional(\''.$value->id.'\')"><i class="la la-trash"></i></button></td></tr>';
+					$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d', $value->tgl_trans)->format('d-m-Y').'</td><td>'.$value->nama_item.'</td><td align="right">'.bulan_indo($value->bulan_trans).'</td><td>'.$value->tahun_trans.'</td><td align="right">'.number_format($value->harga_total,0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_operasional(\''.$value->id.'\')"><i class="la la-trash"></i></button></td></tr>';
 				}
 			}
 		}
@@ -799,18 +797,11 @@ class Trans_lain extends CI_Controller {
 			$data['is_select2'][] = TRUE;
 		}
 
-		if ($this->input->post('tahun_out') == '') {
-			$data['inputerror'][] = 'tahun_out';
-			$data['error_string'][] = 'Wajib Mengisi Tahun';
+		if ($this->input->post('tgl_out') == '') {
+			$data['inputerror'][] = 'tgl_out';
+			$data['error_string'][] = 'Wajib Mengisi Tanggal';
 			$data['status'] = FALSE;
 			$data['is_select2'][] = TRUE;
-		}
-
-		if ($this->input->post('bulan_out') == '') {
-			$data['inputerror'][] = 'bulan_out';
-			$data['error_string'][] = 'Wajib Mengisi Bulan';
-			$data['status'] = FALSE;
-			$data['is_select2'][] = FALSE;
 		}
 
 		if ($this->input->post('qty_out') == '') {
@@ -847,8 +838,9 @@ class Trans_lain extends CI_Controller {
 		$id_header = gen_uuid();
 		$slug_trans = $this->input->post('slug_trans');
 		$item_out = $this->input->post('item_out');
-		$tahun = $this->input->post('tahun_out');
-		$bulan = $this->input->post('bulan_out');
+		$tanggal = $obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_out'))->format('Y-m-d');
+		$tahun = (int)$obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_out'))->format('Y');
+		$bulan = (int)$obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_out'))->format('m');
 		$qty = $this->input->post('qty_out');
 		$harga_out = $this->input->post('harga_out_raw');
 		$total_out = $this->input->post('hargatot_out_raw');
@@ -858,8 +850,9 @@ class Trans_lain extends CI_Controller {
 		$data = [
 			'id' => $id_header,
 			'id_jenis_trans' => $cek_jenis->id,
-			'bulan_gaji' => $bulan,
-			'tahun_gaji' => $tahun,
+			'bulan_trans' => $bulan,
+			'tahun_trans' => $tahun,
+			'tgl_trans' => $tanggal,
 			'harga_total' => $total_out,
 			'id_user' => $this->session->userdata('id_user'),
 			'created_at' => $timestamp
@@ -907,7 +900,7 @@ class Trans_lain extends CI_Controller {
 		
 		if($data){
 			foreach ($data as $key => $value) {
-				$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d H:i:s', $value['created_at'])->format('d-m-Y').'</td><td>'.$value['nama_item'].'</td><td align="right">'.bulan_indo($value['bulan_gaji']).'</td><td>'.$value['tahun_gaji'].'</td><td align="right">'.number_format($value['harga_satuan'],0,',','.').'</td><td align="right">'.number_format($value['qty'],0,',','.').'</td><td align="right">'.number_format($value['harga_total'],0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_pengeluaran_lain(\''.$value['id'].'\')"><i class="la la-trash"></i></button></td></tr>';
+				$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d', $value['tgl_trans'])->format('d-m-Y').'</td><td>'.$value['nama_item'].'</td><td align="right">'.bulan_indo($value['bulan_trans']).'</td><td>'.$value['tahun_trans'].'</td><td align="right">'.number_format($value['harga_satuan'],0,',','.').'</td><td align="right">'.number_format($value['qty'],0,',','.').'</td><td align="right">'.number_format($value['harga_total'],0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_pengeluaran_lain(\''.$value['id'].'\')"><i class="la la-trash"></i></button></td></tr>';
 			}
 		}else{
 			$slug = $this->clean_txt_div($this->input->post('activeModal'));
@@ -920,12 +913,14 @@ class Trans_lain extends CI_Controller {
 				['table' => 't_transaksi_det', 'on' => 't_transaksi.id = t_transaksi_det.id_transaksi'],
 				['table' => 'm_item_trans', 'on' => 't_transaksi_det.id_item_trans = m_item_trans.id']
 			];
+
+			$order_by = "t_transaksi.tgl_trans desc";
 		
-			$datanya = $this->m_global->multi_row($select,$where,$table, $join);
+			$datanya = $this->m_global->multi_row($select,$where,$table, $join, $order_by);
 
 			if($datanya){
 				foreach ($datanya as $key => $value) {
-					$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d H:i:s', $value->created_at)->format('d-m-Y').'</td><td>'.$value->nama_item.'</td><td align="right">'.bulan_indo($value->bulan_gaji).'</td><td>'.$value->tahun_gaji.'</td><td align="right">'.number_format($value->harga_satuan,0,',','.').'</td><td align="right">'.number_format($value->qty,0,',','.').'</td><td align="right">'.number_format($value->harga_total,0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_pengeluaran_lain(\''.$value->id.'\')"><i class="la la-trash"></i></button></td></tr>';
+					$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d', $value->tgl_trans)->format('d-m-Y').'</td><td>'.$value->nama_item.'</td><td align="right">'.bulan_indo($value->bulan_trans).'</td><td>'.$value->tahun_trans.'</td><td align="right">'.number_format($value->harga_satuan,0,',','.').'</td><td align="right">'.number_format($value->qty,0,',','.').'</td><td align="right">'.number_format($value->harga_total,0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_pengeluaran_lain(\''.$value->id.'\')"><i class="la la-trash"></i></button></td></tr>';
 				}
 			}
 		}
@@ -976,18 +971,11 @@ class Trans_lain extends CI_Controller {
 			$data['is_select2'][] = TRUE;
 		}
 
-		if ($this->input->post('tahun_in') == '') {
-			$data['inputerror'][] = 'tahun_in';
-			$data['error_string'][] = 'Wajib Mengisi Tahun';
+		if ($this->input->post('tgl_in') == '') {
+			$data['inputerror'][] = 'tgl_in';
+			$data['error_string'][] = 'Wajib Mengisi Tanggal';
 			$data['status'] = FALSE;
 			$data['is_select2'][] = TRUE;
-		}
-
-		if ($this->input->post('bulan_in') == '') {
-			$data['inputerror'][] = 'bulan_in';
-			$data['error_string'][] = 'Wajib Mengisi Bulan';
-			$data['status'] = FALSE;
-			$data['is_select2'][] = FALSE;
 		}
 
 		if ($this->input->post('qty_in') == '') {
@@ -1024,8 +1012,9 @@ class Trans_lain extends CI_Controller {
 		$id_header = gen_uuid();
 		$slug_trans = $this->input->post('slug_trans');
 		$item_in = $this->input->post('item_in');
-		$tahun = $this->input->post('tahun_in');
-		$bulan = $this->input->post('bulan_in');
+		$tanggal = $obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_in'))->format('Y-m-d');
+		$tahun = (int)$obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_in'))->format('Y');
+		$bulan = (int)$obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_in'))->format('m');
 		$qty = $this->input->post('qty_in');
 		$harga_in = $this->input->post('harga_in_raw');
 		$total_in = $this->input->post('hargatot_in_raw');
@@ -1035,8 +1024,9 @@ class Trans_lain extends CI_Controller {
 		$data = [
 			'id' => $id_header,
 			'id_jenis_trans' => $cek_jenis->id,
-			'bulan_gaji' => $bulan,
-			'tahun_gaji' => $tahun,
+			'bulan_trans' => $bulan,
+			'tahun_trans' => $tahun,
+			'tgl_trans' => $tanggal,
 			'harga_total' => $total_in,
 			'id_user' => $this->session->userdata('id_user'),
 			'created_at' => $timestamp
@@ -1084,7 +1074,7 @@ class Trans_lain extends CI_Controller {
 		
 		if($data){
 			foreach ($data as $key => $value) {
-				$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d H:i:s', $value['created_at'])->format('d-m-Y').'</td><td>'.$value['nama_item'].'</td><td align="right">'.bulan_indo($value['bulan_gaji']).'</td><td>'.$value['tahun_gaji'].'</td><td align="right">'.number_format($value['harga_satuan'],0,',','.').'</td><td align="right">'.number_format($value['qty'],0,',','.').'</td><td align="right">'.number_format($value['harga_total'],0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_penerimaan_lain(\''.$value['id'].'\')"><i class="la la-trash"></i></button></td></tr>';
+				$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d', $value['tgl_trans'])->format('d-m-Y').'</td><td>'.$value['nama_item'].'</td><td align="right">'.bulan_indo($value['bulan_trans']).'</td><td>'.$value['tahun_trans'].'</td><td align="right">'.number_format($value['harga_satuan'],0,',','.').'</td><td align="right">'.number_format($value['qty'],0,',','.').'</td><td align="right">'.number_format($value['harga_total'],0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_penerimaan_lain(\''.$value['id'].'\')"><i class="la la-trash"></i></button></td></tr>';
 			}
 		}else{
 			$slug = $this->clean_txt_div($this->input->post('activeModal'));
@@ -1097,12 +1087,13 @@ class Trans_lain extends CI_Controller {
 				['table' => 't_transaksi_det', 'on' => 't_transaksi.id = t_transaksi_det.id_transaksi'],
 				['table' => 'm_item_trans', 'on' => 't_transaksi_det.id_item_trans = m_item_trans.id']
 			];
+			$order_by = "t_transaksi.tgl_trans desc";
 		
-			$datanya = $this->m_global->multi_row($select,$where,$table, $join);
+			$datanya = $this->m_global->multi_row($select,$where,$table, $join, $order_by);
 
 			if($datanya){
 				foreach ($datanya as $key => $value) {
-					$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d H:i:s', $value->created_at)->format('d-m-Y').'</td><td>'.$value->nama_item.'</td><td align="right">'.bulan_indo($value->bulan_gaji).'</td><td>'.$value->tahun_gaji.'</td><td align="right">'.number_format($value->harga_satuan,0,',','.').'</td><td align="right">'.number_format($value->qty,0,',','.').'</td><td align="right">'.number_format($value->harga_total,0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_penerimaan_lain(\''.$value->id.'\')"><i class="la la-trash"></i></button></td></tr>';
+					$html .= '<tr><td>'.($key+1).'</td><td>'.$obj_date->createFromFormat('Y-m-d', $value->tgl_trans)->format('d-m-Y').'</td><td>'.$value->nama_item.'</td><td align="right">'.bulan_indo($value->bulan_trans).'</td><td>'.$value->tahun_trans.'</td><td align="right">'.number_format($value->harga_satuan,0,',','.').'</td><td align="right">'.number_format($value->qty,0,',','.').'</td><td align="right">'.number_format($value->harga_total,0,',','.').'</td><td><button type="button" class="btn btn-sm btn-danger" onclick="hapus_penerimaan_lain(\''.$value->id.'\')"><i class="la la-trash"></i></button></td></tr>';
 				}
 			}
 		}

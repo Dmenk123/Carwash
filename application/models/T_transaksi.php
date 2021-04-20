@@ -71,11 +71,11 @@ class T_transaksi extends CI_Model
 	###################################### datatable penjualan
 	protected $column_search_p = ['t_transaksi.kode','t_transaksi.created_at','jenis_member','m_user.nama','t_transaksi.harga_total', 't_transaksi.harga_bayar', 't_transaksi.harga_kembalian','status_kunci'];
 
-	protected $column_search_tl = ['t_transaksi.created_at','m_jenis_trans.nama_jenis','m_user.nama','t_transaksi.harga_total', 't_transaksi.bulan_gaji', 't_transaksi.tahun_gaji','status_kunci'];
+	protected $column_search_tl = ['t_transaksi.created_at','m_jenis_trans.nama_jenis','m_user.nama','t_transaksi.harga_total', 't_transaksi.bulan_trans', 't_transaksi.tahun_trans','status_kunci'];
 
 	protected $column_order_p = ['t_transaksi.kode','t_transaksi.created_at','jenis_member','m_user.nama','t_transaksi.harga_total', 't_transaksi.harga_bayar', 't_transaksi.harga_kembalian', 'status_kunci',null];
 
-	protected $column_order_tl = ['t_transaksi.created_at','m_jenis_trans.nama_jenis','m_user.nama','t_transaksi.harga_total', 't_transaksi.bulan_gaji', 't_transaksi.tahun_gaji', 'status_kunci',null];
+	protected $column_order_tl = ['t_transaksi.created_at','m_jenis_trans.nama_jenis','m_user.nama','t_transaksi.harga_total', 't_transaksi.bulan_trans', 't_transaksi.tahun_trans', 'status_kunci',null];
 
 	protected $order_p = ['t_transaksi.kode' => 'desc']; 
 
@@ -153,25 +153,25 @@ class T_transaksi extends CI_Model
 						 */
 						$this->db->or_like('(CASE WHEN t_transaksi.is_kunci = 1 THEN \'Terkunci\' ELSE \'Terbuka\' END)', $_POST['search']['value'],'both',false);
 					}
-					elseif($item == 't_transaksi.bulan_gaji') {
+					elseif($item == 't_transaksi.bulan_trans') {
 						/**
 						 * param both untuk wildcard pada awal dan akhir kata
 						 * param false untuk disable escaping (karena pake subquery)
 						 */
 						$this->db->or_like('(
 							CASE 
-								WHEN t_transaksi.bulan_gaji = 1 THEN \'Januari\'
-								WHEN t_transaksi.bulan_gaji = 2 THEN \'Februari\'
-								WHEN t_transaksi.bulan_gaji = 3 THEN \'Maret\'
-								WHEN t_transaksi.bulan_gaji = 4 THEN \'April\'
-								WHEN t_transaksi.bulan_gaji = 5 THEN \'Mei\'
-								WHEN t_transaksi.bulan_gaji = 6 THEN \'Juni\'
-								WHEN t_transaksi.bulan_gaji = 7 THEN \'Juli\'
-								WHEN t_transaksi.bulan_gaji = 8 THEN \'Agustus\'
-								WHEN t_transaksi.bulan_gaji = 9 THEN \'September\'
-								WHEN t_transaksi.bulan_gaji = 10 THEN \'Oktober\'
-								WHEN t_transaksi.bulan_gaji = 11 THEN \'November\'
-								WHEN t_transaksi.bulan_gaji = 12 THEN \'Desember\'
+								WHEN t_transaksi.bulan_trans = 1 THEN \'Januari\'
+								WHEN t_transaksi.bulan_trans = 2 THEN \'Februari\'
+								WHEN t_transaksi.bulan_trans = 3 THEN \'Maret\'
+								WHEN t_transaksi.bulan_trans = 4 THEN \'April\'
+								WHEN t_transaksi.bulan_trans = 5 THEN \'Mei\'
+								WHEN t_transaksi.bulan_trans = 6 THEN \'Juni\'
+								WHEN t_transaksi.bulan_trans = 7 THEN \'Juli\'
+								WHEN t_transaksi.bulan_trans = 8 THEN \'Agustus\'
+								WHEN t_transaksi.bulan_trans = 9 THEN \'September\'
+								WHEN t_transaksi.bulan_trans = 10 THEN \'Oktober\'
+								WHEN t_transaksi.bulan_trans = 11 THEN \'November\'
+								WHEN t_transaksi.bulan_trans = 12 THEN \'Desember\'
 							END
 						)', $_POST['search']['value'],'both',false);
 					}
