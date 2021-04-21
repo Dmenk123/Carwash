@@ -246,5 +246,32 @@ class T_transaksi extends CI_Model
 		}
 	}
 
+	public function get_detail_transaksi($id)
+	{
+		$this->db->select('
+			t_transaksi.*,
+			t_transaksi_det.id_item_trans,
+			t_transaksi_det.harga_satuan,
+			t_transaksi_det.qty,
+			m_item_trans.nama as nama_item,
+            m_supplier.nama_supplier,
+			m_user.nama as nama_user
+		');
+
+		$this->db->from('t_transaksi');
+		$this->db->join('t_transaksi_det', 't_transaksi.id = t_transaksi_det.id_transaksi', 'left');
+		$this->db->join('m_item_trans', 't_transaksi_det.id_item_trans = m_item_trans.id', 'left');
+        $this->db->join('m_supplier', 't_transaksi.id_supplier = m_supplier.id', 'left');
+		$this->db->join('m_user', 't_transaksi.id_user = m_user.id', 'left');
+		$this->db->where('t_transaksi.id', $id);
+		$query = $this->db->get();
+
+		if($query) {
+			return $query->result();
+		}else{
+			return false;
+		}
+	}
+
 	
 }

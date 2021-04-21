@@ -3,6 +3,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Daftar_transaksi_lain extends CI_Controller {
 	
+	const ID_JENIS_PEMBELIAN = 2;
+	const ID_JENIS_PENGGAJIAN = 3;
+	const ID_JENIS_INVESTASI = 4;
+	const ID_JENIS_OPERSAIONAL = 5;
+	const ID_JENIS_PENGELUARAN_LAIN = 6;
+	const ID_JENIS_PENERIMAAN_LAIN = 7;
+
 	public function __construct()
 	{
 		parent::__construct();
@@ -39,8 +46,8 @@ class Daftar_transaksi_lain extends CI_Controller {
 		 */
 		$content = [
 			'css' 	=> null,
-			'modal' => 'modal_daftar_transaksi',
-			'js'	=> 'daftar_transakli_lain.js',
+			'modal' => ['modal_daftar_transaksi', 'trans_lain/modal_pembelian','trans_lain/modal_penggajian', 'trans_lain/modal_investasi', 'trans_lain/modal_operasional', 'trans_lain/modal_out_lain', 'trans_lain/modal_in_lain'],
+			'js'	=> 'daftar_transaksi_lain.js',
 			'view'	=> 'view_daftar_transaksi'
 		];
 
@@ -110,13 +117,13 @@ class Daftar_transaksi_lain extends CI_Controller {
 					<button type="button" class="btn btn-sm btn_1 dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
 					<div class="dropdown-menu">
 						<button class="dropdown-item" onclick="detailTransLain(\''.$item->id.'\')">
-							<i class="la la-file"></i> Detail Penjualan
+							<i class="la la-file"></i> Detail Transaksi
 						</button>
 						<button class="dropdown-item" onclick="editTransLain(\''.$item->id.'\')">
-							<i class="la la-pencil"></i> Edit Penjualan
+							<i class="la la-pencil"></i> Edit Transaksi
 						</button>
 						<button class="dropdown-item" onclick="deleteTransLain(\''.$item->id.'\')">
-							<i class="la la-trash"></i> Hapus Penjualan
+							<i class="la la-trash"></i> Hapus Transaksi
 						</button>';
 
 			$str_aksi .= '</div></div>';
@@ -138,11 +145,13 @@ class Daftar_transaksi_lain extends CI_Controller {
 		echo json_encode($output);
 	}
 
-	function get_detail_penjualan() {
+	function get_detail_transaksi() {
 		$id = $this->input->get('id');
-		$data = $this->t_transaksi->get_detail_penjualan($id);
+		$data = $this->t_transaksi->get_detail_transaksi($id);
+		$is_pembelian = ($data[0]->id_jenis_trans == self::ID_JENIS_PEMBELIAN) ? true : false;
 		$html = '';
 		$html2 = '';
+		$html3 = '';
 		
 		if($data) {
 			$status = true;
@@ -152,42 +161,33 @@ class Daftar_transaksi_lain extends CI_Controller {
 						<table class="table table-bordered table-hover">
 						<thead>
 							<tr>
-							<th>No.</th>
-							<th>Nama Item</th>
-							<th>Harga</th>
-							<th>Potongan</th>
-							<th>Ket Potongan</th>
+								<th>No.</th>
+								<th>Nama Item</th>
+								<th>Harga</th>
+								<th>Qty</th>
+								<th>Harga Total</th>
 							</tr>
 						</thead>
 						<tbody>
 			';
 
 			$total_harga = 0;
-			$total_pot = 0;
 			foreach ($data as $key => $value) {
-				$txt_disc_jual = ($value->is_disc_jual) ? number_format($value->harga_satuan, 0 ,',','.') : '0';
-				$txt_ket_disc_jual = ($value->ket_disc_jual) ? $value->ket_disc_jual : '-';
-				$total_harga += $value->harga_satuan;
-				$total_pot += ($value->is_disc_jual) ? $value->harga_satuan : 0;
+				$total_harga += $value->harga_satuan * $value->qty;
 				$html .= '
                     <tr>
                       <th scope="row">'.($key+1).'</th>
                       <td>'.$value->nama_item.'</td>
 					  <td>Rp '.number_format($value->harga_satuan, 0 ,',','.').'</td>
-                      <td>'.$txt_disc_jual.'</td>
-					  <td>'.$txt_ket_disc_jual.'</td>
+                      <td>'.number_format($value->qty, 0 ,',','.').'</td>
+					  <td>'.number_format($total_harga, 0 ,',','.').'</td>
                     </tr>';  
 			}
 
 			$html .= '
 					<tr>
-						<th scope="row" colspan="2">Total</th>
-						<td>Rp '.number_format($total_harga, 0 ,',','.').'</td>
-						<td>Rp '.number_format($total_pot, 0 ,',','.').'</td>
-					</tr>
-					<tr>
 						<th scope="row" colspan="3">Grand Total</th>
-						<td colspan="2" align="center">Rp '.number_format(($total_harga-$total_pot), 0 ,',','.').'</td>
+						<td colspan="2" align="center">Rp. '.number_format(($total_harga), 0 ,',','.').'</td>
 					</tr>
 					';  
 			
@@ -197,6 +197,13 @@ class Daftar_transaksi_lain extends CI_Controller {
 				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
 				<button id="btnCetak" type="button" class="btn btn-primary" onclick="printStruk(\''.$data[0]->id.'\')">Cetak</button>
 			';
+
+			if($is_pembelian) {
+				$html3 .= '<label class="col-3 col-form-label">Supplier :</label>
+                <div class="col-9">
+                  <span class="form-control-plaintext kt-font-bolder" id="spn-supplier">'.$data[0]->nama_supplier.'</span>
+                </div>';
+			}
 		}else{
 			$status = false;
 		}
@@ -205,10 +212,82 @@ class Daftar_transaksi_lain extends CI_Controller {
 			'status' => $status,
 			'data' => $data,
 			'html' => $html,
-			'html2' => $html2
+			'html2' => $html2,
+			'html3' => $html3
 		]);
 	}
 
+	public function edit_data()
+	{
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$id = $this->input->post('id');
+		
+		$select = "t_transaksi.*, m_item_trans.nama as nama_item, t_transaksi_det.qty, t_transaksi_det.harga_satuan, t_transaksi_det.id_item_trans, m_supplier.nama_supplier";
+		$where = ['t_transaksi.deleted_at' => null, 't_transaksi.id' => $id];
+		$table = 't_transaksi';
+		$join = [ 
+			['table' => 't_transaksi_det', 'on' => 't_transaksi.id = t_transaksi_det.id_transaksi'],
+			['table' => 'm_item_trans', 'on' => 't_transaksi_det.id_item_trans = m_item_trans.id'],
+			['table' => 'm_supplier', 'on' => 't_transaksi.id_supplier = m_supplier.id']
+		];
+	
+		$datanya = $this->m_global->single_row($select,$where,$table, $join);
+		if($datanya) {
+			$status = true;
+			$jenis_trans =  $this->cek_jenis_trans($datanya->id_jenis_trans);
+		}else{
+			$datanya = null;
+			$jenis_trans = null;
+			$status = false;
+		}
+		
+		$data = [ 
+			'data' => $datanya,
+			'jenis_trans'	=> $jenis_trans,
+			'status' => $status
+		];
+		
+		echo json_encode($data);
+	}
+
+	private function cek_jenis_trans($id_jenis_trans)
+	{
+		switch ((int)$id_jenis_trans) {
+			case self::ID_JENIS_PEMBELIAN:
+				return 'pembelian';
+				break;
+
+			case self::ID_JENIS_PENGGAJIAN:
+				return 'penggajian';
+				break;
+
+			case self::ID_JENIS_INVESTASI:
+				return 'investasi';
+				break;
+
+			case self::ID_JENIS_OPERSAIONAL:
+				return 'operasional';
+				break;
+
+			case self::ID_JENIS_PENGELUARAN_LAIN:
+				return 'out_lain';
+				break;
+
+			case self::ID_JENIS_PENERIMAAN_LAIN:
+				return 'in_lain';
+				break;
+			
+			default:
+				return false;
+				break;
+		}
+	}
+
+
+	
+
+	/////////////////////////////
 	public function toggle_kunci()
 	{
 		$id_trans = $this->input->post('id_trans');
@@ -233,30 +312,7 @@ class Daftar_transaksi_lain extends CI_Controller {
 			echo json_encode(['status' => $status, 'pesan' => 'Maaf Data tidak ditemukan, Proses Gagal']);
 		}
 	}
-
-	/////////////////////////////
-
-	public function edit_item_trans()
-	{
-		$this->load->library('Enkripsi');
-		$id_user = $this->session->userdata('id_user');
-		$data_user = $this->m_user->get_by_id($id_user);
 	
-		$id = $this->input->post('id');
-		$oldData = $this->m_item_trans->get_by_id($id);
-		
-		if(!$oldData){
-			return redirect($this->uri->segment(1));
-		}
-
-		$data = array(
-			'data_user' => $data_user,
-			'old_data'	=> $oldData
-		);
-		
-		echo json_encode($data);
-	}
-
 	public function add_data_item_trans()
 	{
 	

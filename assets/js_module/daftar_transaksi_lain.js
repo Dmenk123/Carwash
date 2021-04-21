@@ -7,10 +7,24 @@ const formatRupiah = new Intl.NumberFormat('id-ID', {
     maximumSignificantDigits: 1
 });
 
+const formatMoney = (number) => {
+    var value = number.toLocaleString(
+        'id-ID', 
+        { minimumFractionDigits: 2 }
+    );
+    return value;
+}
+
 const formatTanggal = (tgl) => {
   let formatnya = 'DD-MM-YYYY HH:mm:ss';
   let objDate = new Date(tgl);
   return moment(objDate).format(formatnya);
+};
+
+const formatTanggalCustom = (tgl, format) => {
+    let formatnya = format;
+    let objDate = new Date(tgl);
+    return moment(objDate).format(formatnya);
 };
 
 const filter_tabel = () => {
@@ -45,6 +59,105 @@ const filter_tabel = () => {
 		],
     });
 };
+
+const hitungTotalBeli = () => {
+    let harga = $('#harga_beli').inputmask('unmaskedvalue');
+    let qty = $('#qty_beli').inputmask('unmaskedvalue');
+    
+    harga = harga.replace(",", ".");
+    hargaFix = parseFloat(harga).toFixed(2);
+    
+    let total = hargaFix * qty;
+    let totalFix = Number(total).toFixed(2);
+    $('#hargatot_beli').val(formatMoney(Number(totalFix)));
+
+    // set raw value
+    $('#harga_beli_raw').val(hargaFix);
+    $('#hargatot_beli_raw').val(totalFix);
+}
+
+const loadModalPembelian = (dataTrans) => {
+    (() => {
+        $("#item_beli").select2({
+            tokenSeparators: [',', ' '],
+            minimumInputLength: 0,
+            minimumResultsForSearch: 5,
+            ajax: {
+                url: base_url+'master_item_trans/get_select_pembelian',
+                dataType: "json",
+                type: "GET",
+                data: function (params) {
+    
+                    var queryParameters = {
+                        term: params.term
+                    }
+                    return queryParameters;
+                },
+                processResults: function (data) {
+                    return {
+                        results: $.map(data, function (item) {
+                            return {
+                                text: item.text,
+                                id: item.id,
+                                harga: item.harga
+                            }
+                        })
+                    };
+                }
+            }
+        });
+
+        $("#sup_beli").select2({
+            // tags: true,
+            //multiple: false,
+            tokenSeparators: [',', ' '],
+            minimumInputLength: 0,
+            minimumResultsForSearch: 5,
+            ajax: {
+                url: base_url+'master_supplier/get_select_supplier',
+                dataType: "json",
+                type: "GET",
+                data: function (params) {
+    
+                    var queryParameters = {
+                        term: params.term
+                    }
+                    return queryParameters;
+                },
+                processResults: function (data) {
+                    return {
+                        results: $.map(data, function (item) {
+                            return {
+                                text: item.text,
+                                id: item.id,
+                            }
+                        })
+                    };
+                }
+            }
+        });
+    })();
+
+    $('#item_beli').on('select2:selecting', function(e) {
+        let data = e.params.args.data;
+        let hargaFix = Number(data.harga).toFixed(2);
+        $('#harga_beli').val(formatMoney(Number(hargaFix)));
+        $('#harga_beli_raw').val(hargaFix);
+    });
+
+    $('#tgl_beli').val(formatTanggalCustom(dataTrans.tgl_trans, 'DD/MM/YYYY'));
+    // var $newOption = $("<option selected='selected'></option>").val("TheID").text("The text")
+ 
+    $("#item_beli").append(() => {
+        return $("<option selected='selected'></option>").val(dataTrans.id_item_trans).text(dataTrans.nama_item);
+    }).trigger('change');    
+
+    $("#sup_beli").append(() => {
+        return $("<option selected='selected'></option>").val(dataTrans.id_supplier).text(dataTrans.nama_supplier);
+    }).trigger('change');    
+
+    $('#div-pembelian-modal').modal('show');
+}
   
 $(document).ready(function() {
     filter_tabel();
@@ -112,16 +225,14 @@ function detailTransLain(id) {
         success: function(response)
         {
             if(response.status) {
-                $('#modal_detail_penjualan').modal('show');
-                $('#spn-invoice').text(response.data[0].kode);
-                $('#spn-tanggal').text(formatTanggal(response.data[0].created_at));
-                $('#spn-jenismember').text(response.data[0].jenis_member);
-                $('#spn-namamember').text(response.data[0].nama_member);
-                $('#spn-harga').text(formatRupiah.format(response.data[0].harga_total));
-                $('#spn-hargabayar').text(formatRupiah.format(response.data[0].harga_bayar));
-                $('#spn-hargakembali').text(formatRupiah.format(response.data[0].harga_kembalian));
+                $('#modal_detail_transaksi').modal('show');
+                // $('#spn-invoice').text(response.data[0].kode);
+                $('#spn-tanggal').text(formatTanggalCustom(response.data[0].tgl_trans, 'DD-MM-YYYY'));
+                $('#spn-user').text(response.data[0].nama_user);
+                $('#spn-total').text(formatRupiah.format(response.data[0].harga_total));
                 $('#div_tabel_detail').html(response.html);
                 $('#div_button_detail').html(response.html2);
+                $('#div_supplier_modal').html(response.html3);
             }else{
                 alert('Terjadi Kesalahan');
             }
@@ -195,10 +306,10 @@ function toggleKunci(id_trans) {
     });
 }
 
-function editPenjualan(id) {
-    sessionStorage.setItem("dariEditPenjualan", "true");
-    window.open(base_url+'penjualan?token='+id, '_blank');
-}
+// function editPenjualan(id) {
+//     sessionStorage.setItem("dariEditPenjualan", "true");
+//     window.open(base_url+'penjualan?token='+id, '_blank');
+// }
 
 ///////////////
 
@@ -210,28 +321,34 @@ function add_tindakan()
 	$('#modal_title').text('Entry data Jenis Transaksi'); 
 }
 
-function edit_item_trans(id)
+function editTransLain(id)
 {
     // alert('tes'); exit;
-    reset_modal_form();
+    // reset_modal_form();
     save_method = 'update';
     //Ajax Load data from ajax
     $.ajax({
-        url : base_url + 'master_item_trans/edit_item_trans',
+        url : base_url + 'daftar_transaksi_lain/edit_data',
         type: "POST",
         dataType: "JSON",
         data : {id:id},
-        success: function(data)
+        success: function(response)
         {
-            $('[name="id"]').val(data.old_data.id);
-            $('[name="id_jenis_trans"]').val(data.old_data.id_jenis_trans);
-            $('[name="nama"]').val(data.old_data.nama);
-            $('[name="harga_awal"]').val(data.old_data.harga_awal);
-            $('[name="harga"]').val(data.old_data.harga);
-            $('[name="keterangan"]').val(data.old_data.keterangan);
-            $('#modal_pegawai_form').modal('show');
-	        $('#modal_title').text('Edit Data Item Transaksi'); 
-
+            if(response.status) {
+                if(response.jenis_trans == 'pembelian') {
+                    loadModalPembelian(response.data);
+                }else if(response.jenis_trans == 'penggajian'){
+                    loadModalPenggajian(response.data);
+                }else if(response.jenis_trans == 'investasi'){
+                    loadModalInvestasi(response.data);
+                }else if(response.jenis_trans == 'operasional'){
+                    loadModalOperasional(response.data);
+                }else if(response.jenis_trans == 'out_lain'){
+                    loadModalPengeluaranLain(response.data);
+                }else if(response.jenis_trans == 'in_lain'){
+                    loadModalPenerimaanLain(response.data);
+                }
+            }
         },
         error: function (jqXHR, textStatus, errorThrown)
         {

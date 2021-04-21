@@ -7,7 +7,7 @@
   <div class="modal-dialog modal-xl" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="div_diagnosa_modal_title">Pembelian</h5>
+        <h5 class="modal-title" id="">Pembelian</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
         </button>
       </div>
