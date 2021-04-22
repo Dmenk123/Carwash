@@ -46,7 +46,7 @@ class Daftar_transaksi_lain extends CI_Controller {
 		 */
 		$content = [
 			'css' 	=> null,
-			'modal' => ['modal_daftar_transaksi', 'trans_lain/modal_pembelian','trans_lain/modal_penggajian', 'trans_lain/modal_investasi', 'trans_lain/modal_operasional', 'trans_lain/modal_out_lain', 'trans_lain/modal_in_lain'],
+			'modal' => ['modal_daftar_transaksi', 'modal_pembelian','modal_penggajian', 'modal_investasi', 'modal_operasional', 'modal_out_lain', 'modal_in_lain'],
 			'js'	=> 'daftar_transaksi_lain.js',
 			'view'	=> 'view_daftar_transaksi'
 		];
@@ -284,6 +284,125 @@ class Daftar_transaksi_lain extends CI_Controller {
 		}
 	}
 
+	private function rule_validasi_pembelian()
+	{
+		$data = array();
+		$data['error_string'] = array();
+		$data['inputerror'] = array();
+		$data['status'] = TRUE;
+
+		if ($this->input->post('item_beli') == '') {
+			$data['inputerror'][] = 'item_beli';
+			$data['error_string'][] = 'Wajib Mengisi Pembelian';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = TRUE;
+		}
+
+		if ($this->input->post('sup_beli') == '') {
+			$data['inputerror'][] = 'sup_beli';
+			$data['error_string'][] = 'Wajib Mengisi Supplier';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = TRUE;
+		}
+
+		if ($this->input->post('qty_beli') == '') {
+			$data['inputerror'][] = 'qty_beli';
+			$data['error_string'][] = 'Wajib Mengisi qty';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = FALSE;
+		}
+
+		if ($this->input->post('harga_beli') == '') {
+			$data['inputerror'][] = 'harga_beli';
+			$data['error_string'][] = 'Wajib Mengisi harga';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = FALSE;
+		}
+			
+        return $data;
+	}
+
+	public function simpan_form_pembelian()
+	{
+		$data_log_arr = [];
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$datenow = $obj_date->format('Y-m-d');
+		$arr_valid = $this->rule_validasi_pembelian();
+		
+		if ($arr_valid['status'] == FALSE) {
+			echo json_encode($arr_valid);
+			return;
+		}
+
+		
+		$id_header = $this->input->post('id_trans_beli');
+		$id_jenis = $this->input->post('id_jenis_beli');
+		$item_beli = $this->input->post('item_beli');
+		$sup_beli = $this->input->post('sup_beli');
+		$qty_beli = $this->input->post('qty_beli');
+		$tanggal = $obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_beli'))->format('Y-m-d');
+		$tahun = (int)$obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_beli'))->format('Y');
+		$bulan = (int)$obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_beli'))->format('m');
+		$harga_beli = $this->input->post('harga_beli_raw');
+		$hargatot_beli = $this->input->post('hargatot_beli_raw');
+
+		$oldData = $this->m_global->single_row_array('*', ['id' => $id_header], 't_transaksi');
+		$oldDataDet = $this->m_global->single_row_array('*', ['id_transaksi' => $id_header], 't_transaksi_det');
+
+		if($oldData) {
+			$this->db->trans_begin();
+
+			###update
+			$data = [
+				'id_jenis_trans' => $id_jenis,
+				'id_supplier' => $sup_beli,
+				'bulan_trans' => $bulan,
+				'tahun_trans' => $tahun,
+				'tgl_trans' => $tanggal,
+				'harga_total' => $hargatot_beli,
+				'id_user' => $this->session->userdata('id_user'),
+				'updated_at' => $timestamp
+			];
+
+			$update = $this->m_global->update('t_transaksi', $data, ['id' => $id_header]);
+			$data_log_arr_old[] = $oldData;
+			$data_log_arr_new[] = $data;
+
+			if($update){
+				$data_det = [
+					'id_item_trans' => $item_beli,
+					'harga_satuan' => $harga_beli,
+					'qty' => $qty_beli,
+					'updated_at' => $timestamp
+				];
+							
+				$update_det = $this->m_global->update('t_transaksi_det', $data_det, ['id_transaksi' => $id_header]);
+				$data_log_arr_old[] = $oldDataDet;
+				$data_log_arr_new[] = $data_det;
+			}
+
+			$data_log_old = json_encode($data_log_arr_old);
+			$data_log_new = json_encode($data_log_arr_new);
+			$this->lib_fungsi->catat_log_aktifitas('UPDATE', $data_log_old, $data_log_new);
+
+			if ($this->db->trans_status() === FALSE){
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal Menambah Data';
+			}else{
+				$this->db->trans_commit();
+				$retval['status'] = true;
+				$retval['pesan'] = 'Sukses Menambah Data';
+			}
+	
+		}else{
+			$retval['status'] = false;
+			$retval['pesan'] = 'Gagal Menambah Data';
+		}
+		
+		echo json_encode($retval);
+	}
 
 	
 

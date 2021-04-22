@@ -27,6 +27,58 @@ const formatTanggalCustom = (tgl, format) => {
     return moment(objDate).format(formatnya);
 };
 
+const save = (id_form) => {
+    let str1 = '#';
+    let id_element = str1.concat(id_form);
+    var form = $(id_element)[0];
+    var data = new FormData(form);
+    
+    $("#btnSave").prop("disabled", true);
+    $('#btnSave').text('Menyimpan Data'); //change button text
+    $.ajax({
+        type: "POST",
+        enctype: 'multipart/form-data',
+        url: base_url+'daftar_transaksi_lain/simpan_'+id_form,
+        data: data,
+        dataType: "JSON",
+        processData: false,
+        contentType: false, 
+        cache: false,
+        timeout: 600000,
+        success: function (data) {
+            if(data.status) {
+                swal.fire({
+                    title: "Sukses!!", 
+                    text: data.pesan, 
+                    type: "success"
+                }).then(function() {
+                    filter_tabel();
+                });
+                // swal.fire("Sukses!!", data.pesan, "success");     
+            }else {
+                for (var i = 0; i < data.inputerror.length; i++) 
+                {
+                    if (data.is_select2[i] == false) {
+                        $('[name="'+data.inputerror[i]+'"]').addClass('is-invalid');
+                        $('[name="'+data.inputerror[i]+'"]').next().text(data.error_string[i]).addClass('invalid-feedback');
+                    }else{
+                        //ikut style global
+                        $('[name="'+data.inputerror[i]+'"]').next().next().text(data.error_string[i]).addClass('invalid-feedback-select');
+                    }
+                }
+
+                $("#btnSave").prop("disabled", false);
+                $('#btnSave').text('Simpan');
+            }
+        },
+        error: function (e) {
+            console.log("ERROR : ", e);
+            $("#btnSave").prop("disabled", false);
+            $('#btnSave').text('Simpan');
+        }
+    });
+}
+
 const filter_tabel = () => {
     //datatables
     let tglAwal = $('#tgl_filter_mulai').val();
@@ -146,16 +198,20 @@ const loadModalPembelian = (dataTrans) => {
     });
 
     $('#tgl_beli').val(formatTanggalCustom(dataTrans.tgl_trans, 'DD/MM/YYYY'));
-    // var $newOption = $("<option selected='selected'></option>").val("TheID").text("The text")
- 
+     
     $("#item_beli").append(() => {
         return $("<option selected='selected'></option>").val(dataTrans.id_item_trans).text(dataTrans.nama_item);
     }).trigger('change');    
 
     $("#sup_beli").append(() => {
         return $("<option selected='selected'></option>").val(dataTrans.id_supplier).text(dataTrans.nama_supplier);
-    }).trigger('change');    
-
+    }).trigger('change');
+    
+    $('#id_trans_beli').val(dataTrans.id);
+    $('#id_jenis_beli').val(dataTrans.id_jenis_trans);
+    $('#qty_beli').val(Number(dataTrans.qty));
+    $('#harga_beli').val(formatMoney(Number(Number(dataTrans.harga_satuan).toFixed(2))));
+    hitungTotalBeli();
     $('#div-pembelian-modal').modal('show');
 }
   
@@ -313,14 +369,6 @@ function toggleKunci(id_trans) {
 
 ///////////////
 
-function add_tindakan()
-{
-    reset_modal_form();
-    save_method = 'add';
-	$('#modal_pegawai_form').modal('show');
-	$('#modal_title').text('Entry data Jenis Transaksi'); 
-}
-
 function editTransLain(id)
 {
     // alert('tes'); exit;
@@ -362,91 +410,7 @@ function reload_table()
     table.ajax.reload(null,false); //reload datatable ajax 
 }
 
-function save()
-{
-    var url;
-    var txtAksi;
 
-    if(save_method == 'add') {
-        url = base_url + 'master_item_trans/add_data_item_trans';
-        txtAksi = 'Tambah Item Transaksi';
-    }else{
-        url = base_url + 'master_item_trans/update_data_item_trans';
-        txtAksi = 'Edit Item Transaksi';
-    }
-    
-    var form = $('#form-pegawai')[0];
-    var data = new FormData(form);
-    
-    $("#btnSave").prop("disabled", true);
-    $('#btnSave').text('Menyimpan Data'); //change button text
-    swalConfirmDelete.fire({
-        title: 'Perhatian !!',
-        text: "Apakah anda yakin menambah data ini ?",
-        type: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Ya',
-        cancelButtonText: 'Tidak',
-        reverseButtons: true
-      }).then((result) => {
-        if (result.value) {
-            $.ajax({
-                type: "POST",
-                enctype: 'multipart/form-data',
-                url: url,
-                data: data,
-                dataType: "JSON",
-                processData: false, // false, it prevent jQuery form transforming the data into a query string
-                contentType: false, 
-                cache: false,
-                timeout: 600000,
-                success: function (data) {
-                    if(data.status) {
-                        swal.fire("Sukses!!", "Aksi "+txtAksi+" Berhasil", "success");
-                        $("#btnSave").prop("disabled", false);
-                        $('#btnSave').text('Simpan');
-                        
-                        reset_modal_form();
-                        $(".modal").modal('hide');
-                        
-                        reload_table();
-                    }else {
-                        for (var i = 0; i < data.inputerror.length; i++) 
-                        {
-                            if (data.inputerror[i] != 'jabatans') {
-                                $('[name="'+data.inputerror[i]+'"]').addClass('is-invalid');
-                                $('[name="'+data.inputerror[i]+'"]').next().text(data.error_string[i]).addClass('invalid-feedback'); //select span help-block class set text error string
-                            }else{
-                                $($('#jabatans').data('select2').$container).addClass('has-error');
-                            }
-                        }
-        
-                        $("#btnSave").prop("disabled", false);
-                        $('#btnSave').text('Simpan');
-                    }
-                },
-                error: function (e) {
-                    console.log("ERROR : ", e);
-                    $("#btnSave").prop("disabled", false);
-                    $('#btnSave').text('Simpan');
-        
-                    reset_modal_form();
-                    $(".modal").modal('hide');
-                }
-            });
-        } else if (
-          /* Read more about handling dismissals below */
-          result.dismiss === Swal.DismissReason.cancel
-        ) {
-          swalConfirm.fire(
-            'Dibatalkan',
-            'Aksi Dibatalakan',
-            'error'
-          )
-        }
-      })
-    
-}
 
 function delete_item_trans(id){
     swalConfirmDelete.fire({
