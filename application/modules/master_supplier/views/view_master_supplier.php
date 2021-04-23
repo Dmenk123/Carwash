@@ -31,17 +31,13 @@
       <div class="kt-portlet__body">
 
         <!--begin: Datatable -->
-        <table class="table table-striped- table-bordered table-hover table-checkable" id="tabel_member">
+        <table class="table table-striped- table-bordered table-hover table-checkable" id="tabel_supplier">
           <thead>
             <tr>
               <th style="width: 5%;">No</th>
-              <th>Kode Member</th>
-              <th>Nama Member</th>
-              <th>Alamat</th>
-              <th>Email</th>
-              <th>No. HP</th>
-              <th>Jenis Kelamin</th>
-              <th>Jumlah Cuci</th>
+              <th>Nama Supplier</th>
+              <th>Alamat Supplier</th>
+              <th>Telp</th>
               <th style="width: 5%;">Aksi</th>
             </tr>
           </thead>
