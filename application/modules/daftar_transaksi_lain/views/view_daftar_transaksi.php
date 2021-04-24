@@ -65,9 +65,7 @@
             <div class="col-md-12 row">
                 
                 <div class="col-12 btn-group btn-group">
-                  <button type="button" class="btn btn-primary btn-sm" onclick="filter_tabel()">Cari</button>
-                  <button type="button" class="btn btn-sm btn-success" onclick="ekspor_excel()">Eksport Excel</button>
-                  <button type="button" class="btn btn-sm btn-warning" onclick="cetak_data()">Cetak Data</button>
+                  <button type="button" class="btn btn-primary btn-md" onclick="filter_tabel()">Cari</button>
                 </div>
             
             </div>
@@ -86,7 +84,6 @@
               <th>Harga</th>
               <th>Bulan</th>
               <th>Tahun</th>
-              <th>Status</th>
               <th style="width: 5%;">Aksi</th>
             </tr>
           </thead>

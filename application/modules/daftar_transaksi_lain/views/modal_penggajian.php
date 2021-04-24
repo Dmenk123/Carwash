@@ -17,6 +17,8 @@
       
       <div class="modal-body">
         <form id="form_penggajian" name="form_penggajian">
+          <input type="hidden" class="form-control form-control-sm" id="id_trans_gaji" name="id_trans_gaji" value="">
+          <input type="hidden" class="form-control form-control-sm" id="id_jenis_gaji" name="id_jenis_gaji" value="">
           <div class="col-md-12">
             <div class="kt-portlet__body">
               <div class="form-group">       

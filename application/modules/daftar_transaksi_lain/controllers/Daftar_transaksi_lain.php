@@ -23,6 +23,26 @@ class Daftar_transaksi_lain extends CI_Controller {
 		$this->load->model('m_global');
 	}
 
+	public function cek_kunci_transaksi($date)
+	{
+		$obj_date = new DateTime();
+		$bulan_kunci = (int)$obj_date->createFromFormat('Y-m-d', $date)->format('m');
+		$tahun_kunci = (int)$obj_date->createFromFormat('Y-m-d', $date)->format('Y');
+		$cek = $this->m_global->single_row('*', ['deleted_at' => null, 'bulan' => $bulan_kunci, 'tahun' => $tahun_kunci], 't_log_kunci');
+
+		if($cek) {
+			$sts = true;
+		}else{
+			$sts = false;
+		}
+
+		return [
+			'status' => $sts,
+			'bulan_kunci' => $bulan_kunci,
+			'tahun_kunci' => $tahun_kunci
+		];
+	}
+
 	public function index()
 	{
 		$id_user = $this->session->userdata('id_user'); 
@@ -81,36 +101,8 @@ class Daftar_transaksi_lain extends CI_Controller {
 			$row[] = bulan_indo((int)$item->bulan_trans);
 			$row[] = $item->tahun_trans;
 
-			$status_kuncian = ($item->status_kunci == 'Terkunci') ? '<span style="color:green;">Terkunci</span>' : '<span style="color:red;">Terbuka</span>';
-			$row[] = $status_kuncian;
-			
-			// $str_aksi = '
-			// 	<div class="btn-group">
-			// 		<button type="button" class="btn btn-sm btn_1 dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Opsi</button>
-			// 		<div class="dropdown-menu">
-			// 			<button class="dropdown-item" onclick="detailPenjualan(\''.$item->id.'\')">
-			// 				<i class="la la-file"></i> Detail Penjualan
-			// 			</button>
-			// ';
-
-			// if($this->session->userdata('id_role') == '1') {
-			// 	$str_aksi .= '
-			// 		<button class="dropdown-item" onclick="toggleKunci(\''.$item->id.'\')">
-			// 			<i class="la la-lock"></i> Buka/Kunci
-			// 		</button>
-			// 		<button class="dropdown-item" onclick="deletePenjualan(\''.$item->id.'\')">
-			// 			<i class="la la-trash"></i> Hapus Penjualan
-			// 		</button>
-			// 	';
-			// }else{
-			// 	if($item->status_kunci == 'Terbuka') {
-			// 		$str_aksi .= '
-			// 			<button class="dropdown-item" onclick="editPenjualan(\''.$item->id.'\')">
-			// 				<i class="la la-pencil"></i> Edit Penjualan
-			// 			</button>
-			// 		';
-			// 	}
-			// }
+			// $status_kuncian = ($item->status_kunci == 'Terkunci') ? '<span style="color:green;">Terkunci</span>' : '<span style="color:red;">Terbuka</span>';
+			// $row[] = $status_kuncian;
 
 			$str_aksi = '
 				<div class="btn-group">
@@ -145,7 +137,7 @@ class Daftar_transaksi_lain extends CI_Controller {
 		echo json_encode($output);
 	}
 
-	function get_detail_transaksi() {
+	public function get_detail_transaksi() {
 		$id = $this->input->get('id');
 		$data = $this->t_transaksi->get_detail_transaksi($id);
 		$is_pembelian = ($data[0]->id_jenis_trans == self::ID_JENIS_PEMBELIAN) ? true : false;
@@ -234,18 +226,36 @@ class Daftar_transaksi_lain extends CI_Controller {
 	
 		$datanya = $this->m_global->single_row($select,$where,$table, $join);
 		if($datanya) {
+			#### cek kuncian laporan
+			$cek_kunci = $this->cek_kunci_transaksi($datanya->tgl_trans);
+			if($cek_kunci['status'] == true) {
+				$bulan_kunci = $cek_kunci['bulan_kunci'];
+				$tahun_kunci = $cek_kunci['tahun_kunci'];
+				$bln_txt = bulan_indo($bulan_kunci);
+				echo json_encode([ 
+					'data' => null,
+					'jenis_trans'	=> null,
+					'status' => false,
+					'pesan' => 'Maaf Laporan Bulan '.$bln_txt.' '.$tahun_kunci.' Telah Terkunci'
+				]);
+				return;
+			}
+
 			$status = true;
+			$pesan = null;
 			$jenis_trans =  $this->cek_jenis_trans($datanya->id_jenis_trans);
 		}else{
 			$datanya = null;
 			$jenis_trans = null;
 			$status = false;
+			$pesan = 'Maaf Data Tidak Ditemukan';
 		}
 		
 		$data = [ 
 			'data' => $datanya,
 			'jenis_trans'	=> $jenis_trans,
-			'status' => $status
+			'status' => $status,
+			'pesan' => $pesan
 		];
 		
 		echo json_encode($data);
@@ -389,185 +399,653 @@ class Daftar_transaksi_lain extends CI_Controller {
 			if ($this->db->trans_status() === FALSE){
 				$this->db->trans_rollback();
 				$retval['status'] = false;
-				$retval['pesan'] = 'Gagal Menambah Data';
+				$retval['pesan'] = 'Gagal Update Data';
 			}else{
 				$this->db->trans_commit();
 				$retval['status'] = true;
-				$retval['pesan'] = 'Sukses Menambah Data';
+				$retval['pesan'] = 'Sukses Update Data';
 			}
 	
 		}else{
 			$retval['status'] = false;
-			$retval['pesan'] = 'Gagal Menambah Data';
+			$retval['pesan'] = 'Gagal Update Data';
 		}
 		
 		echo json_encode($retval);
 	}
 
-	
+	#####################################################
 
-	/////////////////////////////
-	public function toggle_kunci()
+	private function rule_validasi_penggajian()
 	{
-		$id_trans = $this->input->post('id_trans');
-		$data_trans = $this->m_global->single_row('*', ['id' => $id_trans], 't_transaksi');
-		if($data_trans) {
-			$status = true;
-			if($data_trans->is_kunci == '1') {
-				$where = ['is_kunci' => '0'];
-				$pesan = 'Transaksi di Buka Kuncinya';
+		$data = array();
+		$data['error_string'] = array();
+		$data['inputerror'] = array();
+		$data['status'] = TRUE;
+
+		if ($this->input->post('item_gaji') == '') {
+			$data['inputerror'][] = 'item_gaji';
+			$data['error_string'][] = 'Wajib Mengisi Gaji';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = TRUE;
+		}
+
+		if ($this->input->post('tahun_gaji') == '') {
+			$data['inputerror'][] = 'tahun_gaji';
+			$data['error_string'][] = 'Wajib Mengisi Tahun Gaji';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = TRUE;
+		}
+
+		if ($this->input->post('bulan_gaji') == '') {
+			$data['inputerror'][] = 'bulan_gaji';
+			$data['error_string'][] = 'Wajib Mengisi Bulan Gaji';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = FALSE;
+		}
+
+		if ($this->input->post('harga_gaji') == '') {
+			$data['inputerror'][] = 'harga_gaji';
+			$data['error_string'][] = 'Wajib Mengisi Nilai Gaji Total';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = FALSE;
+		}
+			
+        return $data;
+	}
+
+	public function simpan_form_penggajian()
+	{
+		$data_log_arr = [];
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$datenow = $obj_date->format('Y-m-d');
+		$arr_valid = $this->rule_validasi_penggajian();
+		
+		if ($arr_valid['status'] == FALSE) {
+			echo json_encode($arr_valid);
+			return;
+		}
+
+		
+		$id_header = $this->input->post('id_trans_gaji');
+		$id_jenis = $this->input->post('id_jenis_gaji');
+		$item_gaji = $this->input->post('item_gaji');
+		$tahun = $this->input->post('tahun_gaji');
+		$bulan = $this->input->post('bulan_gaji');
+		$total_gaji = $this->input->post('harga_gaji_raw');
+	
+		$oldData = $this->m_global->single_row_array('*', ['id' => $id_header], 't_transaksi');
+		$oldDataDet = $this->m_global->single_row_array('*', ['id_transaksi' => $id_header], 't_transaksi_det');
+
+		if($oldData) {
+			$this->db->trans_begin();
+
+			###update
+			$data = [
+				'id_jenis_trans' => $id_jenis,
+				'bulan_trans' => $bulan,
+				'tahun_trans' => $tahun,
+				'tgl_trans' => $datenow,
+				'harga_total' => $total_gaji,
+				'id_user' => $this->session->userdata('id_user'),
+				'updated_at' => $timestamp
+			];
+
+			$update = $this->m_global->update('t_transaksi', $data, ['id' => $id_header]);
+			$data_log_arr_old[] = $oldData;
+			$data_log_arr_new[] = $data;
+
+			if($update){
+				$data_det = [
+					'id_item_trans' => $item_gaji,
+					'harga_satuan' => $total_gaji,
+					'qty' => 1,
+					'updated_at' => $timestamp
+				];
+							
+				$update_det = $this->m_global->update('t_transaksi_det', $data_det, ['id_transaksi' => $id_header]);
+				$data_log_arr_old[] = $oldDataDet;
+				$data_log_arr_new[] = $data_det;
+			}
+
+			$data_log_old = json_encode($data_log_arr_old);
+			$data_log_new = json_encode($data_log_arr_new);
+			$this->lib_fungsi->catat_log_aktifitas('UPDATE', $data_log_old, $data_log_new);
+
+			if ($this->db->trans_status() === FALSE){
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal Update Data';
 			}else{
-				$where = ['is_kunci' => '1'];
-				$pesan = 'Transaksi di Kunci';
+				$this->db->trans_commit();
+				$retval['status'] = true;
+				$retval['pesan'] = 'Sukses Update Data';
 			}
-
-			$update = $this->t_transaksi->update(['id' => $data_trans->id], $where);
-
-			if($update) {
-				echo json_encode(['status' => $status, 'pesan' => $pesan]);
-			}
+	
 		}else{
-			$status = false;
-			echo json_encode(['status' => $status, 'pesan' => 'Maaf Data tidak ditemukan, Proses Gagal']);
-		}
-	}
-	
-	public function add_data_item_trans()
-	{
-	
-		$this->load->library('Enkripsi');
-		$obj_date = new DateTime();
-		$timestamp = $obj_date->format('Y-m-d H:i:s');
-		$arr_valid = $this->rule_validasi();
-		
-		$id_jenis_trans = $this->input->post('id_jenis_trans');
-		$nama = $this->input->post('nama');
-		$harga_awal = $this->input->post('harga_awal');
-		$harga = $this->input->post('harga');
-		$keterangan    = $this->input->post('keterangan');
-
-		if ($arr_valid['status'] == FALSE) {
-			echo json_encode($arr_valid);
-			return;
-		}
-
-
-		$this->db->trans_begin();
-		
-		$data = [
-			'id_jenis_trans' => $id_jenis_trans,
-			'nama' => $nama,
-			'harga_awal' => $harga_awal,
-			'harga' => $harga,
-			'keterangan'         => $keterangan,
-			'created_at' 	=> $timestamp
-		];
-		
-		$insert = $this->m_item_trans->save($data);
-		
-		if ($this->db->trans_status() === FALSE){
-			$this->db->trans_rollback();
 			$retval['status'] = false;
-			$retval['pesan'] = 'Gagal menambahkan Data Item Transaksi';
-		}else{
-			$this->db->trans_commit();
-			$retval['status'] = true;
-			$retval['pesan'] = 'Sukses menambahkan Data Item Transaksi';
+			$retval['pesan'] = 'Gagal Update Data';
 		}
-
+		
 		echo json_encode($retval);
 	}
 
-	public function update_data_item_trans()
+	#####################################################
+
+	private function rule_validasi_investasi()
 	{
-		$id_user = $this->session->userdata('id_user'); 
-		$this->load->library('Enkripsi');
+		$data = array();
+		$data['error_string'] = array();
+		$data['inputerror'] = array();
+		$data['status'] = TRUE;
+
+		if ($this->input->post('item_inves') == '') {
+			$data['inputerror'][] = 'item_inves';
+			$data['error_string'][] = 'Wajib Mengisi Investasi';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = TRUE;
+		}
+
+		if ($this->input->post('tgl_inves') == '') {
+			$data['inputerror'][] = 'tgl_inves';
+			$data['error_string'][] = 'Wajib Mengisi Tanggal';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = FALSE;
+		}
+
+		if ($this->input->post('harga_inves') == '') {
+			$data['inputerror'][] = 'harga_inves';
+			$data['error_string'][] = 'Wajib Mengisi Nilai Investasi';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = FALSE;
+		}
+			
+        return $data;
+	}
+
+	public function simpan_form_investasi()
+	{
+		$data_log_arr = [];
 		$obj_date = new DateTime();
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
-		$arr_valid = $this->rule_validasi(true);
-
+		$datenow = $obj_date->format('Y-m-d');
+		$arr_valid = $this->rule_validasi_investasi();
+		
 		if ($arr_valid['status'] == FALSE) {
 			echo json_encode($arr_valid);
 			return;
 		}
 
-		$id_jenis_trans = $this->input->post('id_jenis_trans');
-		$nama = $this->input->post('nama');
-		$harga_awal = $this->input->post('harga_awal');
-		$harga = $this->input->post('harga');
-		$keterangan    = $this->input->post('keterangan');
-
-		$this->db->trans_begin();
 		
-		$data = [
-			'id_jenis_trans' => $id_jenis_trans,
-			'nama' => $nama,
-			'harga_awal' => $harga_awal,
-			'harga' => $harga,
-			'keterangan'         => $keterangan,
-			'updated_at' 	=> $timestamp
-		];
+		$id_header = $this->input->post('id_trans_inves');
+		$id_jenis = $this->input->post('id_jenis_inves');
+		$item_inves = $this->input->post('item_inves');
+		$tanggal = $obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_inves'))->format('Y-m-d');
+		$tahun = (int)$obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_inves'))->format('Y');
+		$bulan = (int)$obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_inves'))->format('m');
 
-		$where = ['id' => $this->input->post('id')];
-		$update = $this->m_item_trans->update($where, $data);
-				
-		if ($this->db->trans_status() === FALSE){
-			$this->db->trans_rollback();
-			$data['status'] = false;
-			$data['pesan'] = 'Gagal update Master Item Transaksi';
+		$total_inves = $this->input->post('harga_inves_raw');
+
+		$oldData = $this->m_global->single_row_array('*', ['id' => $id_header], 't_transaksi');
+		$oldDataDet = $this->m_global->single_row_array('*', ['id_transaksi' => $id_header], 't_transaksi_det');
+
+		if($oldData) {
+			$this->db->trans_begin();
+
+			###update
+			$data = [
+				'id_jenis_trans' => $id_jenis,
+				'bulan_trans' => $bulan,
+				'tahun_trans' => $tahun,
+				'tgl_trans' => $tanggal,
+				'harga_total' => $total_inves,
+				'id_user' => $this->session->userdata('id_user'),
+				'updated_at' => $timestamp
+			];
+
+			$update = $this->m_global->update('t_transaksi', $data, ['id' => $id_header]);
+			$data_log_arr_old[] = $oldData;
+			$data_log_arr_new[] = $data;
+
+			if($update){
+				$data_det = [
+					'id_item_trans' => $item_inves,
+					'harga_satuan' => $total_inves,
+					'qty' => 1,
+					'updated_at' => $timestamp
+				];
+							
+				$update_det = $this->m_global->update('t_transaksi_det', $data_det, ['id_transaksi' => $id_header]);
+				$data_log_arr_old[] = $oldDataDet;
+				$data_log_arr_new[] = $data_det;
+			}
+
+			$data_log_old = json_encode($data_log_arr_old);
+			$data_log_new = json_encode($data_log_arr_new);
+			$this->lib_fungsi->catat_log_aktifitas('UPDATE', $data_log_old, $data_log_new);
+
+			if ($this->db->trans_status() === FALSE){
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal Update Data';
+			}else{
+				$this->db->trans_commit();
+				$retval['status'] = true;
+				$retval['pesan'] = 'Sukses Update Data';
+			}
+	
 		}else{
-			$this->db->trans_commit();
-			$data['status'] = true;
-			$data['pesan'] = 'Sukses update Master Item Transaksi';
+			$retval['status'] = false;
+			$retval['pesan'] = 'Gagal Update Data';
 		}
 		
-		echo json_encode($data);
+		echo json_encode($retval);
 	}
+
+	#####################################################
+
+	private function rule_validasi_operasional()
+	{
+		$data = array();
+		$data['error_string'] = array();
+		$data['inputerror'] = array();
+		$data['status'] = TRUE;
+
+		if ($this->input->post('item_op') == '') {
+			$data['inputerror'][] = 'item_op';
+			$data['error_string'][] = 'Wajib Memilih Operasional';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = TRUE;
+		}
+
+		if ($this->input->post('tgl_op') == '') {
+			$data['inputerror'][] = 'tgl_op';
+			$data['error_string'][] = 'Wajib Mengisi Tanggal';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = TRUE;
+		}
+
+		if ($this->input->post('harga_op') == '') {
+			$data['inputerror'][] = 'harga_op';
+			$data['error_string'][] = 'Wajib Mengisi Nilai';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = FALSE;
+		}
+			
+        return $data;
+	}
+
+	public function simpan_form_operasional()
+	{
+		$data_log_arr = [];
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$datenow = $obj_date->format('Y-m-d');
+		$arr_valid = $this->rule_validasi_operasional();
+		
+		if ($arr_valid['status'] == FALSE) {
+			echo json_encode($arr_valid);
+			return;
+		}
+
+		
+		$id_header = $this->input->post('id_trans_op');
+		$id_jenis = $this->input->post('id_jenis_op');
+		$item_inves = $this->input->post('item_inves');
+		$tanggal = $obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_op'))->format('Y-m-d');
+		$tahun = (int)$obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_op'))->format('Y');
+		$bulan = (int)$obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_op'))->format('m');
+
+		$total_op = $this->input->post('harga_op_raw');
+
+		$oldData = $this->m_global->single_row_array('*', ['id' => $id_header], 't_transaksi');
+		$oldDataDet = $this->m_global->single_row_array('*', ['id_transaksi' => $id_header], 't_transaksi_det');
+
+		if($oldData) {
+			$this->db->trans_begin();
+
+			###update
+			$data = [
+				'id_jenis_trans' => $id_jenis,
+				'bulan_trans' => $bulan,
+				'tahun_trans' => $tahun,
+				'tgl_trans' => $tanggal,
+				'harga_total' => $total_op,
+				'id_user' => $this->session->userdata('id_user'),
+				'updated_at' => $timestamp
+			];
+
+			$update = $this->m_global->update('t_transaksi', $data, ['id' => $id_header]);
+			$data_log_arr_old[] = $oldData;
+			$data_log_arr_new[] = $data;
+
+			if($update){
+				$data_det = [
+					'id_item_trans' => $item_inves,
+					'harga_satuan' => $total_op,
+					'qty' => 1,
+					'updated_at' => $timestamp
+				];
+							
+				$update_det = $this->m_global->update('t_transaksi_det', $data_det, ['id_transaksi' => $id_header]);
+				$data_log_arr_old[] = $oldDataDet;
+				$data_log_arr_new[] = $data_det;
+			}
+
+			$data_log_old = json_encode($data_log_arr_old);
+			$data_log_new = json_encode($data_log_arr_new);
+			$this->lib_fungsi->catat_log_aktifitas('UPDATE', $data_log_old, $data_log_new);
+
+			if ($this->db->trans_status() === FALSE){
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal Update Data';
+			}else{
+				$this->db->trans_commit();
+				$retval['status'] = true;
+				$retval['pesan'] = 'Sukses Update Data';
+			}
+	
+		}else{
+			$retval['status'] = false;
+			$retval['pesan'] = 'Gagal Update Data';
+		}
+		
+		echo json_encode($retval);
+	}
+
+	#####################################################
+
+	private function rule_validasi_pengeluaran_lain()
+	{
+		$data = array();
+		$data['error_string'] = array();
+		$data['inputerror'] = array();
+		$data['status'] = TRUE;
+
+		if ($this->input->post('item_out') == '') {
+			$data['inputerror'][] = 'item_out';
+			$data['error_string'][] = 'Wajib Memilih Pengeluaran';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = TRUE;
+		}
+
+		if ($this->input->post('tgl_out') == '') {
+			$data['inputerror'][] = 'tgl_out';
+			$data['error_string'][] = 'Wajib Mengisi Tanggal';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = TRUE;
+		}
+
+		if ($this->input->post('qty_out') == '') {
+			$data['inputerror'][] = 'qty_out';
+			$data['error_string'][] = 'Wajib Mengisi Qty';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = TRUE;
+		}
+
+		if ($this->input->post('harga_out') == '') {
+			$data['inputerror'][] = 'harga_out';
+			$data['error_string'][] = 'Wajib Mengisi Nilai';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = FALSE;
+		}
+			
+        return $data;
+	}
+
+	public function simpan_form_out_lain()
+	{
+		$data_log_arr = [];
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$datenow = $obj_date->format('Y-m-d');
+		$arr_valid = $this->rule_validasi_pengeluaran_lain();
+		
+		if ($arr_valid['status'] == FALSE) {
+			echo json_encode($arr_valid);
+			return;
+		}
+
+		$id_header = $this->input->post('id_trans_out');
+		$id_jenis = $this->input->post('id_jenis_out');
+		$item_out = $this->input->post('item_out');
+		$tanggal = $obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_out'))->format('Y-m-d');
+		$tahun = (int)$obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_out'))->format('Y');
+		$bulan = (int)$obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_out'))->format('m');
+
+		$qty = $this->input->post('qty_out');
+		$harga_out = $this->input->post('harga_out_raw');
+		$total_out = $this->input->post('hargatot_out_raw');
+
+		$oldData = $this->m_global->single_row_array('*', ['id' => $id_header], 't_transaksi');
+		$oldDataDet = $this->m_global->single_row_array('*', ['id_transaksi' => $id_header], 't_transaksi_det');
+
+		if($oldData) {
+			$this->db->trans_begin();
+
+			###update
+			$data = [
+				'id_jenis_trans' => $id_jenis,
+				'bulan_trans' => $bulan,
+				'tahun_trans' => $tahun,
+				'tgl_trans' => $tanggal,
+				'harga_total' => $total_out,
+				'id_user' => $this->session->userdata('id_user'),
+				'updated_at' => $timestamp
+			];
+
+			$update = $this->m_global->update('t_transaksi', $data, ['id' => $id_header]);
+			$data_log_arr_old[] = $oldData;
+			$data_log_arr_new[] = $data;
+
+			if($update){
+				$data_det = [
+					'id_item_trans' => $item_out,
+					'harga_satuan' => $harga_out,
+					'qty' => $qty,
+					'updated_at' => $timestamp
+				];
+							
+				$update_det = $this->m_global->update('t_transaksi_det', $data_det, ['id_transaksi' => $id_header]);
+				$data_log_arr_old[] = $oldDataDet;
+				$data_log_arr_new[] = $data_det;
+			}
+
+			$data_log_old = json_encode($data_log_arr_old);
+			$data_log_new = json_encode($data_log_arr_new);
+			$this->lib_fungsi->catat_log_aktifitas('UPDATE', $data_log_old, $data_log_new);
+
+			if ($this->db->trans_status() === FALSE){
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal Update Data';
+			}else{
+				$this->db->trans_commit();
+				$retval['status'] = true;
+				$retval['pesan'] = 'Sukses Update Data';
+			}
+	
+		}else{
+			$retval['status'] = false;
+			$retval['pesan'] = 'Gagal Update Data';
+		}
+		
+		echo json_encode($retval);
+	}
+
+	#####################################################
+
+	private function rule_validasi_penerimaan_lain()
+	{
+		$data = array();
+		$data['error_string'] = array();
+		$data['inputerror'] = array();
+		$data['status'] = TRUE;
+
+		if ($this->input->post('item_in') == '') {
+			$data['inputerror'][] = 'item_in';
+			$data['error_string'][] = 'Wajib Memilih Penerimaan';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = TRUE;
+		}
+
+		if ($this->input->post('tgl_in') == '') {
+			$data['inputerror'][] = 'tgl_in';
+			$data['error_string'][] = 'Wajib Mengisi Tanggal';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = TRUE;
+		}
+
+		if ($this->input->post('qty_in') == '') {
+			$data['inputerror'][] = 'qty_in';
+			$data['error_string'][] = 'Wajib Mengisi Qty';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = TRUE;
+		}
+
+		if ($this->input->post('harga_in') == '') {
+			$data['inputerror'][] = 'harga_in';
+			$data['error_string'][] = 'Wajib Mengisi Nilai';
+			$data['status'] = FALSE;
+			$data['is_select2'][] = FALSE;
+		}
+			
+        return $data;
+	}
+
+	public function simpan_form_in_lain()
+	{
+		$data_log_arr = [];
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$datenow = $obj_date->format('Y-m-d');
+		$arr_valid = $this->rule_validasi_penerimaan_lain();
+		
+		if ($arr_valid['status'] == FALSE) {
+			echo json_encode($arr_valid);
+			return;
+		}
+
+		$id_header = $this->input->post('id_trans_in');
+		$id_jenis = $this->input->post('id_jenis_in');
+		$item_in = $this->input->post('item_in');
+		$tanggal = $obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_in'))->format('Y-m-d');
+		$tahun = (int)$obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_in'))->format('Y');
+		$bulan = (int)$obj_date->createFromFormat('d/m/Y', $this->input->post('tgl_in'))->format('m');
+
+		$qty = $this->input->post('qty_in');
+		$harga_in = $this->input->post('harga_in_raw');
+		$total_in = $this->input->post('hargatot_in_raw');
+
+		$oldData = $this->m_global->single_row_array('*', ['id' => $id_header], 't_transaksi');
+		$oldDataDet = $this->m_global->single_row_array('*', ['id_transaksi' => $id_header], 't_transaksi_det');
+
+		if($oldData) {
+			$this->db->trans_begin();
+
+			###update
+			$data = [
+				'id_jenis_trans' => $id_jenis,
+				'bulan_trans' => $bulan,
+				'tahun_trans' => $tahun,
+				'tgl_trans' => $tanggal,
+				'harga_total' => $total_in,
+				'id_user' => $this->session->userdata('id_user'),
+				'updated_at' => $timestamp
+			];
+
+			$update = $this->m_global->update('t_transaksi', $data, ['id' => $id_header]);
+			$data_log_arr_old[] = $oldData;
+			$data_log_arr_new[] = $data;
+
+			if($update){
+				$data_det = [
+					'id_item_trans' => $item_in,
+					'harga_satuan' => $harga_in,
+					'qty' => $qty,
+					'updated_at' => $timestamp
+				];
+							
+				$update_det = $this->m_global->update('t_transaksi_det', $data_det, ['id_transaksi' => $id_header]);
+				$data_log_arr_old[] = $oldDataDet;
+				$data_log_arr_new[] = $data_det;
+			}
+
+			$data_log_old = json_encode($data_log_arr_old);
+			$data_log_new = json_encode($data_log_arr_new);
+			$this->lib_fungsi->catat_log_aktifitas('UPDATE', $data_log_old, $data_log_new);
+
+			if ($this->db->trans_status() === FALSE){
+				$this->db->trans_rollback();
+				$retval['status'] = false;
+				$retval['pesan'] = 'Gagal Update Data';
+			}else{
+				$this->db->trans_commit();
+				$retval['status'] = true;
+				$retval['pesan'] = 'Sukses Update Data';
+			}
+	
+		}else{
+			$retval['status'] = false;
+			$retval['pesan'] = 'Gagal Update Data';
+		}
+		
+		echo json_encode($retval);
+	}
+
+	######################################################
 
 	/**
 	 * Hanya melakukan softdelete saja
 	 * isi kolom updated_at dengan datetime now()
 	 */
-	public function delete_item_trans()
+
+	public function delete_item_trans_lain()
 	{
 		$id = $this->input->post('id');
-		$del = $this->m_item_trans->softdelete_by_id($id);
-		if($del) {
-			$retval['status'] = TRUE;
-			$retval['pesan'] = 'Data Master Item Transaksi Berhasil dihapus';
+		$this->db->trans_begin();
+		$old_data_header = $this->t_transaksi->get_by_condition(['id' => $id, 'deleted_at' => null]);
+		$old_data = $this->t_transaksi_det->get_by_condition(['id_transaksi' => $id, 'deleted_at' => null]);
+		
+		#### cek kuncian laporan
+		$cek_kunci = $this->cek_kunci_transaksi($old_data_header[0]->tgl_trans);
+		if($cek_kunci['status'] == true) {
+			$bulan_kunci = $cek_kunci['bulan_kunci'];
+			$tahun_kunci = $cek_kunci['tahun_kunci'];
+			$bln_txt = bulan_indo($bulan_kunci);
+			echo json_encode([ 
+				'data' => null,
+				'jenis_trans'	=> null,
+				'status' => false,
+				'pesan' => 'Maaf Laporan Bulan '.$bln_txt.' '.$tahun_kunci.' Telah Terkunci'
+			]);
+			return;
+		}
+
+		$del_1 = $this->t_transaksi_det->softdelete_by_trans($id);
+		$del_2 = $this->t_transaksi->softdelete_by_id($id);
+
+		$data_log = json_encode($old_data);
+		$this->lib_fungsi->catat_log_aktifitas('DELETE', $data_log, null);
+
+		if ($this->db->trans_status() === FALSE){
+			$this->db->trans_rollback();
+			$retval['status'] = false;
+			$retval['pesan'] = 'Gagal Menghapus Data';
 		}else{
-			$retval['status'] = FALSE;
-			$retval['pesan'] = 'Data Master Item Transaksi Gagal dihapus';
+			$this->db->trans_commit();
+			$retval['status'] = true;
+			$retval['pesan'] = 'Sukses Menghapus Data';
 		}
 
 		echo json_encode($retval);
 	}
+		
+	
+	
 
-	public function edit_status_pegawai()
-	{
-		$input_status = $this->input->post('status');
-		// jika aktif maka di set ke nonaktif / "0"
-		$status = ($input_status == "aktif") ? $status = 0 : $status = 1;
-			
-		$input = ['is_aktif' => $status];
-
-		$where = ['id' => $this->input->post('id')];
-
-		$this->m_pegawai->update($where, $input);
-
-		if ($this->db->affected_rows() == '1') {
-			$data = array(
-				'status' => TRUE,
-				'pesan' => "Status Pegawai berhasil di ubah.",
-			);
-		}else{
-			$data = array(
-				'status' => FALSE
-			);
-		}
-
-		echo json_encode($data);
-	}
 
 	public function import_excel()
 	{

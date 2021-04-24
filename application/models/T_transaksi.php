@@ -71,11 +71,11 @@ class T_transaksi extends CI_Model
 	###################################### datatable penjualan
 	protected $column_search_p = ['t_transaksi.kode','t_transaksi.created_at','jenis_member','m_user.nama','t_transaksi.harga_total', 't_transaksi.harga_bayar', 't_transaksi.harga_kembalian','status_kunci'];
 
-	protected $column_search_tl = ['t_transaksi.created_at','m_jenis_trans.nama_jenis','m_user.nama','t_transaksi.harga_total', 't_transaksi.bulan_trans', 't_transaksi.tahun_trans','status_kunci'];
+	protected $column_search_tl = ['t_transaksi.created_at','m_jenis_trans.nama_jenis','m_user.nama','t_transaksi.harga_total', 't_transaksi.bulan_trans', 't_transaksi.tahun_trans'];
 
 	protected $column_order_p = ['t_transaksi.kode','t_transaksi.created_at','jenis_member','m_user.nama','t_transaksi.harga_total', 't_transaksi.harga_bayar', 't_transaksi.harga_kembalian', 'status_kunci',null];
 
-	protected $column_order_tl = ['t_transaksi.created_at','m_jenis_trans.nama_jenis','m_user.nama','t_transaksi.harga_total', 't_transaksi.bulan_trans', 't_transaksi.tahun_trans', 'status_kunci',null];
+	protected $column_order_tl = ['t_transaksi.created_at','m_jenis_trans.nama_jenis','m_user.nama','t_transaksi.harga_total', 't_transaksi.bulan_trans', 't_transaksi.tahun_trans',null];
 
 	protected $order_p = ['t_transaksi.kode' => 'desc']; 
 

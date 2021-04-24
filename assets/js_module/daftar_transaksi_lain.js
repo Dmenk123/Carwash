@@ -1,6 +1,15 @@
 var save_method;
 var table;
 
+$(document).ready(function() {
+    filter_tabel();
+
+    //force integer input in textfield
+    $('input.numberinput').bind('keypress', function (e) {
+        return (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57) && e.which != 46) ? false : true;
+    });
+});
+
 const formatRupiah = new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
@@ -52,6 +61,7 @@ const save = (id_form) => {
                     text: data.pesan, 
                     type: "success"
                 }).then(function() {
+                    $(".modal").modal('hide');
                     filter_tabel();
                 });
                 // swal.fire("Sukses!!", data.pesan, "success");     
@@ -126,6 +136,59 @@ const hitungTotalBeli = () => {
     // set raw value
     $('#harga_beli_raw').val(hargaFix);
     $('#hargatot_beli_raw').val(totalFix);
+}
+
+const hitungTotalGaji = () => {
+    let harga = $('#harga_gaji').inputmask('unmaskedvalue');
+    harga = harga.replace(",", ".");
+    hargaFix = parseFloat(harga).toFixed(2);
+    $('#harga_gaji_raw').val(hargaFix);
+}
+
+const hitungTotalInvestasi = () => {
+    let harga = $('#harga_inves').inputmask('unmaskedvalue');
+    harga = harga.replace(",", ".");
+    hargaFix = parseFloat(harga).toFixed(2);
+    $('#harga_inves_raw').val(hargaFix);
+}
+
+const hitungTotalOperasional = () => {
+    let harga = $('#harga_op').inputmask('unmaskedvalue');
+    harga = harga.replace(",", ".");
+    hargaFix = parseFloat(harga).toFixed(2);
+    $('#harga_op_raw').val(hargaFix);
+}
+
+const hitungTotalOut = () => {
+    let harga = $('#harga_out').inputmask('unmaskedvalue');
+    let qty = $('#qty_out').inputmask('unmaskedvalue');
+    
+    harga = harga.replace(",", ".");
+    hargaFix = parseFloat(harga).toFixed(2);
+    
+    let total = hargaFix * qty;
+    let totalFix = Number(total).toFixed(2);
+    $('#hargatot_out').val(formatMoney(Number(totalFix)));
+
+    // set raw value
+    $('#harga_out_raw').val(hargaFix);
+    $('#hargatot_out_raw').val(totalFix);
+}
+
+const hitungTotalIn = () => {
+    let harga = $('#harga_in').inputmask('unmaskedvalue');
+    let qty = $('#qty_in').inputmask('unmaskedvalue');
+    
+    harga = harga.replace(",", ".");
+    hargaFix = parseFloat(harga).toFixed(2);
+    
+    let total = hargaFix * qty;
+    let totalFix = Number(total).toFixed(2);
+    $('#hargatot_in').val(formatMoney(Number(totalFix)));
+
+    // set raw value
+    $('#harga_in_raw').val(hargaFix);
+    $('#hargatot_in_raw').val(totalFix);
 }
 
 const loadModalPembelian = (dataTrans) => {
@@ -214,65 +277,321 @@ const loadModalPembelian = (dataTrans) => {
     hitungTotalBeli();
     $('#div-pembelian-modal').modal('show');
 }
-  
-$(document).ready(function() {
-    filter_tabel();
 
-    //force integer input in textfield
-    $('input.numberinput').bind('keypress', function (e) {
-        return (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57) && e.which != 46) ? false : true;
-    });
-
-    //change menu status
-    $(document).on('click', '.btn_edit_status', function(){
-        var id = $(this).attr('id');
-        var status = $(this).val();
-        swalConfirmDelete.fire({
-            title: 'Ubah Status Data Pegawai ?',
-            text: "Apakah Anda Yakin ?",
-            type: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Ya, Ubah Status!',
-            cancelButtonText: 'Tidak, Batalkan!',
-            reverseButtons: true
-          }).then((result) => {
-            if (result.value) {
-                $.ajax({
-                    url : base_url + 'master_pegawai/edit_status_pegawai',
-                    type: "POST",
-                    dataType: "JSON",
-                    data : {status : status, id : id},
-                    success: function(data)
-                    {
-                        swalConfirm.fire('Berhasil Ubah Status Pegawai!', data.pesan, 'success');
-                        table.ajax.reload();
-                    },
-                    error: function (jqXHR, textStatus, errorThrown)
-                    {
-                        Swal.fire('Terjadi Kesalahan');
+const loadModalPenggajian = (dataTrans) => {
+    (() => {
+        $("#item_gaji").select2({
+            // tags: true,
+            //multiple: false,
+            tokenSeparators: [',', ' '],
+            minimumInputLength: 0,
+            minimumResultsForSearch: 5,
+            ajax: {
+                url: base_url+'master_item_trans/get_select_penggajian',
+                dataType: "json",
+                type: "GET",
+                data: function (params) {
+    
+                    var queryParameters = {
+                        term: params.term
                     }
-                });
-            } else if (
-              /* Read more about handling dismissals below */
-              result.dismiss === Swal.DismissReason.cancel
-            ) {
-              swalConfirm.fire(
-                'Dibatalkan',
-                'Aksi Dibatalakan',
-                'error'
-              )
+                    return queryParameters;
+                },
+                processResults: function (data) {
+                    return {
+                        results: $.map(data, function (item) {
+                            return {
+                                text: item.text,
+                                id: item.id,
+                                harga: item.harga
+                            }
+                        })
+                    };
+                }
             }
         });
+
+    })();
+
+    $('#item_gaji').on('select2:selecting', function(e) {
+        let data = e.params.args.data;
+        let hargaFix = Number(data.harga).toFixed(2);
+        $('#harga_gaji').val(formatMoney(Number(hargaFix)));
+        $('#harga_gaji_raw').val(hargaFix);
     });
 
-    $(".modal").on("hidden.bs.modal", function(){
-        reset_modal_form();
-        reset_modal_form_import();
+    $('#id_trans_gaji').val(dataTrans.id);
+    $('#id_jenis_gaji').val(dataTrans.id_jenis_trans);
+
+    // $('#tgl_beli').val(formatTanggalCustom(dataTrans.tgl_trans, 'DD/MM/YYYY'));
+    $("#bulan_gaji").val(dataTrans.bulan_trans).trigger('change');
+    $("#tahun_gaji").val(dataTrans.tahun_trans).trigger('change');
+    
+    $("#item_gaji").append(() => {
+        return $("<option selected='selected'></option>").val(dataTrans.id_item_trans).text(dataTrans.nama_item);
+    }).trigger('change');    
+
+    $('#harga_gaji').val(formatMoney(Number(Number(dataTrans.harga_satuan).toFixed(2))));
+    hitungTotalGaji();
+    $('#div-penggajian-modal').modal('show');
+}
+
+const loadModalInvestasi = (dataTrans) => {
+    (() => {
+        $("#item_inves").select2({
+            // tags: true,
+            //multiple: false,
+            tokenSeparators: [',', ' '],
+            minimumInputLength: 0,
+            minimumResultsForSearch: 5,
+            ajax: {
+                url: base_url+'master_item_trans/get_select_investasi',
+                dataType: "json",
+                type: "GET",
+                data: function (params) {
+    
+                    var queryParameters = {
+                        term: params.term
+                    }
+                    return queryParameters;
+                },
+                processResults: function (data) {
+                    return {
+                        results: $.map(data, function (item) {
+                            return {
+                                text: item.text,
+                                id: item.id,
+                                harga: item.harga
+                            }
+                        })
+                    };
+                }
+            }
+        });
+    })();
+
+    $('#item_inves').on('select2:selecting', function(e) {
+        let data = e.params.args.data;
+        let hargaFix = Number(data.harga).toFixed(2);
+        $('#harga_inves').val(formatMoney(Number(hargaFix)));
+        $('#harga_inves_raw').val(hargaFix);
     });
-});	
 
+    $('#tgl_inves').val(formatTanggalCustom(dataTrans.tgl_trans, 'DD/MM/YYYY'));
+     
+    $("#item_inves").append(() => {
+        return $("<option selected='selected'></option>").val(dataTrans.id_item_trans).text(dataTrans.nama_item);
+    }).trigger('change');    
 
-function detailTransLain(id) {
+    $('#id_trans_inves').val(dataTrans.id);
+    $('#id_jenis_inves').val(dataTrans.id_jenis_trans);
+    $('#harga_inves').val(formatMoney(Number(Number(dataTrans.harga_satuan).toFixed(2))));
+    hitungTotalInvestasi();
+    $('#div-investasi-modal').modal('show');
+}
+
+const loadModalOperasional = (dataTrans) => {
+    (() => {
+        $("#item_op").select2({
+            tokenSeparators: [',', ' '],
+            minimumInputLength: 0,
+            minimumResultsForSearch: 5,
+            ajax: {
+                url: base_url+'master_item_trans/get_select_operasional',
+                dataType: "json",
+                type: "GET",
+                data: function (params) {
+    
+                    var queryParameters = {
+                        term: params.term
+                    }
+                    return queryParameters;
+                },
+                processResults: function (data) {
+                    return {
+                        results: $.map(data, function (item) {
+                            return {
+                                text: item.text,
+                                id: item.id,
+                                harga: item.harga
+                            }
+                        })
+                    };
+                }
+            }
+        });
+    })();
+
+    $('#item_op').on('select2:selecting', function(e) {
+        let data = e.params.args.data;
+        let hargaFix = Number(data.harga).toFixed(2);
+        $('#harga_op').val(formatMoney(Number(hargaFix)));
+        $('#harga_op_raw').val(hargaFix);
+    });
+
+    $('#tgl_op').val(formatTanggalCustom(dataTrans.tgl_trans, 'DD/MM/YYYY'));
+     
+    $("#item_op").append(() => {
+        return $("<option selected='selected'></option>").val(dataTrans.id_item_trans).text(dataTrans.nama_item);
+    }).trigger('change');    
+
+    $('#id_trans_op').val(dataTrans.id);
+    $('#id_jenis_op').val(dataTrans.id_jenis_trans);
+    $('#harga_op').val(formatMoney(Number(Number(dataTrans.harga_satuan).toFixed(2))));
+    hitungTotalOperasional();
+    $('#div-operasional-modal').modal('show');
+}
+
+const loadModalPengeluaranLain = (dataTrans) => {
+    (() => {
+        $("#item_out").select2({
+            // tags: true,
+            //multiple: false,
+            tokenSeparators: [',', ' '],
+            minimumInputLength: 0,
+            minimumResultsForSearch: 5,
+            ajax: {
+                url: base_url+'master_item_trans/get_select_pengeluaran_lain',
+                dataType: "json",
+                type: "GET",
+                data: function (params) {
+    
+                    var queryParameters = {
+                        term: params.term
+                    }
+                    return queryParameters;
+                },
+                processResults: function (data) {
+                    return {
+                        results: $.map(data, function (item) {
+                            return {
+                                text: item.text,
+                                id: item.id,
+                                harga: item.harga
+                            }
+                        })
+                    };
+                }
+            }
+        });
+    })();
+
+    $('#item_out').on('select2:selecting', function(e) {
+        let data = e.params.args.data;
+        let hargaFix = Number(data.harga).toFixed(2);
+        $('#harga_out').val(formatMoney(Number(hargaFix)));
+        $('#harga_out_raw').val(hargaFix);
+    }); 
+
+    $('#tgl_out').val(formatTanggalCustom(dataTrans.tgl_trans, 'DD/MM/YYYY'));
+     
+    $("#item_out").append(() => {
+        return $("<option selected='selected'></option>").val(dataTrans.id_item_trans).text(dataTrans.nama_item);
+    }).trigger('change');    
+
+    $('#id_trans_out').val(dataTrans.id);
+    $('#id_jenis_out').val(dataTrans.id_jenis_trans);
+    $('#qty_out').val(Number(dataTrans.qty));
+    $('#harga_out').val(formatMoney(Number(Number(dataTrans.harga_satuan).toFixed(2))));
+    hitungTotalOut();
+    $('#div-pengeluaran-lain-lain-modal').modal('show');
+}
+
+const loadModalPenerimaanLain = (dataTrans) => {
+    (() => {
+        $("#item_in").select2({
+            // tags: true,
+            //multiple: false,
+            tokenSeparators: [',', ' '],
+            minimumInputLength: 0,
+            minimumResultsForSearch: 5,
+            ajax: {
+                url: base_url+'master_item_trans/get_select_penerimaan_lain',
+                dataType: "json",
+                type: "GET",
+                data: function (params) {
+    
+                    var queryParameters = {
+                        term: params.term
+                    }
+                    return queryParameters;
+                },
+                processResults: function (data) {
+                    return {
+                        results: $.map(data, function (item) {
+                            return {
+                                text: item.text,
+                                id: item.id,
+                                harga: item.harga
+                            }
+                        })
+                    };
+                }
+            }
+        });
+    })();
+
+    $('#item_in').on('select2:selecting', function(e) {
+        let data = e.params.args.data;
+        let hargaFix = Number(data.harga).toFixed(2);
+        $('#harga_in').val(formatMoney(Number(hargaFix)));
+        $('#harga_in_raw').val(hargaFix);
+    }); 
+
+    $('#tgl_in').val(formatTanggalCustom(dataTrans.tgl_trans, 'DD/MM/YYYY'));
+     
+    $("#item_in").append(() => {
+        return $("<option selected='selected'></option>").val(dataTrans.id_item_trans).text(dataTrans.nama_item);
+    }).trigger('change');    
+
+    $('#id_trans_in').val(dataTrans.id);
+    $('#id_jenis_in').val(dataTrans.id_jenis_trans);
+    $('#qty_in').val(Number(dataTrans.qty));
+    $('#harga_in').val(formatMoney(Number(Number(dataTrans.harga_satuan).toFixed(2))));
+    hitungTotalIn();
+    $('#div-penerimaan-lain-lain-modal').modal('show');
+}
+
+const editTransLain = (id) =>
+{
+    save_method = 'update';
+    $.ajax({
+        url : base_url + 'daftar_transaksi_lain/edit_data',
+        type: "POST",
+        dataType: "JSON",
+        data : {id:id},
+        success: function(response)
+        {
+            if(response.status) {
+                if(response.jenis_trans == 'pembelian') {
+                    loadModalPembelian(response.data);
+                }else if(response.jenis_trans == 'penggajian'){
+                    loadModalPenggajian(response.data);
+                }else if(response.jenis_trans == 'investasi'){
+                    loadModalInvestasi(response.data);
+                }else if(response.jenis_trans == 'operasional'){
+                    loadModalOperasional(response.data);
+                }else if(response.jenis_trans == 'out_lain'){
+                    loadModalPengeluaranLain(response.data);
+                }else if(response.jenis_trans == 'in_lain'){
+                    loadModalPenerimaanLain(response.data);
+                }
+            }else{
+                swalConfirm.fire(
+                    'Error',
+                    response.pesan,
+                    'error'
+                );
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown)
+        {
+            alert('Error get data from ajax');
+        }
+    });
+}
+
+const detailTransLain = (id) => {
     $.ajax({
         url : base_url + 'daftar_transaksi_lain/get_detail_transaksi',
         type: "GET",
@@ -300,48 +619,33 @@ function detailTransLain(id) {
     });
 }
 
-function printStruk(id_trans) 
-{
-    $.ajax({
-        type: "get",
-        url:  base_url+"penjualan/cetak_struk/"+id_trans,
-        dataType: "json",
-        // data: {id_trans:id_trans},
-        success: function (response) {
-           return;     
-        }
-    });
-    
-}
-
-function toggleKunci(id_trans) {
-    swalConfirm.fire({
-        title: 'Perhatian !!!',
-        text: "Yakin Buka/Kunci Transaksi ?",
+const deleteTransLain = (id) => {
+    swalConfirmDelete.fire({
+        title: 'Peringatan !',
+        text: "Data Akan dihapus permanen ?",
         type: 'warning',
         showCancelButton: true,
-        confirmButtonText: 'Ya!, Buka/Kunci Transaksi',
+        confirmButtonText: 'Ya, Hapus Data !',
         cancelButtonText: 'Tidak, Batalkan!',
         reverseButtons: true
       }).then((result) => {
         if (result.value) {
             $.ajax({
+                url : base_url + 'daftar_transaksi_lain/delete_item_trans_lain',
                 type: "POST",
-                url : base_url + 'daftar_penjualan/toggle_kunci',
-                data: {id_trans:id_trans},
                 dataType: "JSON",
-                // processData: false, // false, it prevent jQuery form transforming the data into a query string
-                // contentType: false, 
-                cache: false,
-                timeout: 600000,
+                data : {id:id},
                 success: function(data)
                 {
                     if(data.status) {
-                        swalConfirm.fire('Berhasil !!', data.pesan, 'success');
+                        swalConfirm.fire('Berhasil Hapus data transaksi!', data.pesan, 'success');
                         filter_tabel();
                     }else{
-                        swalConfirm.fire('Gagal !!', data.pesan, 'error');
-                        filter_tabel();
+                        swalConfirm.fire(
+                            'Error',
+                            data.pesan,
+                            'error'
+                        );
                     }
                 },
                 error: function (jqXHR, textStatus, errorThrown)
@@ -361,153 +665,5 @@ function toggleKunci(id_trans) {
         }
     });
 }
-
-// function editPenjualan(id) {
-//     sessionStorage.setItem("dariEditPenjualan", "true");
-//     window.open(base_url+'penjualan?token='+id, '_blank');
-// }
-
+  
 ///////////////
-
-function editTransLain(id)
-{
-    // alert('tes'); exit;
-    // reset_modal_form();
-    save_method = 'update';
-    //Ajax Load data from ajax
-    $.ajax({
-        url : base_url + 'daftar_transaksi_lain/edit_data',
-        type: "POST",
-        dataType: "JSON",
-        data : {id:id},
-        success: function(response)
-        {
-            if(response.status) {
-                if(response.jenis_trans == 'pembelian') {
-                    loadModalPembelian(response.data);
-                }else if(response.jenis_trans == 'penggajian'){
-                    loadModalPenggajian(response.data);
-                }else if(response.jenis_trans == 'investasi'){
-                    loadModalInvestasi(response.data);
-                }else if(response.jenis_trans == 'operasional'){
-                    loadModalOperasional(response.data);
-                }else if(response.jenis_trans == 'out_lain'){
-                    loadModalPengeluaranLain(response.data);
-                }else if(response.jenis_trans == 'in_lain'){
-                    loadModalPenerimaanLain(response.data);
-                }
-            }
-        },
-        error: function (jqXHR, textStatus, errorThrown)
-        {
-            alert('Error get data from ajax');
-        }
-    });
-}
-
-function reload_table()
-{
-    table.ajax.reload(null,false); //reload datatable ajax 
-}
-
-
-
-function delete_item_trans(id){
-    swalConfirmDelete.fire({
-        title: 'Peringatan !',
-        text: "Data Akan dihapus permanen ?",
-        type: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Ya, Hapus Data !',
-        cancelButtonText: 'Tidak, Batalkan!',
-        reverseButtons: true
-      }).then((result) => {
-        if (result.value) {
-            $.ajax({
-                url : base_url + 'master_item_trans/delete_item_trans',
-                type: "POST",
-                dataType: "JSON",
-                data : {id:id},
-                success: function(data)
-                {
-                    swalConfirm.fire('Berhasil Hapus data item transaksi!', data.pesan, 'success');
-                    table.ajax.reload();
-                },
-                error: function (jqXHR, textStatus, errorThrown)
-                {
-                    Swal.fire('Terjadi Kesalahan');
-                }
-            });
-        } else if (
-          /* Read more about handling dismissals below */
-          result.dismiss === Swal.DismissReason.cancel
-        ) {
-          swalConfirm.fire(
-            'Dibatalkan',
-            'Aksi Dibatalakan',
-            'error'
-          )
-        }
-    });
-}
-
-function reset_modal_form()
-{
-    $('#form-pegawai')[0].reset();
-    $('.append-opt').remove(); 
-    $('div.form-group').children().removeClass("is-invalid invalid-feedback");
-    $('span.help-block').text('');
-    $('#div_pass_lama').css("display","none");
-}
-
-function reset_modal_form_import()
-{
-    $('#form_import_excel')[0].reset();
-    $('#label_file_excel').text('Pilih file excel yang akan diupload');
-}
-
-function import_excel(){
-    $('#modal_import_excel').modal('show');
-	$('#modal_import_title').text('Import data pegawai'); 
-}
-
-function import_data_excel(){
-    var form = $('#form_import_excel')[0];
-    var data = new FormData(form);
-    
-    $("#btnSaveImport").prop("disabled", true);
-    $('#btnSaveImport').text('Import Data');
-    $.ajax({
-        type: "POST",
-        enctype: 'multipart/form-data',
-        url: base_url + 'master_pegawai/import_data_master',
-        data: data,
-        dataType: "JSON",
-        processData: false, // false, it prevent jQuery form transforming the data into a query string
-        contentType: false, 
-        success: function (data) {
-            if(data.status) {
-                swal.fire("Sukses!!", data.pesan, "success");
-                $("#btnSaveImport").prop("disabled", false);
-                $('#btnSaveImport').text('Simpan');
-            }else {
-                swal.fire("Gagal!!", data.pesan, "error");
-                $("#btnSaveImport").prop("disabled", false);
-                $('#btnSaveImport').text('Simpan');
-            }
-
-            reset_modal_form_import();
-            $(".modal").modal('hide');
-            table.ajax.reload();
-        },
-        error: function (e) {
-            console.log("ERROR : ", e);
-            $("#btnSaveImport").prop("disabled", false);
-            $('#btnSaveImport').text('Simpan');
-
-            reset_modal_form_import();
-            $(".modal").modal('hide');
-            table.ajax.reload();
-        }
-    });
-}

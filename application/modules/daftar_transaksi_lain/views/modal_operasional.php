@@ -7,13 +7,15 @@
   <div class="modal-dialog modal-xl" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="div_diagnosa_modal_title">Operasional</h5>
+        <h5 class="modal-title">Operasional</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
         </button>
       </div>
       
       <div class="modal-body">
         <form id="form_operasional" name="form_operasional">
+          <input type="hidden" class="form-control form-control-sm" id="id_trans_op" name="id_trans_op" value="">
+          <input type="hidden" class="form-control form-control-sm" id="id_jenis_op" name="id_jenis_op" value="">
           <div class="col-md-12">
             <div class="kt-portlet__body">
               <div class="form-group">       
@@ -46,30 +48,6 @@
                     <span class="help-block"></span>
                   </div>
                 </div>
-                <br>
-                <div class="col-12">
-                  <button type="button" id="btnSave" class="btn btn-primary" onclick="save('form_operasional')">Tambahkan</button>
-                </div>
-                <div class="kt-separator kt-separator--border-dashed kt-separator--space-lg kt-separator--portlet-fit"></div>
-               
-                <div class=" col-lg-12 col-sm-12">
-                  <h4>Tabel Operasional (10 Transaksi Terakhir)</h4>
-                  <table class="table table-striped- table-bordered table-hover" id="tabel_modal_operasional">
-                    <thead>
-                      <tr>
-                        <th>No</th>
-                        <th>Tanggal</th>
-                        <th>Nama</th>
-                        <th>Bulan</th>
-                        <th>Tahun</th>
-                        <th>Total</th>
-                        <th style="width: 10%;">Aksi</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                  </table>
-                </div>
               </div>
               
             </div>
@@ -77,7 +55,7 @@
         </form>
       </div>
       <div class="modal-footer">
-        <a type="button" class="btn btn-primary btn_direct_data" style="color:white;" target="_blank" href="">Klik Untuk Ke Daftar Transaksi</a>
+        <button type="button" id="btnSave" class="btn btn-primary" onclick="save('form_operasional')">Tambahkan</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
       </div>
     </div>
