@@ -200,7 +200,23 @@ class Daftar_penjualan extends CI_Controller {
 	{
 		$id_trans = $this->input->post('id_trans');
 		$data_trans = $this->m_global->single_row('*', ['id' => $id_trans], 't_transaksi');
+
+		#### cek kuncian laporan
 		if($data_trans) {
+			## cek kunci bulanan dulu, sudah dikunci atau belum
+			$cek_kunci = $this->cek_kunci_transaksi($data_trans->tgl_trans);
+			
+			if($cek_kunci['status'] == true) {
+				$bulan_kunci = $cek_kunci['bulan_kunci'];
+				$tahun_kunci = $cek_kunci['tahun_kunci'];
+				$bln_txt = bulan_indo($bulan_kunci);
+				echo json_encode([ 
+					'status' => false,
+					'pesan' => 'Maaf Laporan Bulan '.$bln_txt.' '.$tahun_kunci.' Telah Terkunci'
+				]);
+				return;
+			}
+
 			$status = true;
 			if($data_trans->is_kunci == '1') {
 				$where = ['is_kunci' => '0'];
@@ -211,8 +227,14 @@ class Daftar_penjualan extends CI_Controller {
 			}
 
 			$update = $this->t_transaksi->update(['id' => $data_trans->id], $where);
-
+			
 			if($update) {
+				$data_log_old = json_encode($data_trans);
+				
+				$data_trans_new = $this->m_global->single_row('*', ['id' => $id_trans], 't_transaksi');
+				$data_log_new = json_encode($data_trans_new);
+				
+				$this->lib_fungsi->catat_log_aktifitas('UPDATE', $data_log_old, $data_log_new);
 				echo json_encode(['status' => $status, 'pesan' => $pesan]);
 			}
 		}else{
@@ -355,275 +377,24 @@ class Daftar_penjualan extends CI_Controller {
 		echo json_encode($retval);
 	}
 
-	public function edit_status_pegawai()
-	{
-		$input_status = $this->input->post('status');
-		// jika aktif maka di set ke nonaktif / "0"
-		$status = ($input_status == "aktif") ? $status = 0 : $status = 1;
-			
-		$input = ['is_aktif' => $status];
-
-		$where = ['id' => $this->input->post('id')];
-
-		$this->m_pegawai->update($where, $input);
-
-		if ($this->db->affected_rows() == '1') {
-			$data = array(
-				'status' => TRUE,
-				'pesan' => "Status Pegawai berhasil di ubah.",
-			);
-		}else{
-			$data = array(
-				'status' => FALSE
-			);
-		}
-
-		echo json_encode($data);
-	}
-
-	public function import_excel()
-	{
-		$select = "m_pegawai.*, m_jabatan.nama as nama_jabatan";
-		$where = ['m_pegawai.deleted_at' => null];
-		$table = 'm_pegawai';
-		$join = [ 
-			[
-				'table' => 'm_jabatan',
-				'on'	=> 'm_pegawai.id_jabatan = m_jabatan.id'
-			]
-		];
-
-		$data = $this->m_global->multi_row($select, $where, $table, $join, 'm_pegawai.kode');
-		
-		$spreadsheet = $this->excel->spreadsheet_obj();
-		$writer = $this->excel->xlsx_obj($spreadsheet);
-		$number_format_obj = $this->excel->number_format_obj();
-		
-		$spreadsheet
-			->getActiveSheet()
-			->getStyle('E2:E1000')
-			->getNumberFormat()
-			->setFormatCode($number_format_obj::FORMAT_NUMBER);
-
-		$spreadsheet
-			->getActiveSheet()
-			->getStyle('F2:F1000')
-			->getNumberFormat()
-			->setFormatCode($number_format_obj::FORMAT_NUMBER);	
-		
-		$sheet = $spreadsheet->getActiveSheet();
-
-		$sheet
-			->setCellValue('A1', 'Kode')
-			->setCellValue('B1', 'Nama')
-			->setCellValue('C1', 'Alamat')
-			->setCellValue('D1', 'Jabatan')
-			->setCellValue('E1', 'Telp. 1')
-			->setCellValue('F1', 'Telp. 2')
-			->setCellValue('G1', 'Status Aktif');
-		
-		$startRow = 2;
-		$row = $startRow;
-		if($data){
-			foreach ($data as $key => $val) {
-				$sts = ($val->is_aktif = '1') ? 'Aktif' : 'Non Aktif';
-				
-				$sheet
-					->setCellValue("A{$row}", $val->kode)
-					->setCellValue("B{$row}", $val->nama)
-					->setCellValue("C{$row}", $val->alamat)
-					->setCellValue("D{$row}", $val->nama_jabatan)
-					->setCellValue("E{$row}", $val->telp_1)
-					->setCellValue("F{$row}", $val->telp_2)
-					->setCellValue("G{$row}", $sts);
-				$row++;
-			}
-			$endRow = $row - 1;
-		}
-		
-		
-		$filename = 'master-pegawai-'.time();
-		
-		header('Content-Type: application/vnd.ms-excel');
-		header('Content-Disposition: attachment;filename="'. $filename .'.xlsx"'); 
-		header('Cache-Control: max-age=0');
-
-		$writer->save('php://output');
-		
-	}
-
-	public function template_excel()
-	{
-		$file_url = base_url().'files/template_dokumen/template_master_pegawai.xlsx';
-		header('Content-Type: application/octet-stream');
-		header("Content-Transfer-Encoding: Binary"); 
-		header("Content-disposition: attachment; filename=\"" . basename($file_url) . "\""); 
-		readfile($file_url); 
-	}
-
-	public function export_data_master()
+	public function cek_kunci_transaksi($date)
 	{
 		$obj_date = new DateTime();
-		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$bulan_kunci = (int)$obj_date->createFromFormat('Y-m-d', $date)->format('m');
+		$tahun_kunci = (int)$obj_date->createFromFormat('Y-m-d', $date)->format('Y');
+		$cek = $this->m_global->single_row('*', ['deleted_at' => null, 'bulan' => $bulan_kunci, 'tahun' => $tahun_kunci], 't_log_kunci');
 
-		$file_mimes = ['text/x-comma-separated-values', 'text/comma-separated-values', 'application/octet-stream', 'application/vnd.ms-excel', 'application/x-csv', 'text/x-csv', 'text/csv', 'application/csv', 'application/excel', 'application/vnd.msexcel', 'text/plain', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
-		$retval = [];
-		if(isset($_FILES['file_excel']['name']) && in_array($_FILES['file_excel']['type'], $file_mimes)) {
-			$arr_file = explode('.', $_FILES['file_excel']['name']);
-			$extension = end($arr_file);
-			if('csv' == $extension){
-				$reader = $this->excel->csv_reader_obj();
-			} else {
-				$reader = $this->excel->reader_obj();
-			}
-
-			$spreadsheet = $reader->load($_FILES['file_excel']['tmp_name']);
-			$sheetData = $spreadsheet->getActiveSheet()->toArray();
-			
-			for ($i=0; $i <count($sheetData); $i++) { 
-				
-				if ($sheetData[$i][0] == '' || $sheetData[$i][1] == '' || $sheetData[$i][2] == '' || $sheetData[$i][3] == '') {
-					
-					if($i == 0) {
-						$flag_kosongan = true;
-						$status_ekspor = false;
-						$pesan = "Data Kosong...";
-					}else{
-						$flag_kosongan = false;
-						$status_ekspor = true;
-						$pesan = "Data Sukses Di Ekspor";
-					}
-
-					break;
-				}
-
-				$data['kode'] = strtoupper(strtolower(trim($sheetData[$i][0])));
-				$data['nama'] = strtoupper(strtolower(trim($sheetData[$i][1])));
-				$data['alamat'] = strtoupper(strtolower(trim($sheetData[$i][2])));
-				
-				#jabatan
-				$id_jabatan = $this->m_pegawai->get_id_jabatan_by_name(strtolower(trim($sheetData[$i][3])));
-				
-				if($id_jabatan){
-					$data['id_jabatan'] = $id_jabatan->id;
-				}else{
-					if($i == 0) {
-						continue;
-					}else{
-						$flag_kosongan = false;
-						$status_ekspor = false;
-						$pesan = "Terjadi Kesalahan Dalam Penulisan Nama Jabatan, Mohon Cek Kembali";
-						break;
-					}
-				}
-				#end jabatan
-
-				if($sheetData[$i][4] != ''){
-					$data['telp_1'] = trim($sheetData[$i][4]);
-				}
-
-				if($sheetData[$i][5] != ''){
-					$data['telp_2'] = trim($sheetData[$i][5]);
-				}
-
-				$data['created_at'] = $timestamp;
-				$data['is_aktif'] = 1;
-
-				$retval[] = $data;
-			}
-
-			if($status_ekspor) {
-				// var_dump(count($retval));exit;
-				## jika array maks cuma 1, maka batalkan (soalnya hanya header saja disana) ##
-				if(count($retval) <= 1) {
-					echo json_encode([
-						'status' => false,
-						'pesan'	=> 'Ekspor dibatalkan, Data Kosong...'
-					]);
-
-					return;
-				}
-				
-				$this->db->trans_begin();
-				
-				#### truncate loh !!!!!!
-				$this->m_pegawai->trun_master_pegawai();
-				
-				foreach ($retval as $keys => $vals) {
-					#### simpan
-					$vals['id'] = $this->m_pegawai->get_max_id_pegawai();
-					$simpan = $this->m_pegawai->save($vals);
-				}
-
-				if ($this->db->trans_status() === FALSE){
-					$this->db->trans_rollback();
-					$status = false;
-					$pesan = 'Gagal melakukan ekspor, cek ulang dalam melakukan pengisian data excel';
-				}else{
-					$this->db->trans_commit();
-					$status = true;
-					$pesan = 'Sukses ekspor data pegawai';
-				}
-
-				echo json_encode([
-					'status' => $status,
-					'pesan'	=> $pesan
-				]);
-				
-			}else{
-				echo json_encode([
-					'status' => false,
-					'pesan'	=> $pesan
-				]);
-			}
-
+		if($cek) {
+			$sts = true;
 		}else{
-			echo json_encode([
-				'status' => false,
-				'pesan'	=> 'Terjadi Kesalahan dalam upload file. pastikan file adalah file excel .xlsx/.xls'
-			]);
+			$sts = false;
 		}
-	}
 
-	public function cetak_data()
-	{
-		$select = "m_tindakan.*";
-		$where = ["m_tindakan.deleted_at is null"];
-		$orderby = "m_tindakan.kode_tindakan asc";
-		$data = $this->m_global->multi_row($select, $where, 'm_tindakan', null, $orderby);
-		$data_klinik = $this->m_global->single_row('*', 'deleted_at is null', 'm_klinik');
-
-		$retval = [
-			'data' => $data,
-			'data_klinik' => $data_klinik,
-			'title' => 'Master Data Tindakan'
+		return [
+			'status' => $sts,
+			'bulan_kunci' => $bulan_kunci,
+			'tahun_kunci' => $tahun_kunci
 		];
-		
-		// $this->load->view('pdf', $retval);
-		$html = $this->load->view('pdf', $retval, true);
-	    $filename = 'master_data_tindakan_'.time();
-	    $this->lib_dompdf->generate($html, $filename, true, 'A4', 'potrait');
-	}
-
-	public function get_select_tindakan()
-	{
-		$term = $this->input->get('term');
-		$data_tindakan = $this->m_global->multi_row('*', ['deleted_at' => null, 'nama_tindakan like' => '%'.$term.'%'], 'm_tindakan', null, 'nama_tindakan');
-		if($data_tindakan) {
-			foreach ($data_tindakan as $key => $value) {
-				$row['id'] = $value->id_tindakan;
-				$row['text'] = $value->kode_tindakan.' - '.$value->nama_tindakan;
-				$row['kode'] = $value->kode_tindakan;
-				$row['nama'] = $value->nama_tindakan;
-				$row['harga'] = number_format($value->harga,0,',','.');
-				$row['harga_raw'] = $value->harga;
-
-				$retval[] = $row;
-			}
-		}else{
-			$retval = false;
-		}
-		echo json_encode($retval);
 	}
 
 	// ===============================================

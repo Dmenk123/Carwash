@@ -273,5 +273,37 @@ class T_transaksi extends CI_Model
 		}
 	}
 
-	
+	public function get_laporan_transaksi($id_jenis, $date_awal, $date_akhir)
+	{
+		$this->db->select('
+			t_transaksi.*,
+			t_transaksi_det.harga_satuan,
+			t_transaksi_det.qty,
+			m_item_trans.nama,
+			m_jenis_trans.nama_jenis,
+			m_jenis_trans.kode_jenis,
+			m_member.kode_member,
+			m_member.nama as nama_member,
+			m_supplier.nama_supplier'
+		);
+
+		$this->db->from('t_transaksi');
+		$this->db->join('t_transaksi_det', 't_transaksi.id = t_transaksi_det.id_transaksi', 'left');
+		$this->db->join('m_member', 't_transaksi.id_member = m_member.id', 'left');
+		$this->db->join('m_item_trans', 't_transaksi_det.id_item_trans = m_item_trans.id', 'left');
+		$this->db->join('m_jenis_trans', 't_transaksi.id_jenis_trans = m_jenis_trans.id', 'left');
+		$this->db->join('m_supplier', 't_transaksi.id_supplier = m_supplier.id', 'left');
+		$this->db->where('t_transaksi.deleted_at', null);
+		$this->db->where('t_transaksi.id_jenis_trans', $id_jenis);
+		$this->db->where('t_transaksi.tgl_trans >=', $date_awal);
+		$this->db->where('t_transaksi.tgl_trans <=', $date_akhir);
+		$this->db->order_by('t_transaksi.tgl_trans', 'asc');
+		
+		$query = $this->db->get();
+		if($query) {
+			return $query->result();
+		}else{
+			return false;
+		}
+	}
 }

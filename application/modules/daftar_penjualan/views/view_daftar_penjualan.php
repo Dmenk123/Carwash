@@ -41,9 +41,7 @@
             <div class="col-md-4 row">
               
                 <div class="col-12 btn-group btn-group">
-                  <button type="button" class="btn btn-primary btn-sm" onclick="filter_tanggal()">Cari</button>
-                  <button type="button" class="btn btn-sm btn-success" onclick="ekspor_excel()">Eksport Excel</button>
-                  <button type="button" class="btn btn-sm btn-warning" onclick="cetak_data()">Cetak Data</button>
+                  <button type="button" class="btn btn-primary btn-md" onclick="filter_tanggal()">Cari</button>
                 </div>
             
             </div>

@@ -257,6 +257,7 @@ class Penjualan extends CI_Controller {
 					'id_transaksi' => $id_header,
 					'id_item_trans' => $this->input->post('id_item')[$i],
 					'harga_satuan' => $this->input->post('harga')[$i],
+					'qty' => 1,
 					'created_at' => $timestamp
 				];
 
@@ -357,6 +358,7 @@ class Penjualan extends CI_Controller {
 				$data_ins_det = [
 					'id' => gen_uuid(),
 					'id_transaksi' => $id_header,
+					'qty' => 1,
 					'id_item_trans' => $this->input->post('id_item')[$i],
 					'harga_satuan' => $this->input->post('harga')[$i],
 					'created_at' => $timestamp,
