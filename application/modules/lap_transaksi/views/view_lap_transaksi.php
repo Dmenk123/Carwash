@@ -1,7 +1,5 @@
 <?php
   $id_jenis = $this->input->get('jenis');
-
-  var_dump($this->input->get('mulai'));
 ?>
 
 <!-- begin:: Content -->

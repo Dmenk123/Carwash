@@ -306,4 +306,58 @@ class T_transaksi extends CI_Model
 			return false;
 		}
 	}
+
+	public function get_laporan_keuangan($bulan, $tahun)
+	{
+		$this->db->select('
+			t_transaksi.tgl_trans,
+			t_transaksi.id_jenis_trans,
+			sum(t_transaksi.harga_total) as total_harga,
+			t_transaksi.id_jenis_trans,
+			m_jenis_trans.nama_jenis,
+			m_jenis_trans.kode_jenis,
+			m_jenis_trans.cashflow,
+		');
+
+		$this->db->from('t_transaksi');
+		$this->db->join('m_jenis_trans', 't_transaksi.id_jenis_trans = m_jenis_trans.id', 'left');
+		$this->db->where('t_transaksi.deleted_at', null);
+		$this->db->where('t_transaksi.bulan_trans', $bulan);
+		$this->db->where('t_transaksi.tahun_trans', $tahun);
+		$this->db->group_by('t_transaksi.tgl_trans');
+		$this->db->group_by('t_transaksi.id_jenis_trans');
+		$this->db->order_by('t_transaksi.tgl_trans', 'asc');
+		$this->db->order_by('m_jenis_trans.cashflow', 'asc');
+		
+		$query = $this->db->get();
+		if($query) {
+			return $query->result();
+		}else{
+			return false;
+		}
+	}
+
+	public function cari_saldo_by_hitung($bulan, $tahun)
+	{
+		$objDate = new DateTime($tahun.'-'.$bulan.'-01');
+		$tgl =  $objDate->format('Y-m-d');
+
+		$this->db->select("
+			SUM(CASE WHEN b.cashflow = 'in' THEN a.harga_total END ) as penerimaan,
+			SUM(CASE WHEN b.cashflow = 'out' THEN a.harga_total END ) as pengeluaran,
+			(SUM(CASE WHEN b.cashflow = 'in' THEN a.harga_total END ) - SUM(CASE WHEN b.cashflow = 'out' THEN a.harga_total END )) as saldo
+		");
+
+		$this->db->from('t_transaksi a');
+		$this->db->join('m_jenis_trans b', 'a.id_jenis_trans = b.id', 'left');
+		$this->db->where('a.deleted_at', null);
+		$this->db->where('a.tgl_trans <', $tgl);
+
+		$query = $this->db->get();
+		if($query) {
+			return $query->row();
+		}else{
+			return false;
+		}
+	}
 }
