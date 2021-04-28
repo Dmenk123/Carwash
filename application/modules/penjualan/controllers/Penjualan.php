@@ -170,6 +170,11 @@ class Penjualan extends CI_Controller {
 						<table class='tabel-petugas'>
 							<tbody>
 								<tr>
+									<td>Invoice</td>
+									<td>:</td>
+									<td>".$data_penjualan[0]->kode."</td>
+								</tr>
+								<tr>
 									<td>Kasir</td>
 									<td>:</td>
 									<td>".$data_user[0]->nama."</td>
