@@ -19,6 +19,25 @@ class Penjualan extends CI_Controller {
 		$this->load->library('thermalprint_lib');
 	}
 
+	################### cetak struk serverside by lib escpos
+	// public function cetak_struk($id_trans)
+	// {
+	// 	$id_user = $this->session->userdata('id_user'); 
+	// 	$data_profile = $this->m_global->single_row("*",NULL,'m_profil');
+	// 	$select = 'trans.*, trans_det.id as id_det, trans_det.id_item_trans, trans_det.harga_satuan, m_item_trans.nama';
+	// 	$join = [ 
+	// 		['table' => 't_transaksi_det as trans_det', 'on' => 'trans.id = trans_det.id_transaksi'],
+	// 		['table' => 'm_item_trans', 'on' => 'trans_det.id_item_trans = m_item_trans.id and m_item_trans.id_jenis_trans = 1']
+	// 	];
+	// 	$data_penjualan = $this->m_global->multi_row($select, ['trans.id' =>  $id_trans,'trans.deleted_at' => null], 't_transaksi as trans', $join);
+	// 	// echo $this->db->last_query();exit;
+		
+	// 	$data_user = $this->m_user->get_detail_user($id_user);
+		
+	// 	$this->thermalprint_lib->cek_cetak($data_user, $data_profile, $data_penjualan);
+	// }
+
+	##################### cetak struk client side 
 	public function cetak_struk($id_trans)
 	{
 		$id_user = $this->session->userdata('id_user'); 
@@ -28,12 +47,181 @@ class Penjualan extends CI_Controller {
 			['table' => 't_transaksi_det as trans_det', 'on' => 'trans.id = trans_det.id_transaksi'],
 			['table' => 'm_item_trans', 'on' => 'trans_det.id_item_trans = m_item_trans.id and m_item_trans.id_jenis_trans = 1']
 		];
-		$data_penjualan = $this->m_global->multi_row($select, ['trans.id' =>  $id_trans,'trans.deleted_at' => null], 't_transaksi as trans', $join);
-		// echo $this->db->last_query();exit;
-		
-		$data_user = $this->m_user->get_detail_user($id_user);
-		
-		$this->thermalprint_lib->cek_cetak($data_user, $data_profile, $data_penjualan);
+		$data_penjualan = $this->m_global->multi_row($select, ['trans.id' =>  $id_trans,'trans.deleted_at' => null], 't_transaksi as trans', $join);		
+		$data_user = $this->m_user->get_detail_user($id_user);		
+
+		// echo "<pre>";
+		// print_r ($data_user);
+		// echo "</pre>";
+
+		// echo "<pre>";
+		// print_r ($data_profile);
+		// echo "</pre>";
+
+		// echo "<pre>";
+		// print_r ($data_penjualan);
+		// echo "</pre>";
+		// exit;
+
+		$html = $this->get_template_cetak($data_user, $data_profile, $data_penjualan);
+		echo json_encode([
+			'status' => true,
+			'html' => $html
+		]);
+	}
+
+	public function get_template_cetak_header()
+	{
+		return "
+			<html lang='en'>
+				<head>
+					<meta charset='UTF-8'>
+					<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+					<meta http-equiv='X-UA-Compatible' content='ie=edge'>
+					<link rel='stylesheet' href='style.css'>
+					<title>Receipt example</title>
+					<style>
+
+						* {
+							font-size: 9px;
+							font-family: 'Times New Roman';
+						}
+						
+						table {
+							margin-left:5px;
+						}
+						
+						td,
+						th,
+						tr,
+						table.tabel-penjualan {
+							border-top: 1px solid black;
+							border-collapse: collapse;
+						}
+
+						table.tabel-petugas 
+						td,
+						th,
+						tr {
+							border-collapse: collapse;
+							font-size: 8px;
+							border: none;
+						}
+						
+						td.description,
+						th.description {
+							width: 75px;
+							max-width: 75px;
+						}
+						
+						td.quantity,
+						th.quantity {
+							width: 40px;
+							max-width: 40px;
+							word-break: break-all;
+						}
+						
+						td.price,
+						th.price {
+							width: 40px;
+							max-width: 40px;
+							word-break: break-all;
+						}
+						
+						.centered {
+							text-align: center;
+							align-content: center;
+						}
+						
+						.ticket {
+							width: 155px;
+							max-width: 155px;
+						}
+						
+						img {
+							max-width: inherit;
+							width: inherit;
+						}
+						
+						@media print {
+							.hidden-print,
+							.hidden-print * {
+								display: none !important;
+							}
+						}
+					</style>
+				</head>
+		";
+	}
+
+	public function get_template_cetak($data_user, $data_profile, $data_penjualan)
+	{
+		$obj_date = new DateTime();
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$jam_trans = $obj_date->createFromFormat('Y-m-d H:i:s', $data_penjualan[0]->created_at)->format('d-m-Y H:i');
+		$retval = $this->get_template_cetak_header();
+		$retval .= "
+				<body>
+					<div class='ticket'>
+						<p class='centered'><span style='font-size: 12px;'><u>$data_profile->nama</u></span>
+							<br><span style='font-size: 8px;'>$data_profile->alamat</span>
+							<br><span style='font-size: 8px;'>$data_profile->kota</span></p>
+						<hr>
+						<table class='tabel-petugas'>
+							<tbody>
+								<tr>
+									<td>Kasir</td>
+									<td>:</td>
+									<td>".$data_user[0]->nama."</td>
+								</tr>
+								<tr>
+									<td>Waktu</td>
+									<td>:</td>
+									<td>".$jam_trans."</td>
+								</tr>
+							</tbody>
+						</table>
+						<table class='tabel-penjualan'>
+							<thead>
+								<tr>
+									<th class='quality'>No</th>
+									<th class='description'>Deskripsi</th>
+									<th class='price'>Harga</th>
+								</tr>
+							</thead>
+							<tbody>";
+								foreach ($data_penjualan as $key => $value) {
+									$retval .= "<tr>
+										<td class='quality'>".($key+1)."</td>
+										<td class='description'>$value->nama</td>
+										<td class='price' style='text-align:right;'>".number_format($value->harga_satuan,0,',','.')."</td>
+									</tr>";
+								}
+
+								$retval .= "<tr>
+										<td class='description' colspan='2'><strong>Total</strong></td>
+										<td class='price' style='text-align:right;font-weight:bold;'>".number_format($data_penjualan[0]->harga_total,0,',','.')."</td>
+									</tr>
+									<tr>
+										<td class='description' colspan='2' style='border-top: 0px;'>Pembayaran</td>
+										<td class='price' style='text-align:right;border-top: 0px;'>".number_format($data_penjualan[0]->harga_bayar,0,',','.')."</td>
+									</tr>
+									<tr>
+										<td class='description' colspan='2' style='border-top: 0px;'>Kembalian</td>
+										<td class='price' style='text-align:right;border-top: 0px;'>".number_format($data_penjualan[0]->harga_kembalian,0,',','.')."</td>
+									</tr>	
+								";
+
+							$retval .= "</tbody>
+						</table>
+						<p class='centered' style='font-size: 8px;'>Terima Kasih
+							<br>Atas Kepercayaan Anda</p>
+					</div>
+				</body>
+			</html>
+		";
+
+		return $retval;
 	}
 
 	public function index()
@@ -168,11 +356,11 @@ class Penjualan extends CI_Controller {
 		echo json_encode($retval);
 	}
 
-	private function get_div_button()
+	private function get_div_button($id_header)
 	{
 		return '
 			<button type="button" class="btn btn-secondary" onclick="location.reload()">Transaksi Selanjutnya</button>
-			<button type="button" class="btn btn-brand" onclick="printStruk()">Print</button>
+			<button type="button" class="btn btn-brand" onclick="printStruk(\''.$id_header.'\')">Print</button>
 		';
 	}
 
@@ -287,7 +475,7 @@ class Penjualan extends CI_Controller {
 			$this->db->trans_commit();
 			$retval['id_trans'] = $id_header;
 			$retval['status'] = true;
-			$retval['button'] = $this->get_div_button();
+			$retval['button'] = $this->get_div_button($id_header);
 			$retval['pesan'] = 'Sukses memproses Data Transaksi';
 		}
 
@@ -420,11 +608,13 @@ class Penjualan extends CI_Controller {
 			$retval['status'] = false;
 			$retval['button'] = false;
 			$retval['pesan'] = 'Gagal memproses Data Transaksi';
+			$retval['id_trans'] = $id_header;
 		}else{
 			$this->db->trans_commit();
 			$retval['status'] = true;
-			$retval['button'] = $this->get_div_button();
+			$retval['button'] = $this->get_div_button($id_header);
 			$retval['pesan'] = 'Sukses memproses Data Transaksi';
+			$retval['id_trans'] = $id_header;
 		}
 
 		echo json_encode($retval);
@@ -669,5 +859,11 @@ class Penjualan extends CI_Controller {
 		$html = $this->load->view('pdf', $retval, true);
 	    $filename = 'data_registrasi'.$tgl_awal_fix.'_'.$tgl_akhir_fix.'_'.time();
 	    $this->lib_dompdf->generate($html, $filename, true, 'legal', 'landscape');
+	}
+
+	public function print_html()
+	{
+		$this->load->view('print_temp');
+		
 	}
 }

@@ -40,6 +40,7 @@ class Lib_fungsi extends CI_Controller {
 	###################
 	public function insert_counter($id_member, $counter_mobil, $counter_motor, $is_add_cnt_mobil=false, $is_add_cnt_motor=false)
 	{
+		$retval = [];
 		$obj_date = new DateTime();
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
 

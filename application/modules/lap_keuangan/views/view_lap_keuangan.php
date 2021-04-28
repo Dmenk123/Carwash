@@ -82,12 +82,15 @@
                 </div> 
               </div>
               
-              <div class="col-3">
+              <div class="col-3" style="padding-top: 13px;">
                 <label class="col-form-label"></label>
                 <div class="form-group-row">
                   <div class="kt-form__actions">
                     <button type="submit" class="btn btn-primary">Submit</button>
-                    <!-- <button type="reset" class="btn btn-secondary">Cancel</button> -->
+                      <?php if($html != '') { ?>
+                        <button type="button" class="btn btn-secondary">Cetak</button>
+                        <button type="button" class="btn btn-success">Export Excel</button>
+                      <?php } ?>
                   </div>
                 </div>
               </div>

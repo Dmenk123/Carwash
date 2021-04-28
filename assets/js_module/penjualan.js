@@ -150,10 +150,21 @@ $(document).ready(function() {
                     success: function(data)
                     {
                         if(data.status) {
-                            swalConfirm.fire('Berhasil Proses Transaksi!', data.pesan, 'success');
-                            $('.div-button-area').html(data.button);
-                            printStruk(data.id_trans);
-                            disableAllBind();
+                            swalConfirm.fire({
+                                title: 'Berhasil Proses Transaksi!',
+                                text: data.pesan,
+                                type: 'success',
+                                // showCancelButton: true,
+                                confirmButtonText: 'Ok',
+                                // cancelButtonText: 'Tidak, Batalkan!',
+                                reverseButtons: true
+                            }).then((result) => {
+                                if (result.value) {
+                                    $('.div-button-area').html(data.button);
+                                    printStruk(data.id_trans);
+                                    disableAllBind();
+                                }
+                            });
                         }else{
                             for (var i = 0; i < data.inputerror.length; i++) 
                             {
@@ -212,10 +223,21 @@ $(document).ready(function() {
                     success: function(data)
                     {
                         if(data.status) {
-                            swalConfirm.fire('Berhasil Proses Transaksi!', data.pesan, 'success');
-                            $('.div-button-area').html(data.button);
-                            printStruk(data.id_trans);
-                            disableAllBind();
+                            swalConfirm.fire({
+                                title: 'Berhasil Proses Transaksi!',
+                                text: data.pesan,
+                                type: 'success',
+                                // showCancelButton: true,
+                                confirmButtonText: 'Ok',
+                                // cancelButtonText: 'Tidak, Batalkan!',
+                                reverseButtons: true
+                            }).then((result) => {
+                                if (result.value) {
+                                    $('.div-button-area').html(data.button);
+                                    printStruk(data.id_trans);
+                                    disableAllBind();
+                                }
+                            });
                         }else{
                             for (var i = 0; i < data.inputerror.length; i++) 
                             {
@@ -439,18 +461,39 @@ function cariMember(val){
     });
 }
 
-function printStruk(id_trans) 
-{
+// function printStruk(id_trans) 
+// {
+//     $.ajax({
+//         type: "get",
+//         url:  base_url+"penjualan/cetak_struk/"+id_trans,
+//         dataType: "json",
+//         // data: {id_trans:id_trans},
+//         success: function (response) {
+//            return;     
+//         }
+//     });
+    
+// }
+
+const printStruk = (id_trans) => {
+
     $.ajax({
         type: "get",
         url:  base_url+"penjualan/cetak_struk/"+id_trans,
         dataType: "json",
         // data: {id_trans:id_trans},
         success: function (response) {
-           return;     
+            popupPrint(response.html);
         }
     });
-    
+   
+}
+
+const popupPrint = (data) => {
+    let myWindow = window.open('', 'Receipt', 'height=400,width=600');
+    myWindow.document.write(data);
+    myWindow.print();
+    myWindow.close();
 }
 
 function disableAllBind() {

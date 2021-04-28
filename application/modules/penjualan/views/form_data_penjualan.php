@@ -126,7 +126,7 @@ $obj_date = new DateTime();
                 <div class="kt-form__actions kt-form__actions--right div-button-area">
                   <button type="submit" class="btn btn-brand btnSubmit" disabled>Submit</button>
                   <button type="reset" class="btn btn-secondary">Reset</button>
-                  <button type="button" class="btn btn-brand" onclick="printStruk()">Print</button>
+                  <!-- <button type="button" class="btn btn-brand" onclick="printStruk()">Print</button> -->
                 </div>
               </div>
             </div>
@@ -232,7 +232,7 @@ $obj_date = new DateTime();
                 <div class="kt-form__actions kt-form__actions--right div-button-area">
                   <button type="submit" class="btn btn_1 btnSubmit" disabled>Submit</button>
                   <button type="reset" class="btn btn_outline">Reset</button>
-                  <button type="button" class="btn btn_1" onclick="printStruk()">Print</button>
+                  <!-- <button type="button" class="btn btn_1" onclick="printStruk()">Print</button> -->
                 </div>
               </div>
             </div>
