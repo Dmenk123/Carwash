@@ -86,14 +86,14 @@ class Lap_keuangan extends CI_Controller {
 		$content = [
 			'css' 	=> null,
 			'modal' => null,
-			'js'	=> 'lap_transaksi.js',
+			'js'	=> 'lap_keuangan.js',
 			'view'	=> 'view_lap_keuangan'
 		];
 
 		$this->template_view->load_view($content, $data);
 	}
 
-	private function load_tabel_laporan($bulan, $tahun)
+	private function load_tabel_laporan($bulan, $tahun, $is_data_only = false)
 	{
 		$cek = $this->m_global->single_row('*', ['bulan' => $bulan, 'tahun' => $tahun, 'deleted_at' => null], 't_log_laporan');
 		if($cek) {
@@ -120,6 +120,16 @@ class Lap_keuangan extends CI_Controller {
 			}
 
 			$data_laporan = $this->t_transaksi->get_laporan_keuangan($bulan, $tahun);
+			
+			if($is_data_only) {
+				return [
+					'data' => $data_laporan, 
+					'bulan' => $bulan, 
+					'tahun' => $tahun, 
+					'saldo' => $saldo_fix
+				];
+			}
+
 			$html = $this->generate_html_laporan($data_laporan, $bulan, $tahun, $saldo_fix);
 		}
 		
@@ -167,15 +177,20 @@ class Lap_keuangan extends CI_Controller {
 					<td align="right">'.number_format($saldonya, 0 ,',','.').'</td>
 				</tr>
 			';
+
+			$tot_penerimaan = 0;
+        	$tot_pengeluaran = 0;
 			foreach ($data_laporan as $key => $value) {
 				$penerimaan = 0;
 				$pengeluaran = 0;
 				if($value->cashflow == 'in') {
 					$saldonya += $value->total_harga;
 					$penerimaan = $value->total_harga;
+					$tot_penerimaan += $value->total_harga;
 				}else{
 					$saldonya -= $value->total_harga;
 					$pengeluaran = $value->total_harga;
+					$tot_pengeluaran += $value->total_harga;
 				}
 
 				$html .= '
@@ -193,7 +208,9 @@ class Lap_keuangan extends CI_Controller {
 
 			$html .= '
 					<tr>
-						<td colspan="6" align="center"><strong>Saldo Akhir</strong></td>
+						<td colspan="4" align="center"><strong>Grand Total</strong></td>
+						<td align="right"><strong>'.number_format($tot_penerimaan, 0 ,',','.').'</strong></td>
+						<td align="right"><strong>'.number_format($tot_pengeluaran, 0 ,',','.').'</strong></td>
 						<td align="right"><strong>'.number_format($saldonya, 0 ,',','.').'</strong></td>
 					<tr>
 				</tbody>
@@ -216,6 +233,189 @@ class Lap_keuangan extends CI_Controller {
 			'tahun' => (int)$tahun
 		];
 	}
+
+	// public function cetak_laporan($bulan = 4, $tahun = 2021)
+	// {
+	// 	// $bulan = $this->input->post('bulan');
+	// 	// $tahun = $this->input->post('tahun');
+		
+	// 	#### nanti dilakukan pengecekan disini
+	// 	$data = $this->load_tabel_laporan($bulan, $tahun, true);
+	// 	$periode = bulan_indo($bulan).' '.$tahun;
+	// 	$profil = $this->m_global->single_row('*', ['deleted_at' => null], 'm_profil');
+
+	// 	// echo "<pre>";
+	// 	// print_r ($data);
+	// 	// echo "</pre>";
+	// 	// exit;
+
+	// 	$retval = [
+	// 		'data' => $data,
+	// 		'title' => 'Laporan Keuangan',
+	// 		'periode' => 'Periode '.$periode,
+	// 		'profil' => $profil,
+	// 		'tahun' => $tahun,
+	// 		'bulan' => $bulan
+	// 	];
+
+	// 	$this->load->view('view_lap_keuangan_pdf', $retval);
+	// 	// $html = $this->load->view('view_lap_keuangan_pdf', $retval, true);
+	//     // $filename = 'laporan_keuangan_'.$bulan.'_'.$tahun.'_'.time();
+	//     // $this->lib_dompdf->generate($html, $filename, true, 'legal', 'potrait');
+	// }
+
+	public function cetak_laporan()
+	{
+		$bulan = $this->input->post('bulan');
+		$tahun = $this->input->post('tahun');
+		
+		#### nanti dilakukan pengecekan disini
+		$data = $this->load_tabel_laporan($bulan, $tahun, true);
+		$periode = bulan_indo($bulan).' '.$tahun;
+		$profil = $this->m_global->single_row('*', ['deleted_at' => null], 'm_profil');
+
+		// echo "<pre>";
+		// print_r ($data);
+		// echo "</pre>";
+		// exit;
+
+		$retval = [
+			'data' => $data,
+			'title' => 'Laporan Keuangan',
+			'periode' => 'Periode '.$periode,
+			'profil' => $profil,
+			'tahun' => $tahun,
+			'bulan' => $bulan
+		];
+
+		// $this->load->view('view_lap_keuangan_pdf', $retval);
+		$html = $this->load->view('view_lap_keuangan_pdf', $retval, true);
+	    $filename = 'laporan_keuangan_'.$bulan.'_'.$tahun.'_'.time();
+	    $this->lib_dompdf->generate($html, $filename, true, 'legal', 'potrait');
+	}
+
+	public function import_excel()
+	{
+		$bulan = $this->input->get('bulan');
+		$tahun = $this->input->get('tahun');
+		
+		$obj_date = new DateTime();
+		$obj_date2 = new DateTime($tahun.'-'.$bulan.'-01');
+		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		#### nanti dilakukan pengecekan disini
+		$data = $this->load_tabel_laporan($bulan, $tahun, true);
+		$periode = bulan_indo($bulan).' '.$tahun;
+		$profil = $this->m_global->single_row('*', ['deleted_at' => null], 'm_profil');
+		
+		
+		// echo "<pre>";
+		// print_r ($data);
+		// echo "</pre>";
+		// exit;
+
+		if($data) {
+			$counter = count($data['data'])+1;
+		}else{
+			$counter = 1;
+		}
+
+		$spreadsheet = $this->excel->spreadsheet_obj();
+		$writer = $this->excel->xlsx_obj($spreadsheet);
+		$number_format_obj = $this->excel->number_format_obj();
+		
+		$spreadsheet
+			->getActiveSheet()
+			->getStyle('A1:G'.$counter)
+			->getNumberFormat()
+			//format text masih ada bug di nip. jadi kacau
+			//->setFormatCode($number_format_obj::FORMAT_TEXT);
+			// solusi pake format custom
+			->setFormatCode('#');
+		
+		$sheet = $spreadsheet->getActiveSheet();
+
+		$sheet
+			->setCellValue('A1', 'No')
+			->setCellValue('B1', 'Tanggal')
+			->setCellValue('C1', 'Kode')
+			->setCellValue('D1', 'Jenis')
+			->setCellValue('E1', 'Penerimaan')
+			->setCellValue('F1', 'Pengeluaran')
+			->setCellValue('G1', 'Saldo Akhir');
+		$no = 1;
+		$startRow = 2;
+		$row = $startRow;
+		if($data['data']){
+			// row saldo
+			if($data['saldo'] != null) {
+				if($data['saldo'] == 'kosong') {
+				  $saldonya = 0;
+				}else{
+				  // hasil hitungan
+				  $saldonya = (float)$data['saldo'];
+				}
+	  
+				$sheet
+					->setCellValue("A{$row}", $no++)
+					->setCellValue("B{$row}", $obj_date2->format('d/m/Y'))
+					->setCellValue("C{$row}", '-')
+					->setCellValue("D{$row}", 'Saldo Awal')
+					->setCellValue("E{$row}", '-')
+					->setCellValue("F{$row}", '-')
+					->setCellValue("G{$row}", number_format($saldonya, 0 ,',','.'));
+				
+				$row++;
+			}
+
+			$tot_penerimaan = 0;
+        	$tot_pengeluaran = 0;
+			foreach ($data['data'] as $key => $val) {
+				$penerimaan = 0;
+				$pengeluaran = 0;
+
+				if($val->cashflow == 'in') {
+					$saldonya += $val->total_harga;
+					$penerimaan = $val->total_harga;
+					$tot_penerimaan += $val->total_harga;
+				}else{
+					$saldonya -= $val->total_harga;
+					$pengeluaran = $val->total_harga;
+					$tot_pengeluaran += $val->total_harga;
+				}
+
+				$sheet
+					->setCellValue("A{$row}", $no++)
+					->setCellValue("B{$row}", $obj_date->createFromFormat('Y-m-d', $val->tgl_trans)->format('d/m/Y'))
+					->setCellValue("C{$row}", $val->kode_jenis)
+					->setCellValue("D{$row}", $val->nama_jenis)
+					->setCellValue("E{$row}", number_format($penerimaan, 0 ,',','.'))
+					->setCellValue("F{$row}", number_format($pengeluaran, 0 ,',','.'))
+					->setCellValue("G{$row}", number_format($saldonya, 0 ,',','.'));
+				$row++;
+			}
+
+			$sheet->mergeCells("A{$row}:D{$row}");
+			$sheet
+					->setCellValue("A{$row}", 'Grand Total')
+					->setCellValue("E{$row}", number_format($tot_penerimaan, 0 ,',','.'))
+					->setCellValue("F{$row}", number_format($tot_pengeluaran, 0 ,',','.'))
+					->setCellValue("G{$row}", number_format($saldonya, 0 ,',','.'));
+				$row++;
+
+			$endRow = $row - 1;
+		}
+		
+		
+		$filename = 'laporan_keuangan_'.$bulan.'_'.$tahun.'_'.time();
+		
+		header('Content-Type: application/vnd.ms-excel');
+		header('Content-Disposition: attachment;filename="'. $filename .'.xlsx"'); 
+		header('Cache-Control: max-age=0');
+
+		$writer->save('php://output');
+		
+	}
+	///////////////////////////////////////////////////////////////////////
 
 	public function list_penjualan($data)
 	{

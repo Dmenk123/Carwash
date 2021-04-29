@@ -68,7 +68,10 @@
             <div class="form-group-row">
               <div class="kt-form__actions">
                 <button type="submit" class="btn btn-primary">Submit</button>
-                <button type="reset" class="btn btn-secondary">Cancel</button>
+                <?php if($html != '') { ?>
+                  <button type="button" class="btn btn-warning" onclick="cetakLaporan()">Cetak</button>
+                  <button type="button" class="btn btn-success" onclick="importExcel()">Download Excel</button>
+                <?php } ?>
               </div>
             </div>
             

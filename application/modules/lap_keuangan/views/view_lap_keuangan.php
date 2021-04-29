@@ -88,8 +88,8 @@
                   <div class="kt-form__actions">
                     <button type="submit" class="btn btn-primary">Submit</button>
                       <?php if($html != '') { ?>
-                        <button type="button" class="btn btn-secondary">Cetak</button>
-                        <button type="button" class="btn btn-success">Export Excel</button>
+                        <button type="button" class="btn btn-warning" onclick="cetakLaporan()">Cetak</button>
+                        <button type="button" class="btn btn-success" onclick="importExcel()">Download Excel</button>
                       <?php } ?>
                   </div>
                 </div>

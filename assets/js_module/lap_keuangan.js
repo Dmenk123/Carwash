@@ -9,14 +9,13 @@ const cetakLaporan = () => {
         reverseButtons: false
       }).then((result) => {
         if (result.value) {
-            let mulai = $('#mulai').val();
-            let akhir = $('#akhir').val();
-            let jenis = $('#jenis').val();
+            let bulan = $('#bulan').val();
+            let tahun = $('#tahun').val();
             $.ajax({
-                url : base_url + 'lap_transaksi/cetak_laporan',
+                url : base_url + 'lap_keuangan/cetak_laporan',
                 type: "POST",
                 dataType: "JSON",
-                data : {mulai:mulai, akhir:akhir, jenis:jenis},
+                data : {bulan:bulan, tahun:tahun},
                 success: function(data)
                 {
                     swalConfirm.fire('Berhasil Hapus Data!', data.pesan, 'success');
@@ -52,7 +51,7 @@ const importExcel = () => {
         if (result.value) {
             let bulan = $('#bulan').val();
             let tahun = $('#tahun').val();
-            window.open( base_url + 'lap_transaksi/import_excel?bulan='+bulan+'&tahun='+tahun, '_blank');
+            window.open( base_url + 'lap_keuangan/import_excel?bulan='+bulan+'&tahun='+tahun, '_blank');
         } else if (
           /* Read more about handling dismissals below */
           result.dismiss === Swal.DismissReason.cancel
