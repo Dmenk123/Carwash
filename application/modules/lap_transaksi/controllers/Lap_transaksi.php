@@ -112,13 +112,9 @@ class Lap_transaksi extends CI_Controller {
 		$this->template_view->load_view($content, $data);
 	}
 
-	private function load_tabel_laporan($id_jenis_trans, $tgl_awal, $tgl_akhir, $is_data_only = false)
+	private function load_tabel_laporan($id_jenis_trans, $tgl_awal, $tgl_akhir)
 	{
 		$data_laporan = $this->t_transaksi->get_laporan_transaksi($id_jenis_trans, $tgl_awal, $tgl_akhir);
-		
-		if ($is_data_only) {
-			return $data_laporan;
-		}
 				
 		switch ((int)$id_jenis_trans) {
 			case self::ID_JENIS_PENJUALAN:
@@ -161,14 +157,15 @@ class Lap_transaksi extends CI_Controller {
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
 		$total_harga = 0;
 		$html = '
-			<table class="table table-bordered">
+			<table id="tbl_content" class="table table-bordered table-hover" cellspacing="0" width="100%" border="2">
 				<thead>
 					<tr>
-						<th style="text-align:center">No.</th>
-						<th style="text-align:center">Tanggal</th>
-						<th style="text-align:center">Kode</th>
-						<th style="text-align:center">Jenis member</th>
-						<th style="text-align:center">Member</th>
+						<th style="width: 5%;text-align:center">No.</th>
+						<th style="width: 10%;text-align:center">Tanggal</th>
+						<th style="width: 10%;text-align:center">Kode</th>
+						<th style="width: 10%; text-align:center">Jenis member</th>
+						<th style="width: 10%; text-align:center">Kode member</th>
+						<th style="width: 30%;text-align:center">Member</th>
 						<th style="text-align:center">Harga Satuan</th>
 					</tr>
 				</thead>
@@ -182,6 +179,7 @@ class Lap_transaksi extends CI_Controller {
 							<td>'.$obj_date->createFromFormat('Y-m-d', $value->tgl_trans)->format('d/m/Y').'</td>
 							<td>'.$value->kode.'</td>
 							<td>'.$is_jenis.'</td>
+							<td>'.$value->kode_member.'</td>
 							<td>'.$value->nama_member.'</td>
 							<td align="right">'.number_format($value->harga_satuan, 0 ,',','.').'</td>
 						</tr>
@@ -191,7 +189,7 @@ class Lap_transaksi extends CI_Controller {
 				<tr>
 					<td colspan="5" align="center"><strong>Jumlah Total</strong></td>
 					<td align="right"><strong>'.number_format($total_harga, 0 ,',','.').'</strong></td>
-				<tr>
+				</tr>
 			</tbody>
 		</table>';
 		// var_dump($html);exit;
@@ -208,7 +206,7 @@ class Lap_transaksi extends CI_Controller {
 			<table class="table table-bordered">
 				<thead>
 					<tr>
-						<th style="text-align:center">No.</th>
+						<th style="width: 5%;text-align:center">No.</th>
 						<th style="text-align:center">Tanggal</th>
 						<th style="text-align:center">Nama</th>
 						<th style="text-align:center">Supplier</th>
@@ -222,7 +220,7 @@ class Lap_transaksi extends CI_Controller {
 					$total_harga += $value->harga_total;
 					$html .= '
 						<tr>
-							<td>'.($key+1).'</td>
+							<td align="center">'.($key+1).'</td>
 							<td>'.$obj_date->createFromFormat('Y-m-d', $value->tgl_trans)->format('d/m/Y').'</td>
 							<td>'.$value->nama.'</td>
 							<td>'.$value->nama_supplier.'</td>
@@ -236,7 +234,7 @@ class Lap_transaksi extends CI_Controller {
 				<tr>
 					<td colspan="6" align="center"><strong>Jumlah Total</strong></td>
 					<td align="right"><strong>'.number_format($total_harga, 0 ,',','.').'</strong></td>
-				<tr>
+				</tr>
 			</tbody>
 		</table>';
 
@@ -279,7 +277,7 @@ class Lap_transaksi extends CI_Controller {
 				<tr>
 					<td colspan="5" align="center"><strong>Jumlah Total</strong></td>
 					<td align="right"><strong>'.number_format($total_harga, 0 ,',','.').'</strong></td>
-				<tr>
+				</tr>
 			</tbody>
 		</table>';
 
