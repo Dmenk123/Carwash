@@ -112,9 +112,13 @@ class Lap_transaksi extends CI_Controller {
 		$this->template_view->load_view($content, $data);
 	}
 
-	private function load_tabel_laporan($id_jenis_trans, $tgl_awal, $tgl_akhir)
+	private function load_tabel_laporan($id_jenis_trans, $tgl_awal, $tgl_akhir, $is_data_only = false)
 	{
-		$data_laporan = $this->t_transaksi->get_laporan_transaksi($this->input->get('jenis'), $tgl_awal, $tgl_akhir);
+		$data_laporan = $this->t_transaksi->get_laporan_transaksi($id_jenis_trans, $tgl_awal, $tgl_akhir);
+		
+		if ($is_data_only) {
+			return $data_laporan;
+		}
 				
 		switch ((int)$id_jenis_trans) {
 			case self::ID_JENIS_PENJUALAN:
@@ -298,28 +302,26 @@ class Lap_transaksi extends CI_Controller {
 		$periode = $mulai.' s/d '.$akhir;
 
 		#### nanti dilakukan pengecekan disini
-		// $data = $this->load_tabel_laporan($bulan, $tahun, true);
-		// $periode = bulan_indo($bulan).' '.$tahun;
-		// $profil = $this->m_global->single_row('*', ['deleted_at' => null], 'm_profil');
+		$data = $this->load_tabel_laporan($jenis, $tgl_awal, $tgl_akhir);
+		$periode = $tgl_awal.' s/d '.$tgl_akhir;
+		$profil = $this->m_global->single_row('*', ['deleted_at' => null], 'm_profil');
 
+		$retval = [
+			'data' => $data,
+			'title' => 'Laporan Transaksi '.$jenis_trans_txt,
+			'periode' => 'Periode '.$periode,
+			'profil' => $profil,
+		];
+		
 		// echo "<pre>";
-		// print_r ($data);
+		// print_r ($retval);
 		// echo "</pre>";
 		// exit;
 
-		// $retval = [
-		// 	'data' => $data,
-		// 	'title' => 'Laporan Keuangan',
-		// 	'periode' => 'Periode '.$periode,
-		// 	'profil' => $profil,
-		// 	'tahun' => $tahun,
-		// 	'bulan' => $bulan
-		// ];
-
-		// // $this->load->view('view_lap_keuangan_pdf', $retval);
-		// $html = $this->load->view('view_lap_keuangan_pdf', $retval, true);
-	    // $filename = 'laporan_keuangan_'.$bulan.'_'.$tahun.'_'.time();
-	    // $this->lib_dompdf->generate($html, $filename, true, 'legal', 'potrait');
+		// $this->load->view('view_lap_transaksi_pdf', $retval);
+		$html = $this->load->view('view_lap_transaksi_pdf', $retval, true);
+	    $filename = 'laporan_transaksi_'.$jenis_trans_txt.'_'.time();
+	    $this->lib_dompdf->generate($html, $filename, true, 'legal', 'potrait');
 	}
 
 	public function import_excel()
