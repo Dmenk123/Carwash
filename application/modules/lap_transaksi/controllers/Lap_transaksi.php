@@ -162,7 +162,7 @@ class Lap_transaksi extends CI_Controller {
 					<tr>
 						<th style="width: 5%;text-align:center">No.</th>
 						<th style="width: 10%;text-align:center">Tanggal</th>
-						<th style="width: 10%;text-align:center">Kode</th>
+						<th style="width: 15%;text-align:center">Kode</th>
 						<th style="width: 10%; text-align:center">Jenis member</th>
 						<th style="width: 10%; text-align:center">Kode member</th>
 						<th style="width: 30%;text-align:center">Member</th>
