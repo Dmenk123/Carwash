@@ -134,8 +134,8 @@ class Penjualan extends CI_Controller {
 						}
 						
 						.ticket {
-							width: 155px;
-							max-width: 155px;
+							width: 170px;
+							max-width: 170px;
 						}
 						
 						img {
