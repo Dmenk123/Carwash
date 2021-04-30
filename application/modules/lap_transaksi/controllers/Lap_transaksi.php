@@ -187,7 +187,7 @@ class Lap_transaksi extends CI_Controller {
 				}		
 		$html .= '
 				<tr>
-					<td colspan="5" align="center"><strong>Jumlah Total</strong></td>
+					<td colspan="6" align="center"><strong>Jumlah Total</strong></td>
 					<td align="right"><strong>'.number_format($total_harga, 0 ,',','.').'</strong></td>
 				</tr>
 			</tbody>
