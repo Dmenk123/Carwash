@@ -83,8 +83,8 @@ class Penjualan extends CI_Controller {
 					<style>
 
 						* {
-							font-size: 11px;
-							font-family: 'Times New Roman';
+							font-size: 9px;
+							font-family: 'Calibri';
 						}
 						
 						table {
