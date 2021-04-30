@@ -83,7 +83,7 @@ class Penjualan extends CI_Controller {
 					<style>
 
 						* {
-							font-size: 9px;
+							font-size: 11px;
 							font-family: 'Times New Roman';
 						}
 						
@@ -95,7 +95,7 @@ class Penjualan extends CI_Controller {
 						th,
 						tr,
 						table.tabel-penjualan {
-							// border-top: 1px dashed black;
+							border-top: 1px dashed black;
 							border-collapse: collapse;
 						}
 
