@@ -84,7 +84,7 @@ class Penjualan extends CI_Controller {
 
 						* {
 							font-size: 9px;
-							font-family: 'Lucida Console', 'Courier New', 'monospace';
+							font-family: 'Arial';
 						}
 						
 						table {
