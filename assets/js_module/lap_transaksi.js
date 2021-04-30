@@ -19,7 +19,7 @@ const cetakLaporan = () => {
                 data : {mulai:mulai, akhir:akhir, jenis:jenis},
                 success: function(data)
                 {
-                    swalConfirm.fire('Berhasil Hapus Data!', data.pesan, 'success');
+                  return;
                 },
                 error: function (jqXHR, textStatus, errorThrown)
                 {
