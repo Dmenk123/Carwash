@@ -126,6 +126,7 @@ class Penjualan extends CI_Controller {
 							width: 10%;
 							max-width: 10%;
 							word-break: break-all;
+							text-align: left!important;
 						}
 						
 						td.price,
@@ -142,8 +143,8 @@ class Penjualan extends CI_Controller {
 						
 						.ticket {
 							margin-left:5px;
-							width: 172px;
-							max-width: 172px;
+							width: 170px;
+							max-width: 170px;
 						}
 						
 						img {
