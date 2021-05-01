@@ -141,8 +141,8 @@ class Penjualan extends CI_Controller {
 						}
 						
 						.ticket {
-							width: 140px;
-							max-width: 140px;
+							width: 160px;
+							max-width: 160px;
 						}
 						
 						img {
@@ -170,7 +170,7 @@ class Penjualan extends CI_Controller {
 		$retval .= "
 				<body>
 					<div class='ticket'>
-						<p class='centered'><span style='font-size: 12px;'><u>$data_profile->nama</u></span>
+						<p class='centered'><span style='font-size: 12px;'>$data_profile->nama</span>
 							<br><span style='font-size: 8px;'>$data_profile->alamat</span>
 							<br><span style='font-size: 8px;'>$data_profile->kota</span></p>
 						<hr>
