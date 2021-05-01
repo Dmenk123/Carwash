@@ -83,7 +83,7 @@ class Penjualan extends CI_Controller {
 					<style>
 
 						* {
-							font-size: 9px;
+							font-size: 11px;
 							font-family: 'Arial';
 						}
 						
@@ -141,8 +141,8 @@ class Penjualan extends CI_Controller {
 						}
 						
 						.ticket {
-							width: 160px;
-							max-width: 160px;
+							width: 170px;
+							max-width: 170px;
 						}
 						
 						img {
@@ -171,8 +171,8 @@ class Penjualan extends CI_Controller {
 				<body>
 					<div class='ticket'>
 						<p class='centered'><span style='font-size: 12px;'>$data_profile->nama</span>
-							<br><span style='font-size: 8px;'>$data_profile->alamat</span>
-							<br><span style='font-size: 8px;'>$data_profile->kota</span></p>
+							<br><span style='font-size: 9px;'>$data_profile->alamat</span>
+							<br><span style='font-size: 9px;'>$data_profile->kota</span></p>
 						<hr>
 						<table class='tabel-petugas'>
 							<tbody>
@@ -226,7 +226,7 @@ class Penjualan extends CI_Controller {
 
 							$retval .= "</tbody>
 						</table>
-						<p class='centered' style='font-size: 8px;'>Terima Kasih
+						<p class='centered' style='font-size: 9px;'>Terima Kasih
 							<br>Atas Kepercayaan Anda</p>
 					</div>
 				</body>
