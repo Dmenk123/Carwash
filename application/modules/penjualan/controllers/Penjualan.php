@@ -140,11 +140,17 @@ class Penjualan extends CI_Controller {
 							text-align: center;
 							align-content: center;
 						}
+
+						.centered2 {
+							text-align: center;
+							align-content: center;
+							margin-left:3px;
+						}
 						
 						.ticket {
 							margin-left:5px;
-							width: 168px;
-							max-width: 168px;
+							width: 167px;
+							max-width: 167px;
 						}
 						
 						img {
@@ -172,10 +178,10 @@ class Penjualan extends CI_Controller {
 		$retval .= "
 				<body>
 					<div class='ticket'>
-						<p class='centered'><span style='font-size: 12px;'>$data_profile->nama</span>
+						<p class='centered2'><span style='font-size: 12px;'>$data_profile->nama</span>
 							<br><span style='font-size: 9px;'>$data_profile->alamat</span>
 							<br><span style='font-size: 9px;'>$data_profile->kota</span></p>
-						<hr class='centered'>
+						<hr class='centered2'>
 						<table class='tabel-petugas'>
 							<tbody>
 								<tr>
@@ -228,7 +234,7 @@ class Penjualan extends CI_Controller {
 
 							$retval .= "</tbody>
 						</table>
-						<p class='centered' style='font-size: 9px;'>Terima Kasih
+						<p class='centered2' style='font-size: 9px;'>Terima Kasih
 							<br>Atas Kepercayaan Anda</p>
 					</div>
 				</body>
