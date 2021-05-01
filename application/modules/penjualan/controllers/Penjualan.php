@@ -113,6 +113,7 @@ class Penjualan extends CI_Controller {
 							width: 50%;
 							max-width: 50%;
 							font-size:10px;
+							text-align:left;
 						}
 						
 						td.quantity,
