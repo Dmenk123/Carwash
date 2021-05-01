@@ -120,11 +120,18 @@ class Penjualan extends CI_Controller {
 							max-width: 40px;
 							word-break: break-all;
 						}
+
+						td.quality,
+						th.quality {
+							width: 10%;
+							max-width: 10%;
+							word-break: break-all;
+						}
 						
 						td.price,
 						th.price {
-							width: 40px;
-							max-width: 40px;
+							width: 40%;
+							max-width: 40%;
 							word-break: break-all;
 						}
 						
