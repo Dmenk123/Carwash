@@ -141,8 +141,8 @@ class Penjualan extends CI_Controller {
 						}
 						
 						.ticket {
-							width: 170px;
-							max-width: 170px;
+							width: 175px;
+							max-width: 175px;
 						}
 						
 						img {
@@ -173,7 +173,7 @@ class Penjualan extends CI_Controller {
 						<p class='centered'><span style='font-size: 12px;'>$data_profile->nama</span>
 							<br><span style='font-size: 9px;'>$data_profile->alamat</span>
 							<br><span style='font-size: 9px;'>$data_profile->kota</span></p>
-						<hr>
+						<hr class='centered'>
 						<table class='tabel-petugas'>
 							<tbody>
 								<tr>
