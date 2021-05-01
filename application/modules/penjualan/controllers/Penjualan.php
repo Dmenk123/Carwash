@@ -110,8 +110,8 @@ class Penjualan extends CI_Controller {
 						
 						td.description,
 						th.description {
-							width: 75px;
-							max-width: 75px;
+							width: 50%;
+							max-width: 50%;
 						}
 						
 						td.quantity,
@@ -186,7 +186,7 @@ class Penjualan extends CI_Controller {
 								</tr>
 							</tbody>
 						</table>
-						<table class='tabel-penjualan'>
+						<table class='tabel-penjualan' width='100%'>
 							<thead>
 								<tr>
 									<th class='quality'>No</th>
