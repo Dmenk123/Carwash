@@ -88,7 +88,7 @@ class Penjualan extends CI_Controller {
 						}
 						
 						table {
-							margin-left:5px;
+							margin-left:7px;
 						}
 						
 						td,
@@ -104,7 +104,7 @@ class Penjualan extends CI_Controller {
 						th,
 						tr {
 							border-collapse: collapse;
-							font-size: 8px;
+							font-size: 9px;
 							border: none;
 						}
 						
