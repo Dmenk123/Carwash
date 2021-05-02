@@ -4,7 +4,7 @@
 	<head>
 		<base href="">
 		<meta charset="utf-8" />
-		<title>Usaha Anda | <?= $title; ?></title>
+		<title>Wijaya Carwash</title>
 		<meta name="description" content="Updates and statistics">
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -32,7 +32,7 @@
 		
 
 		<!--end::Layout Skins -->
-    	<link rel="shortcut icon" href="<?= base_url('assets/template/')?>assets/media/logos/Logo-uwks-sm.png" />
+    	<link rel="shortcut icon" href="<?= base_url('assets/template/')?>assets/media/logos/wijaya.png" />
 		<style>
 			form .select2:invalid + .select2 .select2-selection{
 				border-color: #fd397a!important;

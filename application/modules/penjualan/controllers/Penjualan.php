@@ -83,12 +83,12 @@ class Penjualan extends CI_Controller {
 					<style>
 
 						* {
-							font-size: 9px;
+							font-size: 12px;
 							font-family: 'Arial';
 						}
 						
 						table {
-							margin-left:5px;
+							margin-left:7px;
 						}
 						
 						td,
@@ -104,14 +104,16 @@ class Penjualan extends CI_Controller {
 						th,
 						tr {
 							border-collapse: collapse;
-							font-size: 8px;
+							font-size: 9px;
 							border: none;
 						}
 						
 						td.description,
 						th.description {
-							width: 75px;
-							max-width: 75px;
+							width: 50%;
+							max-width: 50%;
+							font-size:10px;
+							text-align:left;
 						}
 						
 						td.quantity,
@@ -120,22 +122,39 @@ class Penjualan extends CI_Controller {
 							max-width: 40px;
 							word-break: break-all;
 						}
+
+						td.quality,
+						th.quality {
+							width: 10%;
+							max-width: 10%;
+							word-break: break-all;
+							text-align: left!important;
+							font-size:10px;
+						}
 						
 						td.price,
 						th.price {
-							width: 40px;
-							max-width: 40px;
+							width: 40%;
+							max-width: 40%;
 							word-break: break-all;
+							font-size:10px;
 						}
 						
 						.centered {
 							text-align: center;
 							align-content: center;
 						}
+
+						.centered2 {
+							text-align: center;
+							align-content: center;
+							margin-left:6px!important;
+						}
 						
 						.ticket {
-							width: 155px;
-							max-width: 155px;
+							margin-left:5px;
+							width: 167px;
+							max-width: 167px;
 						}
 						
 						img {
@@ -163,10 +182,10 @@ class Penjualan extends CI_Controller {
 		$retval .= "
 				<body>
 					<div class='ticket'>
-						<p class='centered'><span style='font-size: 12px;'><u>$data_profile->nama</u></span>
-							<br><span style='font-size: 8px;'>$data_profile->alamat</span>
-							<br><span style='font-size: 8px;'>$data_profile->kota</span></p>
-						<hr>
+						<p class='centered2'><span style='font-size: 12px;'>$data_profile->nama</span>
+							<br><span style='font-size: 9px;'>$data_profile->alamat</span>
+							<br><span style='font-size: 9px;'>$data_profile->kota</span></p>
+						<hr class='centered2'>
 						<table class='tabel-petugas'>
 							<tbody>
 								<tr>
@@ -186,7 +205,7 @@ class Penjualan extends CI_Controller {
 								</tr>
 							</tbody>
 						</table>
-						<table class='tabel-penjualan'>
+						<table class='tabel-penjualan' width='100%'>
 							<thead>
 								<tr>
 									<th class='quality'>No</th>
@@ -219,7 +238,7 @@ class Penjualan extends CI_Controller {
 
 							$retval .= "</tbody>
 						</table>
-						<p class='centered' style='font-size: 8px;'>Terima Kasih
+						<p class='centered2' style='font-size: 9px;'>Terima Kasih
 							<br>Atas Kepercayaan Anda</p>
 					</div>
 				</body>
