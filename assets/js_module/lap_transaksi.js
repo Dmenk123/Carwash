@@ -9,6 +9,7 @@ const cetakLaporan = () => {
         reverseButtons: false
       }).then((result) => {
         if (result.value) {
+            $('div#CssLoader').removeClass('hidden');
             let mulai = $('#mulai').val();
             let akhir = $('#akhir').val();
             let jenis = $('#jenis').val();
@@ -19,6 +20,7 @@ const cetakLaporan = () => {
                 data : {mulai:mulai, akhir:akhir, jenis:jenis},
                 success: function(data)
                 {
+                  $('div#CssLoader').addClass('hidden');
                   return;
                 },
                 error: function (jqXHR, textStatus, errorThrown)
@@ -50,9 +52,10 @@ const importExcel = () => {
         reverseButtons: false
       }).then((result) => {
         if (result.value) {
-            let bulan = $('#bulan').val();
-            let tahun = $('#tahun').val();
-            window.open( base_url + 'lap_transaksi/import_excel?bulan='+bulan+'&tahun='+tahun, '_blank');
+            let mulai = $('#mulai').val();
+            let akhir = $('#akhir').val();
+            let jenis = $('#jenis').val();
+            window.open( base_url + 'lap_transaksi/import_excel?mulai='+mulai+'&akhir='+akhir+'&jenis='+jenis, '_blank');
         } else if (
           /* Read more about handling dismissals below */
           result.dismiss === Swal.DismissReason.cancel

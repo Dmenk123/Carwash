@@ -112,9 +112,13 @@ class Lap_transaksi extends CI_Controller {
 		$this->template_view->load_view($content, $data);
 	}
 
-	private function load_tabel_laporan($id_jenis_trans, $tgl_awal, $tgl_akhir)
+	private function load_tabel_laporan($id_jenis_trans, $tgl_awal, $tgl_akhir, $is_excel=false)
 	{
 		$data_laporan = $this->t_transaksi->get_laporan_transaksi($id_jenis_trans, $tgl_awal, $tgl_akhir);
+
+		if($is_excel) {
+			return $data_laporan;
+		}
 				
 		switch ((int)$id_jenis_trans) {
 			case self::ID_JENIS_PENJUALAN:
@@ -324,25 +328,27 @@ class Lap_transaksi extends CI_Controller {
 
 	public function import_excel()
 	{
-		$bulan = $this->input->get('bulan');
-		$tahun = $this->input->get('tahun');
-		
 		$obj_date = new DateTime();
-		$obj_date2 = new DateTime($tahun.'-'.$bulan.'-01');
 		$timestamp = $obj_date->format('Y-m-d H:i:s');
+		$mulai = $this->input->get('mulai');
+		$akhir = $this->input->get('akhir');
+		$jenis = $this->input->get('jenis');
+		$tgl_awal = $obj_date->createFromFormat('d/m/Y', $mulai)->format('Y-m-d');
+		$tgl_akhir = $obj_date->createFromFormat('d/m/Y', $akhir)->format('Y-m-d');
+		
 		#### nanti dilakukan pengecekan disini
-		$data = $this->load_tabel_laporan($bulan, $tahun, true);
-		$periode = bulan_indo($bulan).' '.$tahun;
+		$data = $this->load_tabel_laporan($jenis, $tgl_awal, $tgl_akhir, true);
+		$periode = $tgl_awal.' s/d '.$tgl_akhir;
 		$profil = $this->m_global->single_row('*', ['deleted_at' => null], 'm_profil');
-		
-		
+		$cek = $this->m_global->single_row('*', ['id' => $jenis], 'm_jenis_trans');
+		$jenis_trans_txt = $cek->nama_jenis;
 		// echo "<pre>";
 		// print_r ($data);
 		// echo "</pre>";
 		// exit;
 
 		if($data) {
-			$counter = count($data['data'])+1;
+			$counter = count($data)+1;
 		}else{
 			$counter = 1;
 		}
@@ -351,90 +357,146 @@ class Lap_transaksi extends CI_Controller {
 		$writer = $this->excel->xlsx_obj($spreadsheet);
 		$number_format_obj = $this->excel->number_format_obj();
 		
-		$spreadsheet
-			->getActiveSheet()
-			->getStyle('A1:G'.$counter)
-			->getNumberFormat()
-			//format text masih ada bug di nip. jadi kacau
-			//->setFormatCode($number_format_obj::FORMAT_TEXT);
-			// solusi pake format custom
-			->setFormatCode('#');
-		
-		$sheet = $spreadsheet->getActiveSheet();
+		if($jenis == self::ID_JENIS_PENJUALAN) {
+			$spreadsheet
+				->getActiveSheet()
+				->getStyle('A1:G'.$counter)
+				->getNumberFormat()
+				->setFormatCode('#');
 
-		$sheet
-			->setCellValue('A1', 'No')
-			->setCellValue('B1', 'Tanggal')
-			->setCellValue('C1', 'Kode')
-			->setCellValue('D1', 'Jenis')
-			->setCellValue('E1', 'Penerimaan')
-			->setCellValue('F1', 'Pengeluaran')
-			->setCellValue('G1', 'Saldo Akhir');
-		$no = 1;
-		$startRow = 2;
-		$row = $startRow;
-		if($data['data']){
-			// row saldo
-			if($data['saldo'] != null) {
-				if($data['saldo'] == 'kosong') {
-				  $saldonya = 0;
-				}else{
-				  // hasil hitungan
-				  $saldonya = (float)$data['saldo'];
-				}
-	  
-				$sheet
-					->setCellValue("A{$row}", $no++)
-					->setCellValue("B{$row}", $obj_date2->format('d/m/Y'))
-					->setCellValue("C{$row}", '-')
-					->setCellValue("D{$row}", 'Saldo Awal')
-					->setCellValue("E{$row}", '-')
-					->setCellValue("F{$row}", '-')
-					->setCellValue("G{$row}", number_format($saldonya, 0 ,',','.'));
-				
-				$row++;
-			}
+			$sheet = $spreadsheet->getActiveSheet();
 
-			$tot_penerimaan = 0;
-        	$tot_pengeluaran = 0;
-			foreach ($data['data'] as $key => $val) {
-				$penerimaan = 0;
-				$pengeluaran = 0;
-
-				if($val->cashflow == 'in') {
-					$saldonya += $val->total_harga;
-					$penerimaan = $val->total_harga;
-					$tot_penerimaan += $val->total_harga;
-				}else{
-					$saldonya -= $val->total_harga;
-					$pengeluaran = $val->total_harga;
-					$tot_pengeluaran += $val->total_harga;
-				}
-
-				$sheet
-					->setCellValue("A{$row}", $no++)
-					->setCellValue("B{$row}", $obj_date->createFromFormat('Y-m-d', $val->tgl_trans)->format('d/m/Y'))
-					->setCellValue("C{$row}", $val->kode_jenis)
-					->setCellValue("D{$row}", $val->nama_jenis)
-					->setCellValue("E{$row}", number_format($penerimaan, 0 ,',','.'))
-					->setCellValue("F{$row}", number_format($pengeluaran, 0 ,',','.'))
-					->setCellValue("G{$row}", number_format($saldonya, 0 ,',','.'));
-				$row++;
-			}
-
-			$sheet->mergeCells("A{$row}:D{$row}");
 			$sheet
-					->setCellValue("A{$row}", 'Grand Total')
-					->setCellValue("E{$row}", number_format($tot_penerimaan, 0 ,',','.'))
-					->setCellValue("F{$row}", number_format($tot_pengeluaran, 0 ,',','.'))
-					->setCellValue("G{$row}", number_format($saldonya, 0 ,',','.'));
-				$row++;
+				->setCellValue('A1', 'No')
+				->setCellValue('B1', 'Tanggal')
+				->setCellValue('C1', 'Kode')
+				->setCellValue('D1', 'Jenis Member')
+				->setCellValue('E1', 'Kode Member')
+				->setCellValue('F1', 'Member')
+				->setCellValue('G1', 'Harga Satuan');
+			
+			$no = 1;
+			$startRow = 2;
+			$row = $startRow;
+			if($data){
+				$grand_total = 0;
+				foreach ($data as $key => $val) {
+					$harga_total = 0;
+					$is_jenis = ($val->id_member == '1') ? 'Member' : 'Reguler';
+					$harga_total += $val->harga_total;
+					$grand_total += $val->harga_total;						
+					
+					$sheet
+						->setCellValue("A{$row}", $no++)
+						->setCellValue("B{$row}", $obj_date->createFromFormat('Y-m-d', $val->tgl_trans)->format('d/m/Y'))
+						->setCellValue("C{$row}", $val->kode)
+						->setCellValue("D{$row}", $is_jenis)
+						->setCellValue("E{$row}", $val->kode_member)
+						->setCellValue("F{$row}", $val->nama_member)
+						->setCellValue("G{$row}", $harga_total);
+					$row++;
+				}
+	
+				$sheet->mergeCells("A{$row}:F{$row}");
+				$sheet
+						->setCellValue("A{$row}", 'Grand Total')
+						->setCellValue("G{$row}", $grand_total);
+					$row++;
+	
+				$endRow = $row - 1;
+			}
+		} else if($jenis == self::ID_JENIS_PEMBELIAN) {
+			$spreadsheet
+				->getActiveSheet()
+				->getStyle('A1:G'.$counter)
+				->getNumberFormat()
+				->setFormatCode('#');
 
-			$endRow = $row - 1;
+			$sheet = $spreadsheet->getActiveSheet();
+
+			$sheet
+				->setCellValue('A1', 'No')
+				->setCellValue('B1', 'Tanggal')
+				->setCellValue('C1', 'Nama')
+				->setCellValue('D1', 'Supplier')
+				->setCellValue('E1', 'Qty')
+				->setCellValue('F1', 'Harga Satuan')
+				->setCellValue('G1', 'Harga Total');
+			
+			$no = 1;
+			$startRow = 2;
+			$row = $startRow;
+			if($data){
+				$grand_total = 0;
+				foreach ($data as $key => $val) {
+					$grand_total += $val->harga_total;						
+					
+					$sheet
+						->setCellValue("A{$row}", $no++)
+						->setCellValue("B{$row}", $obj_date->createFromFormat('Y-m-d', $val->tgl_trans)->format('d/m/Y'))
+						->setCellValue("C{$row}", $val->nama)
+						->setCellValue("D{$row}", $val->nama_supplier)
+						->setCellValue("E{$row}", number_format($val->qty, 0 ,',','.'))
+						->setCellValue("F{$row}", $val->harga_satuan)
+						->setCellValue("G{$row}", $val->harga_total);
+					$row++;
+				}
+	
+				$sheet->mergeCells("A{$row}:F{$row}");
+				$sheet
+						->setCellValue("A{$row}", 'Grand Total')
+						->setCellValue("G{$row}", $grand_total);
+					$row++;
+	
+				$endRow = $row - 1;
+			}
+		} else {
+			$spreadsheet
+				->getActiveSheet()
+				->getStyle('A1:F'.$counter)
+				->getNumberFormat()
+				->setFormatCode('#');
+
+			$sheet = $spreadsheet->getActiveSheet();
+
+			$sheet
+				->setCellValue('A1', 'No')
+				->setCellValue('B1', 'Tanggal')
+				->setCellValue('C1', 'Nama')
+				->setCellValue('D1', 'Bulan')
+				->setCellValue('E1', 'Tahun')
+				->setCellValue('F1', 'Harga Total');
+			
+			$no = 1;
+			$startRow = 2;
+			$row = $startRow;
+			if($data){
+				$grand_total = 0;
+				foreach ($data as $key => $val) {
+					$grand_total += $val->harga_total;						
+					
+					$sheet
+						->setCellValue("A{$row}", $no++)
+						->setCellValue("B{$row}", $obj_date->createFromFormat('Y-m-d', $val->tgl_trans)->format('d/m/Y'))
+						->setCellValue("C{$row}", $val->nama)
+						->setCellValue("D{$row}", bulan_indo((int)$val->bulan_trans))
+						->setCellValue("E{$row}", $val->tahun_trans)
+						->setCellValue("F{$row}", $val->harga_total);
+					$row++;
+				}
+	
+				$sheet->mergeCells("A{$row}:E{$row}");
+				$sheet
+						->setCellValue("A{$row}", 'Grand Total')
+						->setCellValue("F{$row}", $grand_total);
+					$row++;
+	
+				$endRow = $row - 1;
+			}
 		}
 		
 		
-		$filename = 'laporan_keuangan_'.$bulan.'_'.$tahun.'_'.time();
+		$filename = 'laporan_transaksi_'.$jenis_trans_txt.'_'.time();
 		
 		header('Content-Type: application/vnd.ms-excel');
 		header('Content-Disposition: attachment;filename="'. $filename .'.xlsx"'); 
