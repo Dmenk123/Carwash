@@ -150,6 +150,21 @@ class M_global extends CI_Model
         return $q->row();
 	}
 
+    function last_id($field, $table){
+        $q = $this->db->query("select MAX($field) as kode_max from $table");
+        $kd = "";
+        if($q->num_rows()>0){
+            foreach($q->result() as $k){
+                $tmp = ((int)$k->kode_max)+1;
+                $kd = $tmp;
+            }
+        }else{
+            $kd = 1;
+        }
+
+        return $kd;
+    }
+
 	public function getSelectedData($table,$datawhere,$data_like=null, $datawhere_or = null, $datawhere1=null,$wherein=null,$where_in=null,$in=null,$where_sekda=null,$datalike_or=null,$not_in=null,$not_like=null)
     {
         $this->db->select('*');

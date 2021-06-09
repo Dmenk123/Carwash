@@ -130,7 +130,8 @@ class T_log_kunci extends CI_Model
 
 	public function save($data)
 	{
-		return $this->db->insert($this->table, $data);	
+		$this->db->insert($this->table, $data);	
+		return $this->db->insert_id();
 	}
 
 	public function update($where, $data)

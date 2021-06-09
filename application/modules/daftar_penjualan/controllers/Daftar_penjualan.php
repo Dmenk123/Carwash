@@ -243,6 +243,28 @@ class Daftar_penjualan extends CI_Controller {
 		}
 	}
 
+	/**
+	 * Hanya melakukan softdelete saja
+	 * isi kolom updated_at dengan datetime now()
+	 */
+	public function delete_penjualan()
+	{
+		$id = $this->input->post('id');
+		$old_data = $this->t_transaksi->get_by_condition(['id' => $id, 'deleted_at' => null]);
+		$del = $this->t_transaksi->softdelete_by_id($id);
+		if($del) {
+			$data_log = json_encode($old_data);
+			$this->lib_fungsi->catat_log_aktifitas('DELETE', $data_log, null);
+			$retval['status'] = TRUE;
+			$retval['pesan'] = 'Data Master Item Transaksi Berhasil dihapus';
+		}else{
+			$retval['status'] = FALSE;
+			$retval['pesan'] = 'Data Master Item Transaksi Gagal dihapus';
+		}
+
+		echo json_encode($retval);
+	}
+
 	/////////////////////////////
 
 	public function edit_item_trans()
@@ -358,24 +380,7 @@ class Daftar_penjualan extends CI_Controller {
 		echo json_encode($data);
 	}
 
-	/**
-	 * Hanya melakukan softdelete saja
-	 * isi kolom updated_at dengan datetime now()
-	 */
-	public function delete_item_trans()
-	{
-		$id = $this->input->post('id');
-		$del = $this->m_item_trans->softdelete_by_id($id);
-		if($del) {
-			$retval['status'] = TRUE;
-			$retval['pesan'] = 'Data Master Item Transaksi Berhasil dihapus';
-		}else{
-			$retval['status'] = FALSE;
-			$retval['pesan'] = 'Data Master Item Transaksi Gagal dihapus';
-		}
-
-		echo json_encode($retval);
-	}
+	
 
 	public function cek_kunci_transaksi($date)
 	{

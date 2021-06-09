@@ -199,6 +199,46 @@ function editPenjualan(id) {
     window.open(base_url+'penjualan?token='+id, '_blank');
 }
 
+function deletePenjualan(id){
+    swalConfirmDelete.fire({
+        title: 'Peringatan !',
+        text: "Data Akan dihapus permanen ?",
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Hapus Data !',
+        cancelButtonText: 'Tidak, Batalkan!',
+        reverseButtons: true
+      }).then((result) => {
+        if (result.value) {
+            $.ajax({
+                url : base_url + 'daftar_penjualan/delete_penjualan',
+                type: "POST",
+                dataType: "JSON",
+                data : {id:id},
+                success: function(data)
+                {
+                    swalConfirm.fire('Berhasil Hapus data item transaksi!', data.pesan, 'success');
+                    table.ajax.reload();
+                },
+                error: function (jqXHR, textStatus, errorThrown)
+                {
+                    Swal.fire('Terjadi Kesalahan');
+                }
+            });
+        } else if (
+          /* Read more about handling dismissals below */
+          result.dismiss === Swal.DismissReason.cancel
+        ) {
+          swalConfirm.fire(
+            'Dibatalkan',
+            'Aksi Dibatalakan',
+            'error'
+          )
+        }
+    });
+}
+
+
 ///////////////
 
 function add_tindakan()
