@@ -96,9 +96,15 @@ class Lap_keuangan extends CI_Controller {
 	private function load_tabel_laporan($bulan, $tahun, $is_data_only = false)
 	{
 		$cek = $this->m_global->single_row('*', ['bulan' => $bulan, 'tahun' => $tahun, 'deleted_at' => null], 't_log_laporan');
+		
 		if($cek) {
-			$data_laporan = $this->t_transaksi->get_log_laporan_keuangan($bulan, $tahun);
-			$html = $this->generate_html_laporan($data_laporan, $bulan, $tahun);
+			$data_laporan = $this->t_transaksi->get_laporan_keuangan($bulan, $tahun);
+			
+			// echo "<pre>";
+			// print_r ($data_laporan);
+			// echo "</pre>";
+			// exit;
+			$html = $this->generate_html_laporan($data_laporan, $bulan, $tahun, $cek->saldo_awal);
 		}else{
 			// cari bulan dan tahun periode sebelumnya
 			$arr_periode = $this->ambil_periode_sebelum($bulan, $tahun);
