@@ -16,28 +16,10 @@ class Penjualan extends CI_Controller {
 		$this->load->model('t_transaksi');
 		$this->load->model('t_transaksi_det');
 		$this->load->library('barcode_lib');
-		// $this->load->library('thermalprint_lib');
+		$this->load->library('thermalprint_lib');
 	}
 
 	################### cetak struk serverside by lib escpos
-	// public function cetak_struk($id_trans)
-	// {
-	// 	$id_user = $this->session->userdata('id_user'); 
-	// 	$data_profile = $this->m_global->single_row("*",NULL,'m_profil');
-	// 	$select = 'trans.*, trans_det.id as id_det, trans_det.id_item_trans, trans_det.harga_satuan, m_item_trans.nama';
-	// 	$join = [ 
-	// 		['table' => 't_transaksi_det as trans_det', 'on' => 'trans.id = trans_det.id_transaksi'],
-	// 		['table' => 'm_item_trans', 'on' => 'trans_det.id_item_trans = m_item_trans.id and m_item_trans.id_jenis_trans = 1']
-	// 	];
-	// 	$data_penjualan = $this->m_global->multi_row($select, ['trans.id' =>  $id_trans,'trans.deleted_at' => null], 't_transaksi as trans', $join);
-	// 	// echo $this->db->last_query();exit;
-		
-	// 	$data_user = $this->m_user->get_detail_user($id_user);
-		
-	// 	$this->thermalprint_lib->cek_cetak($data_user, $data_profile, $data_penjualan);
-	// }
-
-	##################### cetak struk client side 
 	public function cetak_struk($id_trans)
 	{
 		$id_user = $this->session->userdata('id_user'); 
@@ -47,28 +29,46 @@ class Penjualan extends CI_Controller {
 			['table' => 't_transaksi_det as trans_det', 'on' => 'trans.id = trans_det.id_transaksi'],
 			['table' => 'm_item_trans', 'on' => 'trans_det.id_item_trans = m_item_trans.id and m_item_trans.id_jenis_trans = 1']
 		];
-		$data_penjualan = $this->m_global->multi_row($select, ['trans.id' =>  $id_trans,'trans.deleted_at' => null], 't_transaksi as trans', $join);		
-		$data_user = $this->m_user->get_detail_user($id_user);		
-
-		// echo "<pre>";
-		// print_r ($data_user);
-		// echo "</pre>";
-
-		// echo "<pre>";
-		// print_r ($data_profile);
-		// echo "</pre>";
-
-		// echo "<pre>";
-		// print_r ($data_penjualan);
-		// echo "</pre>";
-		// exit;
-
-		$html = $this->get_template_cetak($data_user, $data_profile, $data_penjualan);
-		echo json_encode([
-			'status' => true,
-			'html' => $html
-		]);
+		$data_penjualan = $this->m_global->multi_row($select, ['trans.id' =>  $id_trans,'trans.deleted_at' => null], 't_transaksi as trans', $join);
+		// echo $this->db->last_query();exit;
+		
+		$data_user = $this->m_user->get_detail_user($id_user);
+		
+		$this->thermalprint_lib->cek_cetak($data_user, $data_profile, $data_penjualan);
 	}
+
+	##################### cetak struk client side 
+	// public function cetak_struk($id_trans)
+	// {
+	// 	$id_user = $this->session->userdata('id_user'); 
+	// 	$data_profile = $this->m_global->single_row("*",NULL,'m_profil');
+	// 	$select = 'trans.*, trans_det.id as id_det, trans_det.id_item_trans, trans_det.harga_satuan, m_item_trans.nama';
+	// 	$join = [ 
+	// 		['table' => 't_transaksi_det as trans_det', 'on' => 'trans.id = trans_det.id_transaksi'],
+	// 		['table' => 'm_item_trans', 'on' => 'trans_det.id_item_trans = m_item_trans.id and m_item_trans.id_jenis_trans = 1']
+	// 	];
+	// 	$data_penjualan = $this->m_global->multi_row($select, ['trans.id' =>  $id_trans,'trans.deleted_at' => null], 't_transaksi as trans', $join);		
+	// 	$data_user = $this->m_user->get_detail_user($id_user);		
+
+	// 	// echo "<pre>";
+	// 	// print_r ($data_user);
+	// 	// echo "</pre>";
+
+	// 	// echo "<pre>";
+	// 	// print_r ($data_profile);
+	// 	// echo "</pre>";
+
+	// 	// echo "<pre>";
+	// 	// print_r ($data_penjualan);
+	// 	// echo "</pre>";
+	// 	// exit;
+
+	// 	$html = $this->get_template_cetak($data_user, $data_profile, $data_penjualan);
+	// 	echo json_encode([
+	// 		'status' => true,
+	// 		'html' => $html
+	// 	]);
+	// }
 
 	public function get_template_cetak_header()
 	{

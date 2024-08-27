@@ -28,7 +28,7 @@ class Thermalprint_lib
 
         $tgl_trans = date('d-m-Y H:i:s', strtotime($data_penjualan[0]->created_at));
         // membuat connector printer ke shared printer bernama "printer_a" (yang telah disetting sebelumnya)
-        $connector = new WindowsPrintConnector("POS-58");
+        $connector = new WindowsPrintConnector("POS-58C");
     
         // membuat objek $printer agar dapat di lakukan fungsinya
         $printer = new Printer($connector);

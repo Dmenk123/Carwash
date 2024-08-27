@@ -493,7 +493,7 @@ const popupPrint = (data) => {
     let myWindow = window.open('', 'Receipt', 'height=400,width=600');
     myWindow.document.write(data);
     myWindow.print();
-    myWindow.close();
+    // myWindow.close();
 }
 
 function disableAllBind() {
